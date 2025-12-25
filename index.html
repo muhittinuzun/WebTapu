@@ -406,7 +406,7 @@
 </div>
 
 <script>
-    const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+    const { createApp, ref, computed, onMounted, nextTick, watch, markRaw } = Vue;
 
     // Translations (Shortened for brevity but complete)
     const translations = {
@@ -591,11 +591,12 @@
                 const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' });
                 const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
-                map.value = L.map('map', {
+                // FIX: Use markRaw to prevent Vue from proxying the Leaflet Map instance
+                map.value = markRaw(L.map('map', {
                     center: [33.5138, 36.29],
                     zoom: 14,
                     layers: [satelliteLayer]
-                });
+                }));
 
                 L.control.layers({"Satellite": satelliteLayer, "Street": osmLayer}).addTo(map.value);
 
