@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suriye Tapu ve Kadastro Bilgi Sistemi</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Leaflet CSS & JS (Harita) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts (Cairo Arapça için, Inter diğerleri için) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Dil Bazlı Font Ayarı */
+        body[dir="ltr"] { font-family: 'Inter', sans-serif; }
+        body[dir="rtl"] { font-family: 'Cairo', sans-serif; }
+        
+        #map { 
+            height: 100%; 
+            width: 100%; 
+            border-radius: 0.75rem; 
+            z-index: 1;
+        }
+
+        /* Tapu Kağıdı Deseni */
+        .tapu-bg {
+            background-color: #fffbf0;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Modal Animasyonları */
+        .modal-enter-active, .modal-leave-active { transition: all 0.3s ease; }
+        .modal-enter-from, .modal-leave-to { opacity: 0; transform: scale(0.95); }
+
+        /* Yeni Bayrak Teması Gradient */
+        .flag-gradient {
+            background: linear-gradient(135deg, #007A3D 0%, #1a1a1a 100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden selection:bg-emerald-200" dir="rtl">
+
+<div id="app" class="flex h-full relative">
+
+    <!-- YÜKLENİYOR EKRANI -->
+    <div v-if="loading" class="absolute inset-0 z-[60] bg-slate-950 flex flex-col items-center justify-center text-white">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="h-16 mb-6 shadow-2xl animate-pulse">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-500 mb-4"></div>
+        <h2 class="text-2xl font-bold tracking-widest">{{ t.loading }}</h2>
+        <p class="text-slate-400 text-sm mt-2">v3.0.0 - Damascus Core</p>
+    </div>
+
+    <!-- SIDEBAR (Siyah/Yeşil Tema) -->
+    <aside class="w-72 bg-slate-950 text-slate-300 flex flex-col shadow-2xl z-20 transition-all duration-300 border-e border-slate-800">
+        <!-- Logo Alanı -->
+        <div class="p-6 border-b border-slate-800 flex items-center gap-4">
+            <!-- Bayrak İkonu -->
+            <div class="w-12 h-8 relative shadow-lg overflow-hidden rounded border border-slate-600">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <h1 class="font-bold text-white tracking-wide text-lg">E-TAPU</h1>
+                <p class="text-[10px] text-emerald-500 uppercase tracking-widest font-bold">SYRIA / DAMASCUS</p>
+            </div>
+        </div>
+
+        <!-- Menü -->
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <p class="px-4 text-[10px] font-bold text-slate-500 uppercase mb-2 mt-2 tracking-wider">{{ t.menuGeneral }}</p>
+            
+            <button @click="currentTab = 'dashboard'" 
+                :class="currentTab === 'dashboard' ? 'bg-emerald-700 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 hover:text-white'"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+                <i class="fa-solid fa-map-location-dot w-5 text-center"></i> 
+                <span class="font-medium">{{ t.navMap }}</span>
+            </button>
+
+            <button @click="currentTab = 'properties'" 
+                :class="currentTab === 'properties' ? 'bg-emerald-700 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 hover:text-white'"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+                <i class="fa-solid fa-list-check w-5 text-center"></i> 
+                <span class="font-medium">{{ t.navProperties }}</span>
+            </button>
+
+            <button @click="currentTab = 'transfer'" 
+                :class="currentTab === 'transfer' ? 'bg-emerald-700 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 hover:text-white'"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+                <i class="fa-solid fa-handshake-simple w-5 text-center"></i> 
+                <span class="font-medium">{{ t.navTransfer }}</span>
+            </button>
+
+            <p class="px-4 text-[10px] font-bold text-slate-500 uppercase mb-2 mt-6 tracking-wider">{{ t.menuServices }}</p>
+
+            <button @click="currentTab = 'valuation'" 
+                :class="currentTab === 'valuation' ? 'bg-emerald-700 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 hover:text-white'"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+                <i class="fa-solid fa-robot w-5 text-center"></i> 
+                <span class="font-medium">{{ t.navValuation }}</span>
+            </button>
+
+             <button @click="currentTab = 'expropriation'" 
+                :class="currentTab === 'expropriation' ? 'bg-emerald-700 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 hover:text-white'"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+                <i class="fa-solid fa-gavel w-5 text-center"></i> 
+                <span class="font-medium">{{ t.navExpropriation }}</span>
+            </button>
+        </nav>
+
+        <!-- Dil Seçici (Alt Kısım - Yeni Sıralama) -->
+        <div class="p-4 bg-slate-900 border-t border-slate-800 grid grid-cols-3 gap-2">
+            <!-- 1. Arapça -->
+            <button @click="setLang('ar')" :class="lang === 'ar' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'" class="text-xs font-bold py-1 rounded transition font-serif">عربي</button>
+            <!-- 2. Türkçe -->
+            <button @click="setLang('tr')" :class="lang === 'tr' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'" class="text-xs font-bold py-1 rounded transition">TR</button>
+            <!-- 3. İngilizce -->
+            <button @click="setLang('en')" :class="lang === 'en' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'" class="text-xs font-bold py-1 rounded transition">EN</button>
+        </div>
+    </aside>
+
+    <!-- ANA İÇERİK -->
+    <main class="flex-1 flex flex-col bg-slate-50 h-full overflow-hidden">
+        
+        <!-- Üst Bar -->
+        <header class="h-16 bg-white shadow-sm border-b px-6 flex justify-between items-center z-10">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <span class="w-1.5 h-6 bg-red-600 rounded-full"></span> <!-- Kırmızı Aksan -->
+                {{ t[currentTab + 'Title'] || t.navMap }}
+            </h2>
+            
+            <div class="flex items-center gap-4">
+                 <div class="hidden md:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                    <i class="fa-solid fa-calendar-day text-slate-400"></i>
+                    <span class="text-xs font-semibold text-slate-600">25 Dec 2025</span>
+                 </div>
+
+                <div class="relative group">
+                    <button class="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 transition relative border border-slate-200">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-red-600 rounded-full border border-white animate-pulse"></span>
+                    </button>
+                </div>
+                
+                <button class="flex items-center gap-2">
+                     <img src="https://ui-avatars.com/api/?name=User&background=047857&color=fff" class="w-9 h-9 rounded-full border-2 border-slate-200">
+                </button>
+            </div>
+        </header>
+
+        <!-- İçerik Alanı -->
+        <div class="flex-1 overflow-y-auto p-6 relative">
+            
+            <!-- 1. DASHBOARD (Harita) -->
+            <div v-show="currentTab === 'dashboard'" class="h-full flex flex-col gap-6">
+                <!-- KPI Kartları -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-t-4 border-emerald-600 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl"><i class="fa-solid fa-building-user"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold uppercase">{{ t.totalProperties }}</p>
+                            <p class="text-2xl font-bold text-slate-800">12</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-t-4 border-slate-800 flex items-center gap-4">
+                         <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xl"><i class="fa-solid fa-spinner"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold uppercase">{{ t.pendingApps }}</p>
+                            <p class="text-2xl font-bold text-slate-800">3</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden relative">
+                    <div class="absolute top-4 start-4 z-[400] flex gap-2 max-w-md bg-white/90 backdrop-blur p-2 rounded-lg shadow-xl border border-slate-200">
+                        <input v-model="searchQuery" :placeholder="t.searchPlaceholder" :class="{'text-right': lang === 'ar'}" class="flex-1 bg-transparent border-none outline-none px-2 text-sm w-48">
+                        <button @click="locateProperty" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-md text-sm font-bold transition shadow-md">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                    <div id="map"></div>
+                </div>
+            </div>
+
+            <!-- 2. MÜLK LİSTESİ (TABLO & TAPU) -->
+            <div v-if="currentTab === 'properties'" class="animate-fade-in max-w-6xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+                    <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                        <h3 class="font-bold text-lg text-slate-800">{{ t.propertyListTitle }}</h3>
+                        <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-700 shadow-md shadow-emerald-200">
+                            <i class="fa-solid fa-download me-2"></i> {{ t.exportPdf }}
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left rtl:text-right text-slate-500">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                <tr>
+                                    <th class="px-6 py-3">ID / {{ t.colParcel }}</th>
+                                    <th class="px-6 py-3">{{ t.colLocation }}</th>
+                                    <th class="px-6 py-3">{{ t.colType }}</th>
+                                    <th class="px-6 py-3">{{ t.colValue }}</th>
+                                    <th class="px-6 py-3 text-center">{{ t.colAction }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="prop in properties" :key="prop.id" class="bg-white border-b hover:bg-slate-50 transition">
+                                    <td class="px-6 py-4 font-bold text-slate-900">#{{prop.ada}}/{{prop.parsel}}</td>
+                                    <td class="px-6 py-4">{{ prop.location }}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded border border-blue-400">
+                                            {{ prop.type }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 font-bold text-emerald-600">{{ prop.price }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <button @click="openDeedModal(prop)" class="font-medium text-emerald-600 hover:underline border border-emerald-600 px-3 py-1 rounded hover:bg-emerald-50 transition">
+                                            <i class="fa-solid fa-qrcode me-1"></i> {{ t.btnViewDeed }}
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. DEVİR & SATIŞ -->
+            <div v-if="currentTab === 'transfer'" class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-emerald-600">
+                    <div class="p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-slate-900">{{ t.transferTitle }}</h3>
+                            <div class="flex gap-2">
+                                <button class="px-4 py-2 bg-slate-100 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-200">{{ t.typeSale }}</button>
+                                <button class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-400 hover:text-slate-600">{{ t.typeInheritance }}</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <div>
+                                <label class="block mb-2 text-sm font-bold text-slate-700">{{ t.labelSelectProp }}</label>
+                                <select v-model="selectedPropertyId" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    <option v-for="prop in properties" :key="prop.id" :value="prop.id">
+                                        {{ prop.title }} ({{ prop.location }})
+                                    </option>
+                                </select>
+                                <div class="mt-4 p-4 bg-emerald-50 rounded-lg border border-emerald-100 text-sm">
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-slate-500">{{ t.colValue }}:</span>
+                                        <span class="font-bold text-emerald-700">{{ selectedProperty?.price }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">{{ t.status }}:</span>
+                                        <span class="font-bold text-emerald-700 flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> {{ t.statusActive }}</span>
+                                    </div>
+                                </div>
+                             </div>
+                             
+                             <div class="space-y-4">
+                                <div>
+                                    <label class="block mb-2 text-sm font-bold text-slate-700">{{ t.labelBuyerID }}</label>
+                                    <input type="text" class="w-full p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="SY-12345678">
+                                </div>
+                                <button @click="modals.appointment = true" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 shadow-xl shadow-slate-300/50 transition transform active:scale-95">
+                                    {{ t.btnStartApp }}
+                                </button>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Diğer Sekmeler (Basitleştirilmiş) -->
+            <div v-if="currentTab === 'valuation'" class="flex flex-col items-center justify-center h-full text-center">
+                 <i class="fa-solid fa-robot text-6xl text-emerald-200 mb-4"></i>
+                 <h3 class="text-2xl font-bold text-slate-700">{{ t.navValuation }}</h3>
+                 <p class="text-slate-500 max-w-md mt-2">AI destekli değerleme motoru Mezzeh, Old City ve kırsal alanlar için emlak endeksini analiz ediyor.</p>
+                 <div class="mt-6 font-mono text-3xl font-bold text-emerald-600 bg-white px-6 py-2 rounded-lg shadow-sm border border-emerald-100">$4,250 / m²</div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 1. TAPU GÖRÜNTÜLEME MODALI (QR) -->
+    <transition name="modal">
+        <div v-if="modals.deed && modals.activeProp" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-2xl rounded shadow-2xl overflow-hidden relative tapu-bg border-8 border-double border-slate-300" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+                <button @click="modals.deed = false" class="absolute top-4 end-4 w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center text-red-600 transition"><i class="fa-solid fa-xmark"></i></button>
+                
+                <!-- Tapu Header -->
+                <div class="text-center pt-10 pb-4 border-b-2 border-slate-800 mx-10">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="h-10 mx-auto mb-2">
+                    <h2 class="font-serif text-2xl font-bold text-slate-900 uppercase tracking-widest">{{ t.modalDeedTitle }}</h2>
+                    <p class="text-xs font-bold text-slate-500">{{ t.modalMinistry }}</p>
+                </div>
+
+                <div class="p-10 grid grid-cols-3 gap-8">
+                    <div class="col-span-2 space-y-4 text-sm">
+                        <div class="grid grid-cols-2 gap-4 border-b border-slate-300 pb-2">
+                            <span class="font-bold text-slate-500 uppercase">{{ t.colCity }}:</span>
+                            <span class="font-bold text-slate-900">Damascus (Şam)</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-b border-slate-300 pb-2">
+                            <span class="font-bold text-slate-500 uppercase">{{ t.colDistrict }}:</span>
+                            <span class="font-bold text-slate-900">{{ modals.activeProp.location.split(',')[0] }}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-b border-slate-300 pb-2">
+                            <span class="font-bold text-slate-500 uppercase">{{ t.colParcel }}:</span>
+                            <span class="font-bold text-slate-900">{{ modals.activeProp.ada }} / {{ modals.activeProp.parsel }}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-b border-slate-300 pb-2">
+                            <span class="font-bold text-slate-500 uppercase">{{ t.colType }}:</span>
+                            <span class="font-bold text-slate-900">{{ modals.activeProp.type }}</span>
+                        </div>
+                         <div class="grid grid-cols-2 gap-4 border-b border-slate-300 pb-2">
+                            <span class="font-bold text-slate-500 uppercase">{{ t.owner }}:</span>
+                            <span class="font-bold text-slate-900">Ahmet Al-Hassan</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-span-1 flex flex-col items-center justify-center">
+                        <div class="border-4 border-slate-900 p-2 bg-white">
+                            <!-- QR Code Placeholder -->
+                            <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TapuID:${modals.activeProp.id}-Ada:${modals.activeProp.ada}`" class="w-full">
+                        </div>
+                        <p class="text-[10px] text-center mt-2 text-slate-500 font-mono">DOC ID: {{ Math.floor(Math.random()*1000000) }}</p>
+                        <div class="mt-4 w-20 h-20 border-4 border-red-800 rounded-full opacity-60 flex items-center justify-center rotate-[-15deg] border-double">
+                            <span class="text-red-900 text-[10px] font-bold uppercase text-center leading-tight">OFFICIAL<br>APPROVED<br>2025</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-100 p-4 text-center text-[10px] text-slate-500 font-mono border-t">
+                    Valid Document - Syrian Arab Republic - Land Registry System
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- 2. RANDEVU MODALI (FORM) -->
+    <transition name="modal">
+        <div v-if="modals.appointment" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+                <div class="bg-slate-900 p-6 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-lg">{{ t.modalAppTitle }}</h3>
+                    <button @click="modals.appointment = false" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">{{ t.labelDate }}</label>
+                        <input type="date" class="w-full border p-2 rounded-lg bg-slate-50 outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">{{ t.labelTime }}</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="border p-2 rounded hover:bg-emerald-50 text-sm">09:00</button>
+                            <button class="border p-2 rounded bg-emerald-600 text-white text-sm font-bold shadow">10:30</button>
+                            <button class="border p-2 rounded hover:bg-emerald-50 text-sm">14:00</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">{{ t.labelNote }}</label>
+                        <textarea class="w-full border p-2 rounded-lg bg-slate-50 h-20 text-sm"></textarea>
+                    </div>
+                    <button @click="confirmAppointment" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition">
+                        {{ t.btnConfirm }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- TOAST BİLDİRİM -->
+    <transition name="modal">
+        <div v-if="toast.show" class="fixed bottom-6 end-6 bg-slate-900 text-white p-4 rounded-xl shadow-2xl flex items-center gap-4 z-[200] max-w-sm border-s-4 border-emerald-500" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+            <div class="bg-emerald-500 rounded-full w-8 h-8 flex items-center justify-center text-sm text-slate-900 font-bold shrink-0">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-sm">{{ toast.title }}</h4>
+                <p class="text-xs text-slate-400">{{ toast.message }}</p>
+            </div>
+        </div>
+    </transition>
+
+</div>
+
+<script>
+    const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+
+    // Çeviri Sözlüğü
+    const translations = {
+        tr: {
+            loading: 'YÜKLENİYOR...',
+            menuGeneral: 'GENEL İŞLEMLER',
+            menuServices: 'HİZMETLER & SORGULAMA',
+            navMap: 'Harita & CBS',
+            navProperties: 'Mülk Listesi',
+            navTransfer: 'Tapu Devir/Satış',
+            navValuation: 'Değer Hesapla',
+            navExpropriation: 'Kamulaştırma',
+            searchPlaceholder: 'Ada/Parsel veya Semt Ara...',
+            totalProperties: 'TOPLAM MÜLK',
+            pendingApps: 'BEKLEYEN BAŞVURU',
+            dashboardTitle: 'CBS Yönetim Paneli',
+            propertiesTitle: 'Mülkiyet Kayıtlarım',
+            transferTitle: 'Devir İşlemleri',
+            propertyListTitle: 'Kayıtlı Taşınmazlar',
+            exportPdf: 'PDF İndir',
+            colParcel: 'Ada / Parsel',
+            colLocation: 'Konum',
+            colType: 'Tip',
+            colValue: 'Rayiç Bedel',
+            colAction: 'İşlem',
+            colCity: 'Şehir',
+            colDistrict: 'İlçe/Semt',
+            btnViewDeed: 'Tapu Görüntüle',
+            typeSale: 'Satış',
+            typeInheritance: 'Miras',
+            labelSelectProp: 'İşlem Yapılacak Mülk',
+            labelBuyerID: 'Alıcı Kimlik No',
+            status: 'Durum',
+            statusActive: 'İşleme Uygun',
+            btnStartApp: 'Başvuru Oluştur',
+            owner: 'Malik',
+            modalDeedTitle: 'ELEKTRONİK TAPU SENEDİ',
+            modalMinistry: 'ÇEVRE VE ŞEHİRCİLİK BAKANLIĞI',
+            modalAppTitle: 'Randevu Oluştur',
+            labelDate: 'Tarih Seçiniz',
+            labelTime: 'Saat',
+            labelNote: 'Notlar',
+            btnConfirm: 'Randevuyu Onayla',
+        },
+        en: {
+            loading: 'LOADING...',
+            menuGeneral: 'GENERAL OPERATIONS',
+            menuServices: 'SERVICES & INQUIRY',
+            navMap: 'Map & GIS',
+            navProperties: 'My Properties',
+            navTransfer: 'Transfer & Sale',
+            navValuation: 'Valuation',
+            navExpropriation: 'Expropriation',
+            searchPlaceholder: 'Search Parcel or District...',
+            totalProperties: 'TOTAL PROPERTIES',
+            pendingApps: 'PENDING APPS',
+            dashboardTitle: 'GIS Dashboard',
+            propertiesTitle: 'My Title Deeds',
+            transferTitle: 'Property Transfer',
+            propertyListTitle: 'Registered Properties',
+            exportPdf: 'Export PDF',
+            colParcel: 'Island / Parcel',
+            colLocation: 'Location',
+            colType: 'Type',
+            colValue: 'Market Value',
+            colAction: 'Action',
+            colCity: 'City',
+            colDistrict: 'District',
+            btnViewDeed: 'View Deed',
+            typeSale: 'Sale',
+            typeInheritance: 'Inheritance',
+            labelSelectProp: 'Select Property',
+            labelBuyerID: 'Buyer ID / Passport',
+            status: 'Status',
+            statusActive: 'Eligible',
+            btnStartApp: 'Create Application',
+            owner: 'Owner',
+            modalDeedTitle: 'ELECTRONIC TITLE DEED',
+            modalMinistry: 'MINISTRY OF ENVIRONMENT',
+            modalAppTitle: 'Schedule Appointment',
+            labelDate: 'Select Date',
+            labelTime: 'Time',
+            labelNote: 'Notes',
+            btnConfirm: 'Confirm Appointment',
+        },
+        ar: {
+            loading: 'جار التحميل...',
+            menuGeneral: 'العمليات العامة',
+            menuServices: 'الخدمات والاستعلام',
+            navMap: 'الخريطة ونظم المعلومات',
+            navProperties: 'عقاراتي',
+            navTransfer: 'نقل الملكية والبيع',
+            navValuation: 'التقييم العقاري',
+            navExpropriation: 'الاستملاك',
+            searchPlaceholder: 'بحث عن العقار أو المنطقة...',
+            totalProperties: 'إجمالي العقارات',
+            pendingApps: 'طلبات معلقة',
+            dashboardTitle: 'لوحة التحكم',
+            propertiesTitle: 'سندات الملكية الخاصة بي',
+            transferTitle: 'نقل الملكية',
+            propertyListTitle: 'العقارات المسجلة',
+            exportPdf: 'تصدير PDF',
+            colParcel: 'الجزيرة / القطعة',
+            colLocation: 'الموقع',
+            colType: 'النوع',
+            colValue: 'القيمة السوقية',
+            colAction: 'إجراء',
+            colCity: 'المدينة',
+            colDistrict: 'الحي',
+            btnViewDeed: 'عرض السند',
+            typeSale: 'بيع',
+            typeInheritance: 'ميراث',
+            labelSelectProp: 'اختر العقار',
+            labelBuyerID: 'رقم هوية المشتري',
+            status: 'الحالة',
+            statusActive: 'مؤهل',
+            btnStartApp: 'إنشاء طلب',
+            owner: 'المالك',
+            modalDeedTitle: 'سند ملكية إلكتروني',
+            modalMinistry: 'وزارة الإدارة المحلية والبيئة',
+            modalAppTitle: 'حجز موعد',
+            labelDate: 'اختر التاريخ',
+            labelTime: 'الوقت',
+            labelNote: 'ملاحظات',
+            btnConfirm: 'تأكيد الموعد',
+        }
+    };
+
+    createApp({
+        setup() {
+            const loading = ref(true);
+            const lang = ref('ar'); // Varsayılan Dil ARAPÇA
+            const currentTab = ref('dashboard');
+            const map = ref(null);
+            const searchQuery = ref('');
+            const selectedPropertyId = ref(1);
+            
+            // Modallar
+            const modals = ref({
+                deed: false,
+                appointment: false,
+                activeProp: null
+            });
+
+            const toast = ref({ show: false, title: '', message: '' });
+
+            // Çeviri Computed
+            const t = computed(() => translations[lang.value]);
+
+            const properties = ref([
+                { id: 1, title: 'Mezzeh Panorama', ada: 101, parsel: 4, location: 'Mezzeh, Western Villas', lat: 33.5015, lng: 36.2625, price: '$450,000', type: 'Residential' },
+                { id: 2, title: 'Old City Heritage', ada: 205, parsel: 12, location: 'Bab Touma, Old City', lat: 33.5116, lng: 36.3150, price: '$850,000', type: 'Historical' },
+                { id: 3, title: 'Baramkeh Trade', ada: 150, parsel: 3, location: 'Baramkeh Square', lat: 33.5130, lng: 36.2920, price: '$220,000', type: 'Commercial' },
+            ]);
+
+            const selectedProperty = computed(() => properties.value.find(p => p.id === selectedPropertyId.value));
+
+            // Dil Değiştirme ve RTL Ayarı
+            const setLang = (code) => {
+                lang.value = code;
+                document.documentElement.setAttribute('lang', code);
+                document.documentElement.setAttribute('dir', code === 'ar' ? 'rtl' : 'ltr');
+                document.body.setAttribute('dir', code === 'ar' ? 'rtl' : 'ltr');
+                
+                // Harita RTL sorunu için resize
+                nextTick(() => {
+                    if(map.value) map.value.invalidateSize();
+                });
+            };
+
+            const initMap = () => {
+                if(map.value) return;
+                map.value = L.map('map').setView([33.5138, 36.29], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map.value);
+                
+                properties.value.forEach(prop => {
+                    const el = document.createElement('div');
+                    el.className = 'w-4 h-4 bg-red-600 rounded-full border-2 border-white shadow-lg';
+                    
+                    const icon = L.divIcon({
+                        className: 'custom-icon',
+                        html: `<div style="background-color:#059669; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 0 5px black"></div>`,
+                        iconSize: [14, 14]
+                    });
+
+                    L.marker([prop.lat, prop.lng], {icon: icon}).addTo(map.value)
+                     .bindPopup(`<b style="color:#059669">${prop.title}</b><br>${prop.price}`);
+                });
+            };
+
+            const locateProperty = () => {
+                if(searchQuery.value.toLowerCase().includes('mezzeh') || searchQuery.value.includes('101')) {
+                    const target = properties.value[0];
+                    map.value.flyTo([target.lat, target.lng], 16);
+                    showSuccess(t.value.dashboardTitle, 'Mezzeh Parsel 101/4 bulundu.');
+                }
+            };
+
+            const openDeedModal = (prop) => {
+                modals.value.activeProp = prop;
+                modals.value.deed = true;
+            };
+
+            const confirmAppointment = () => {
+                modals.value.appointment = false;
+                showSuccess(t.value.modalAppTitle, 'Randevunuz sisteme işlendi. SMS gönderildi.');
+            };
+
+            const showSuccess = (title, msg) => {
+                toast.value = { show: true, title, message: msg };
+                setTimeout(() => toast.value.show = false, 3000);
+            };
+
+            watch(currentTab, (newTab) => {
+                if(newTab === 'dashboard') {
+                    nextTick(() => { if(map.value) map.value.invalidateSize(); });
+                }
+            });
+
+            onMounted(() => {
+                // Başlangıçta Arapça ayarlarını zorla uygula
+                setLang('ar');
+                
+                setTimeout(() => {
+                    loading.value = false;
+                    nextTick(() => initMap());
+                }, 1500);
+            });
+
+            return {
+                loading,
+                lang,
+                t,
+                setLang,
+                currentTab,
+                properties,
+                selectedPropertyId,
+                selectedProperty,
+                searchQuery,
+                modals,
+                toast,
+                locateProperty,
+                openDeedModal,
+                confirmAppointment
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
