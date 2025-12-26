@@ -13,7 +13,8 @@
                 extend: {
                     colors: {
                         emerald: { 50: '#ecfdf5', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b' },
-                        slate: { 850: '#1e293b' } 
+                        slate: { 850: '#1e293b' },
+                        gold: { 500: '#D4AF37', 600: '#C5A028' }
                     }
                 }
             }
@@ -35,11 +36,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         body[dir="ltr"] { font-family: 'Inter', sans-serif; }
         body[dir="rtl"] { font-family: 'Cairo', sans-serif; }
+        .tapu-font { font-family: 'Amiri', serif; }
         #map { height: 100%; width: 100%; z-index: 1; background: #e2e8f0; }
         .login-pattern {
             background-color: #0f172a;
@@ -50,14 +52,18 @@
         .leaflet-popup-content { margin: 0; width: 260px !important; }
         select { background-position: left 0.5rem center; }
         [dir="rtl"] select { background-position: right 0.5rem center; }
+        .parchment-bg {
+            background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+            background-color: #fdfbf7;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen overflow-hidden selection:bg-emerald-200" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
 
 <div id="app" class="h-full relative overflow-hidden flex flex-col md:flex-row">
 
-    <!-- LOGIN SCREEN -->
-    <div v-if="!isLoggedIn" class="fixed inset-0 z-[100] flex items-center justify-center login-pattern p-4" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+    <!-- LOGIN SCREEN (Z-Index Increased) -->
+    <div v-if="!isLoggedIn" class="fixed inset-0 z-[10000] flex items-center justify-center login-pattern p-4" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
         <div class="absolute top-6 right-6 flex gap-2 z-20">
             <button @click="setLang('ar')" :class="lang === 'ar' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'" class="px-3 py-1 rounded text-xs font-bold transition">عربي</button>
             <button @click="setLang('tr')" :class="lang === 'tr' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'" class="px-3 py-1 rounded text-xs font-bold transition">TR</button>
@@ -92,6 +98,7 @@
                     <span v-else>{{ t.btnLogin }}</span>
                 </button>
             </form>
+            
             <div class="mt-6 text-center text-[10px] text-slate-400 border-t pt-4"><p>{{ t.loginFooter }}</p></div>
         </div>
     </div>
@@ -99,16 +106,18 @@
     <!-- MAIN APP -->
     <div v-else class="flex h-full w-full relative overflow-hidden">
 
-        <!-- LOADING -->
-        <div v-if="loading" class="absolute inset-0 z-[60] bg-slate-950 flex flex-col items-center justify-center text-white">
+        <!-- LOADING (Z-Index Increased) -->
+        <div v-if="loading" class="absolute inset-0 z-[10000] bg-slate-950 flex flex-col items-center justify-center text-white">
             <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-500 mb-4"></div>
             <h2 class="text-xl font-bold tracking-widest animate-pulse">{{ t.loading }}</h2>
             <p class="text-slate-400 text-xs mt-2 font-mono">{{ loadingMsg || t.loadingMsg }}</p>
         </div>
 
-        <!-- SIDEBAR -->
-        <div v-if="isMobileMenuOpen" @click="isMobileMenuOpen = false" class="fixed inset-0 bg-black/50 z-20 md:hidden backdrop-blur-sm"></div>
-        <aside :class="['fixed md:static inset-y-0 z-30 w-64 bg-slate-950 text-slate-300 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out border-e border-slate-800', isMobileMenuOpen ? 'translate-x-0' : (lang === 'ar' ? 'translate-x-full' : '-translate-x-full'), 'md:translate-x-0']">
+        <!-- MOBILE MENU OVERLAY (Z-Index Increased) -->
+        <div v-if="isMobileMenuOpen" @click="isMobileMenuOpen = false" class="fixed inset-0 bg-black/50 z-[9000] md:hidden backdrop-blur-sm"></div>
+        
+        <!-- SIDEBAR (Z-Index Increased) -->
+        <aside :class="['fixed md:static inset-y-0 z-[9001] w-64 bg-slate-950 text-slate-300 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out border-e border-slate-800', isMobileMenuOpen ? 'translate-x-0' : (lang === 'ar' ? 'translate-x-full' : '-translate-x-full'), 'md:translate-x-0']">
             <div class="p-6 border-b border-slate-800 flex items-center gap-3 shrink-0">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="w-10 h-7 rounded shadow-sm border border-slate-600 object-cover">
                 <div>
@@ -142,7 +151,7 @@
                     </h2>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- KMZ UPLOAD BUTTON (Always visible) -->
+                    <!-- KMZ UPLOAD BUTTON -->
                     <div class="relative group">
                         <input type="file" ref="fileInput" @change="handleFileUpload" accept=".kmz,.kml,.json,.geojson" class="hidden">
                         <button @click="$refs.fileInput.click()" class="bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-slate-900 transition flex items-center gap-2 text-xs md:text-sm font-bold border border-slate-600">
@@ -177,6 +186,7 @@
                     </div>
 
                     <div class="flex-1 bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden relative min-h-[400px]">
+                        <!-- Search Bar is Z-400, but now modals are Z-9999 -->
                         <div class="absolute top-3 start-3 z-[400] w-full max-w-[200px] md:max-w-xs flex gap-2">
                             <div class="flex gap-2 bg-white/95 backdrop-blur p-1.5 rounded-lg shadow-xl border border-slate-200 flex-1">
                                 <input v-model="searchQuery" :placeholder="t.searchPlaceholder" class="flex-1 bg-transparent border-none outline-none px-2 text-xs md:text-sm w-full">
@@ -194,7 +204,7 @@
                             <h3 class="font-bold text-base md:text-lg text-slate-800">{{ t.propertyListTitle }} ({{ properties.length }})</h3>
                             <button class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-emerald-700"><i class="fa-solid fa-download me-1"></i> PDF</button>
                         </div>
-                        <div class="overflow-x-auto h-[600px]"> <!-- Scrollable Table -->
+                        <div class="overflow-x-auto h-[600px]">
                             <table class="w-full text-xs md:text-sm text-left rtl:text-right text-slate-500 whitespace-nowrap">
                                 <thead class="text-xs text-slate-700 uppercase bg-slate-100 sticky top-0 z-10 shadow-sm">
                                     <tr>
@@ -207,7 +217,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Use v-for with slice for performance if needed, but Vue handles 1000s ok -->
                                     <tr v-for="prop in filteredProperties.slice(0, 100)" :key="prop.id" class="bg-white border-b hover:bg-slate-50 transition">
                                         <td class="px-4 py-3 font-bold text-slate-900">#{{prop.ada}}/{{prop.parsel}}</td>
                                         <td class="px-4 py-3 truncate max-w-[120px]">{{ prop.location }}</td>
@@ -227,29 +236,80 @@
                     </div>
                 </div>
 
-                <!-- TRANSFER -->
-                <div v-if="currentTab === 'transfer'" class="max-w-3xl mx-auto">
+                <!-- TRANSFER (PROFESSIONAL REDESIGN) -->
+                <div v-if="currentTab === 'transfer'" class="max-w-5xl mx-auto">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-emerald-600">
-                        <div class="p-6 md:p-8">
-                            <h3 class="text-lg font-bold text-slate-900 mb-4">{{ t.transferTitle }}</h3>
-                            <div class="grid grid-cols-1 gap-6">
+                        <div class="bg-slate-900 p-6 text-white flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-bold">{{ t.transferTitle }}</h3>
+                                <p class="text-sm text-slate-400">{{ t.transferSubtitle }}</p>
+                            </div>
+                            <i class="fa-solid fa-handshake-simple text-4xl text-emerald-400"></i>
+                        </div>
+                        <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <!-- Step 1: Property & Seller Info -->
+                            <div class="md:col-span-1 space-y-6">
+                                <h4 class="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-1 text-emerald-600"></i> {{ t.step1Title }}</h4>
                                 <div>
                                     <label class="block mb-2 text-sm font-bold text-slate-700">{{ t.labelSelectProp }}</label>
-                                    <select v-model="selectedPropertyId" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl outline-none text-sm">
+                                    <select v-model="selectedPropertyId" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl outline-none text-sm focus:border-emerald-500 transition">
                                         <option v-for="prop in properties.slice(0, 50)" :key="prop.id" :value="prop.id">{{ t.parcelPrefix }} #{{ prop.ada }}/{{ prop.parsel }} - {{ prop.location }}</option>
                                     </select>
-                                    <div class="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-sm space-y-2" v-if="selectedProperty">
-                                        <div class="flex justify-between"><span class="text-slate-500">{{ t.colValue }}:</span><span class="font-bold text-emerald-700">{{ selectedProperty.priceStr }}</span></div>
-                                        <div class="flex justify-between"><span class="text-slate-500">{{ t.owner }}:</span><span class="font-bold text-slate-900">{{ selectedProperty.owner }}</span></div>
-                                    </div>
                                 </div>
-                                <button @click="modals.appointment = true" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold shadow-lg">{{ t.btnStartApp }}</button>
+                                <div v-if="selectedProperty" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-sm">
+                                    <div class="flex justify-between"><span class="text-slate-500">{{ t.colParcel }}:</span><span class="font-bold">{{ selectedProperty.ada }}/{{ selectedProperty.parsel }}</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-500">{{ t.colLocation }}:</span><span class="font-bold">{{ selectedProperty.location }}</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-500">{{ t.colType }}:</span><span class="font-bold">{{ t['type' + selectedProperty.type] }}</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-500">{{ t.area }}:</span><span class="font-bold">{{ selectedProperty.area }} m²</span></div>
+                                    <hr class="border-slate-200">
+                                    <div class="flex justify-between"><span class="text-slate-500">{{ t.seller }}:</span><span class="font-bold text-slate-900">{{ selectedProperty.owner }}</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-500">{{ t.share }}:</span><span class="font-bold">Tam (1/1)</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Buyer & Share Info -->
+                            <div class="md:col-span-2 space-y-6">
+                                <h4 class="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-2 text-emerald-600"></i> {{ t.step2Title }}</h4>
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div><label class="block mb-1 text-sm font-bold text-slate-700">{{ t.buyerName }}</label><input type="text" v-model="transferData.buyerName" class="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none text-sm focus:border-emerald-500 transition"></div>
+                                        <div><label class="block mb-1 text-sm font-bold text-slate-700">{{ t.buyerID }}</label><input type="text" v-model="transferData.buyerID" class="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none text-sm focus:border-emerald-500 transition font-mono"></div>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="col-span-2"><label class="block mb-1 text-sm font-bold text-slate-700">{{ t.transferAmount }}</label><input type="text" v-model="transferData.amount" class="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none text-sm focus:border-emerald-500 transition font-mono"></div>
+                                        <div>
+                                            <label class="block mb-1 text-sm font-bold text-slate-700">{{ t.share }} (Pay/Payda)</label>
+                                            <div class="flex items-center gap-2">
+                                                <input type="number" v-model="transferData.shareNumerator" class="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none text-sm focus:border-emerald-500 transition text-center" placeholder="1">
+                                                <span class="text-slate-500 font-bold">/</span>
+                                                <input type="number" v-model="transferData.shareDenominator" class="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none text-sm focus:border-emerald-500 transition text-center" placeholder="1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="text-emerald-600 font-bold text-sm flex items-center gap-1 hover:text-emerald-800 transition"><i class="fa-solid fa-plus-circle"></i> {{ t.addShareholder }}</button>
+                                </div>
+
+                                <!-- Step 3: Confirmation -->
+                                <h4 class="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2 mt-8"><i class="fa-solid fa-3 text-emerald-600"></i> {{ t.step3Title }}</h4>
+                                <div class="bg-emerald-50 p-6 rounded-xl border border-emerald-200">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="font-bold text-slate-700">{{ t.totalTransactionValue }}:</span>
+                                        <span class="font-bold text-2xl text-emerald-700 font-mono">{{ transferData.amount }} TL</span>
+                                    </div>
+                                    <div class="space-y-2 text-sm text-slate-600 mb-6">
+                                        <div class="flex justify-between"><span>{{ t.transferTax }} (%4):</span><span>{{ (parseFloat(transferData.amount) * 0.04 || 0).toFixed(2) }} TL</span></div>
+                                        <div class="flex justify-between"><span>{{ t.serviceFee }}:</span><span>350.00 TL</span></div>
+                                    </div>
+                                    <button @click="completeTransfer" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-slate-800 transition text-lg flex items-center justify-center gap-3">
+                                        <i class="fa-solid fa-file-signature"></i> {{ t.btnCompleteTransfer }}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- OTHER TABS (Valuation, Expropriation) work automatically with properties array -->
+                <!-- VALUATION -->
                 <div v-if="currentTab === 'valuation'" class="max-w-2xl mx-auto">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-blue-600">
                         <div class="bg-slate-900 p-6 text-white text-center">
@@ -258,7 +318,7 @@
                         </div>
                         <div class="p-6 space-y-6">
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">{{ t.labelSelectProp }}</label>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">{{ t.labelSelectProp }} (Auto)</label>
                                 <select v-model="selectedPropertyId" @change="fillValuationData" class="w-full p-2 bg-slate-50 border rounded">
                                     <option v-for="prop in properties.slice(0,50)" :key="prop.id" :value="prop.id">#{{ prop.ada }}/{{ prop.parsel }}</option>
                                 </select>
@@ -272,16 +332,66 @@
                     </div>
                 </div>
 
-                <div v-if="currentTab === 'expropriation'" class="max-w-3xl mx-auto">
-                    <div class="bg-white rounded-xl shadow-lg border-t-8 border-slate-700 p-6">
-                        <h3 class="text-xl font-bold mb-4">{{ t.navExpropriation }}</h3>
-                        <div class="flex gap-4 mb-6">
-                            <select v-model="selectedPropertyId" class="flex-1 border p-2 rounded"><option v-for="prop in properties.slice(0,50)" :key="prop.id" :value="prop.id">#{{ prop.ada }}/{{ prop.parsel }}</option></select>
-                            <button @click="startExpropriationCheck" class="bg-slate-800 text-white px-6 rounded font-bold">{{ t.btnCheck }}</button>
+                <!-- EXPROPRIATION (PROFESSIONAL REDESIGN) -->
+                <div v-if="currentTab === 'expropriation'" class="max-w-4xl mx-auto">
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-red-600">
+                        <div class="bg-slate-900 p-6 text-white flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-bold">{{ t.navExpropriation }}</h3>
+                                <p class="text-sm text-slate-400">{{ t.expSubtitle }}</p>
+                            </div>
+                            <i class="fa-solid fa-gavel text-4xl text-red-400"></i>
                         </div>
-                        <div v-if="expResult" class="border rounded p-4 bg-slate-50">
-                            <h4 :class="expResult.riskLevel==='high'?'text-red-600':'text-emerald-600'" class="font-bold mb-2">{{ t[expResult.titleKey] }}</h4>
-                            <p class="text-sm text-slate-600">{{ t[expResult.descKey] }}</p>
+                        <div class="p-6 md:p-8">
+                            <div class="flex flex-col md:flex-row gap-4 mb-8 items-end">
+                                <div class="flex-1">
+                                    <label class="block mb-2 text-sm font-bold text-slate-700">{{ t.labelSelectProp }}</label>
+                                    <select v-model="selectedPropertyId" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl outline-none text-sm focus:border-emerald-500 transition">
+                                        <option v-for="prop in properties.slice(0,50)" :key="prop.id" :value="prop.id">{{ t.parcelPrefix }} #{{ prop.ada }}/{{ prop.parsel }} - {{ prop.location }}</option>
+                                    </select>
+                                </div>
+                                <button @click="startExpropriationCheck" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-900 shadow-lg transition flex items-center gap-2 h-[46px]">
+                                    <i class="fa-solid fa-magnifying-glass"></i> {{ t.btnCheck }}
+                                </button>
+                            </div>
+
+                            <div v-if="expLoading" class="text-center py-12">
+                                <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-red-600 mx-auto mb-4"></div>
+                                <p class="text-slate-600 font-bold animate-pulse">{{ t.loadingMsg }}</p>
+                            </div>
+
+                            <div v-if="expResult && !expLoading" class="animate-fade-in">
+                                <div :class="expResult.riskLevel === 'high' ? 'bg-red-50 border-red-200' : (expResult.riskLevel === 'medium' ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200')" class="border-l-8 p-6 rounded-r-xl mb-6 shadow-sm">
+                                    <h4 :class="expResult.riskLevel === 'high' ? 'text-red-700' : (expResult.riskLevel === 'medium' ? 'text-amber-700' : 'text-emerald-700')" class="font-bold text-xl flex items-center gap-3 mb-2">
+                                        <i :class="expResult.icon" class="text-2xl"></i> {{ t[expResult.titleKey] }}
+                                    </h4>
+                                    <p class="text-slate-600">{{ t[expResult.descKey] }}</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                        <h5 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-600"></i> {{ t.propertySummary }}</h5>
+                                        <div v-if="selectedProperty" class="space-y-2 text-sm">
+                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.colParcel }}:</span><span class="font-bold">{{ selectedProperty.ada }}/{{ selectedProperty.parsel }}</span></div>
+                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.colLocation }}:</span><span class="font-bold">{{ selectedProperty.location }}</span></div>
+                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.area }}:</span><span class="font-bold">{{ selectedProperty.area }} m²</span></div>
+                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.owner }}:</span><span class="font-bold">{{ selectedProperty.owner }}</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm" v-if="expResult.riskLevel !== 'clean'">
+                                        <h5 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-file-contract text-slate-600"></i> {{ t.decisionDetails }}</h5>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.decisionDate }}:</span><span class="font-bold">{{ expResult.date }}</span></div>
+                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.decisionNo }}:</span><span class="font-bold font-mono">{{ expResult.refNo }}</span></div>
+                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.authority }}:</span><span class="font-bold">{{ t[expResult.authKey] }}</span></div>
+                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.legalBasis }}:</span><span class="font-bold">{{ t.legalBasisValue }}</span></div>
+                                        </div>
+                                        <button class="mt-4 w-full border-2 border-slate-800 text-slate-800 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 hover:text-white transition flex items-center justify-center gap-2">
+                                            <i class="fa-solid fa-file-pdf"></i> {{ t.viewOfficialDoc }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -290,26 +400,100 @@
         </main>
     </div>
 
-    <!-- MODALS -->
+    <!-- MODALS (Z-Index Increased & Professional Deed) -->
     <transition name="modal">
-        <div v-if="modals.deed" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative tapu-bg border-4 border-double border-slate-300" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
-                <button @click="modals.deed = false" class="absolute top-3 end-3 w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-                <div class="text-center pt-6 pb-4 border-b-2 border-slate-800 mx-6">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="h-6 mx-auto mb-2">
-                    <h2 class="font-serif text-xl font-bold text-slate-900 uppercase">{{ t.modalDeedTitle }}</h2>
+        <div v-if="modals.deed" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-3xl rounded-none shadow-2xl overflow-hidden relative tapu-bg border-8 border-double border-gold-600 parchment-bg tapu-font text-slate-900" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+                <button @click="modals.deed = false" class="absolute top-4 end-4 w-10 h-10 bg-red-800 text-white rounded-full flex items-center justify-center z-10 shadow-lg hover:bg-red-900 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+                
+                <!-- Header -->
+                <div class="text-center pt-10 pb-6 border-b-4 border-gold-600 mx-8 relative">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="h-16 mx-auto mb-4 drop-shadow-md absolute top-6 start-0 opacity-20">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Emblem_of_Syria_%282025-%29.svg/1200px-Emblem_of_Syria_%282025-%29.svg.png" class="h-24 mx-auto mb-4 drop-shadow-lg">
+                    <h1 class="text-3xl font-bold text-slate-900 uppercase tracking-wider mb-2">{{ t.syrianRepublic }}</h1>
+                    <h2 class="text-xl font-bold text-slate-800">{{ t.cadastreDirectorate }}</h2>
+                    <h3 class="text-4xl font-bold text-red-800 mt-4 border-t-2 border-b-2 border-red-800 inline-block px-8 py-2">{{ t.modalDeedTitle }}</h3>
                 </div>
-                <div class="p-6 text-sm space-y-3">
-                    <div class="flex justify-between border-b pb-1"><span class="font-bold text-slate-500">{{ t.colCity }}</span> <span class="font-bold">{{ activeRegionName }}</span></div>
-                    <div class="flex justify-between border-b pb-1"><span class="font-bold text-slate-500">{{ t.colParcel }}</span> <span class="font-bold">{{ modals.activeProp.ada }} / {{ modals.activeProp.parsel }}</span></div>
-                    <div class="flex justify-between border-b pb-1"><span class="font-bold text-slate-500">{{ t.colValue }}</span> <span class="font-bold text-emerald-600">{{ modals.activeProp.priceStr }}</span></div>
-                    <div class="text-center mt-4"><img :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=ID:${modals.activeProp.id}`" class="w-24 mx-auto border p-1"></div>
+
+                <!-- Content -->
+                <div class="p-8 space-y-8">
+                    <!-- Property Info Table -->
+                    <div>
+                        <h4 class="font-bold text-xl text-slate-900 mb-4 border-b-2 border-slate-800 pb-1 flex items-center gap-2"><i class="fa-solid fa-location-dot text-gold-600"></i> {{ t.propertyInfo }}</h4>
+                        <table class="w-full border-2 border-slate-800 text-lg">
+                            <tr class="border-b border-slate-800">
+                                <th class="bg-slate-100 p-3 text-start w-1/4 border-e border-slate-800">{{ t.colCity }} / {{ t.colDistrict }}</th>
+                                <td class="p-3 font-bold">{{ activeRegionName }}</td>
+                                <th class="bg-slate-100 p-3 text-start w-1/4 border-e border-slate-800">{{ t.colParcel }} (Ada/Parsel)</th>
+                                <td class="p-3 font-bold">{{ modals.activeProp.ada }} / {{ modals.activeProp.parsel }}</td>
+                            </tr>
+                            <tr class="border-b border-slate-800">
+                                <th class="bg-slate-100 p-3 text-start border-e border-slate-800">{{ t.colType }}</th>
+                                <td class="p-3">{{ t['type' + modals.activeProp.type] }}</td>
+                                <th class="bg-slate-100 p-3 text-start border-e border-slate-800">{{ t.area }}</th>
+                                <td class="p-3 font-bold">{{ modals.activeProp.area }} m²</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Owner Info Table -->
+                    <div>
+                        <h4 class="font-bold text-xl text-slate-900 mb-4 border-b-2 border-slate-800 pb-1 flex items-center gap-2"><i class="fa-solid fa-user-tie text-gold-600"></i> {{ t.ownerInfo }}</h4>
+                        <table class="w-full border-2 border-slate-800 text-lg">
+                            <tr class="bg-slate-100 border-b border-slate-800">
+                                <th class="p-3 text-start border-e border-slate-800">{{ t.ownerName }}</th>
+                                <th class="p-3 text-start border-e border-slate-800">{{ t.share }}</th>
+                                <th class="p-3 text-start">{{ t.acquisitionReason }}</th>
+                            </tr>
+                            <tr class="border-b border-slate-800">
+                                <td class="p-3 font-bold border-e border-slate-800">{{ modals.activeProp.owner }}</td>
+                                <td class="p-3 border-e border-slate-800">Tam (1/1)</td>
+                                <td class="p-3">{{ t.typeSale }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Footer & Validation -->
+                    <div class="flex justify-between items-end mt-12 pt-8 border-t-4 border-gold-600">
+                        <div class="text-center">
+                             <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SY-KADASTRO-TAPU-ID:${modals.activeProp.id}-HASH:${Date.now()}`" class="w-32 h-32 mx-auto border-4 border-slate-800 p-2 bg-white">
+                             <p class="text-sm font-bold mt-2">{{ t.electronicValidation }}</p>
+                             <p class="text-xs font-mono">{{ modals.activeProp.id }}-{{ Date.now().toString().slice(-8) }}</p>
+                        </div>
+                        <div class="text-center relative">
+                            <p class="font-bold text-lg mb-8">{{ t.cadastreOfficial }}</p>
+                            <div class="absolute -top-12 start-1/2 -translate-x-1/2 opacity-30 pointer-events-none">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Emblem_of_Syria_%282025-%29.svg/1200px-Emblem_of_Syria_%282025-%29.svg.png" class="h-40 grayscale">
+                            </div>
+                            <p class="font-bold text-xl text-red-900 border-t-2 border-slate-800 pt-4 inline-block px-8 relative z-10">Ahmad Al-Faruqi</p>
+                            <p class="text-sm">{{ t.officialTitle }}</p>
+                            <p class="text-sm mt-2 font-bold">{{ new Date().toLocaleDateString(lang === 'ar' ? 'ar-SY' : (lang === 'tr' ? 'tr-TR' : 'en-US'), { year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-4 mt-8 no-print">
+                        <button class="flex-1 bg-slate-800 text-white py-3 rounded-lg font-bold shadow-lg hover:bg-slate-900 transition flex items-center justify-center gap-2"><i class="fa-solid fa-print"></i> {{ t.btnPrint }}</button>
+                        <button class="flex-1 bg-red-800 text-white py-3 rounded-lg font-bold shadow-lg hover:bg-red-900 transition flex items-center justify-center gap-2"><i class="fa-solid fa-file-pdf"></i> {{ t.btnDownloadPDF }}</button>
+                    </div>
                 </div>
             </div>
         </div>
     </transition>
 
-    <div v-if="toast.show" class="fixed bottom-6 end-6 bg-slate-900 text-white p-4 rounded-xl shadow-2xl z-[200] max-w-xs border-s-4 border-emerald-500" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+    <transition name="modal">
+        <div v-if="modals.appointment" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+                <div class="bg-slate-900 p-4 text-white flex justify-between items-center"><h3 class="font-bold">{{ t.modalAppTitle }}</h3><button @click="modals.appointment = false"><i class="fa-solid fa-xmark"></i></button></div>
+                <div class="p-6 space-y-4">
+                    <div><label class="block text-xs font-bold mb-1">{{ t.labelDate }}</label><input type="date" class="w-full border p-2 rounded-lg"></div>
+                    <button @click="confirmAppointment" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm">{{ t.btnConfirm }}</button>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <div v-if="toast.show" class="fixed bottom-6 end-6 bg-slate-900 text-white p-4 rounded-xl shadow-2xl z-[10000] max-w-xs border-s-4 border-emerald-500" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
         <h4 class="font-bold text-sm">{{ toast.title }}</h4><p class="text-xs text-slate-400">{{ toast.message }}</p>
     </div>
 
@@ -320,34 +504,58 @@
 
     const translations = {
         tr: {
-            loading: 'YÜKLENİYOR...', loadingMsg: 'Suriye CBS Çekirdeğine Bağlanılıyor...', menuGeneral: 'GENEL İŞLEMLER', menuServices: 'HİZMETLER', navMap: 'Harita & CBS', navProperties: 'Mülk Listesi', navTransfer: 'Tapu Devir/Satış', navValuation: 'Değer Hesapla', navExpropriation: 'Kamulaştırma', searchPlaceholder: 'Ada/Parsel Ara...', totalProperties: 'TOPLAM MÜLK', pendingApps: 'BEKLEYEN', riskCount: 'RİSKLİ', dashboardTitle: 'CBS Paneli', propertyListTitle: 'Taşınmaz Kayıtları', transferTitle: 'Devir İşlemleri', colParcel: 'Ada/Parsel', colLocation: 'Konum', colType: 'Tip', colValue: 'Rayiç Bedel', colAction: 'İşlem', owner: 'Malik', btnViewDeed: 'Tapu', exportPdf: 'PDF İndir', typeSale: 'Satış', typeInheritance: 'Miras', labelSelectProp: 'Mülk Seçiniz', labelBuyerID: 'Alıcı Kimlik No', btnStartApp: 'Başvuru Yap', modalDeedTitle: 'TAPU SENEDİ', colCity: 'Bölge', modalAppTitle: 'Randevu Oluştur', labelDate: 'Tarih Seçiniz', btnConfirm: 'Onayla', btnCheck: 'SORGULA', btnRecalculate: 'Yeniden Hesapla', estValue: 'Tahmini Değer', area: 'Alan', age: 'Bina Yaşı', expSubtitle: 'Resmi Kısıtlama ve Kamulaştırma Sorgusu', decisionDate: 'Karar Tarihi', authority: 'Kurum', logout: 'Çıkış Yap', activeRegion: 'AKTİF BÖLGE',
+            loading: 'YÜKLENİYOR...', loadingMsg: 'Suriye CBS Çekirdeğine Bağlanılıyor...', menuGeneral: 'GENEL İŞLEMLER', menuServices: 'HİZMETLER', navMap: 'Harita & CBS', navProperties: 'Mülk Listesi', navTransfer: 'Tapu Devir/Satış', navValuation: 'Değer Hesapla', navExpropriation: 'Kamulaştırma', searchPlaceholder: 'Ada/Parsel Ara...', totalProperties: 'TOPLAM MÜLK', pendingApps: 'BEKLEYEN', riskCount: 'RİSKLİ', dashboardTitle: 'CBS Paneli', propertyListTitle: 'Taşınmaz Kayıtları', transferTitle: 'RESMİ TAPU DEVİR İŞLEMİ', colParcel: 'Ada/Parsel', colLocation: 'Konum', colType: 'Nitelik', colValue: 'Rayiç Bedel', colAction: 'İşlem', owner: 'Malik', btnViewDeed: 'Tapu', exportPdf: 'PDF İndir', typeSale: 'Satış', typeInheritance: 'Miras', labelSelectProp: 'Mülk Seçiniz', labelBuyerID: 'Alıcı Kimlik No', btnStartApp: 'Başvuru Yap', modalDeedTitle: 'TAPU SENEDİ', colCity: 'İl/İlçe', modalAppTitle: 'Randevu Oluştur', labelDate: 'Tarih Seçiniz', btnConfirm: 'Onayla', btnCheck: 'SORGULA', btnRecalculate: 'Yeniden Hesapla', estValue: 'Tahmini Değer', area: 'Yüzölçümü', age: 'Bina Yaşı', expSubtitle: 'Resmi Kısıtlama ve Kamulaştırma Sorgusu', decisionDate: 'Karar Tarihi', authority: 'İlgili Kurum', logout: 'Çıkış Yap', activeRegion: 'AKTİF BÖLGE',
             typeResidential: 'Konut', typeCommercial: 'Ticari', typeHistorical: 'Tarihi', typeLand: 'Arsa', typeProject: 'Proje',
             loginSystemName: 'E-TAPU SİSTEMİ', loginSubtitle: 'Suriye Arap Cumhuriyeti - Tapu ve Kadastro', lblUsername: 'TC / Pasaport No', lblPassword: 'Şifre', btnLogin: 'GİRİŞ YAP', loginFooter: '© 2025 Tapu ve Kadastro Genel Müdürlüğü',
-            riskHighTitle: 'KAMULAŞTIRMA KARARI', riskHighAuth: 'Yerel Yönetim Bakanlığı', riskHighDesc: 'Yol genişletme çalışması nedeniyle tam kamulaştırma kararı.',
-            riskMedTitle: 'KISITLAMA MEVCUT', riskMedAuth: 'Eski Eserler Müdürlüğü', riskMedDesc: 'Tarihi sit alanı içerisindedir. Tadilat izne tabidir.',
-            riskCleanTitle: 'TEMİZ / KISITLAMA YOK', riskCleanAuth: 'Tapu Sicil Müdürlüğü', riskCleanDesc: 'Herhangi bir şerh veya kısıtlama bulunmamaktadır.',
+            riskHighTitle: 'KAMULAŞTIRMA KARARI MEVCUT', riskHighAuth: 'Yerel Yönetim Bakanlığı', riskHighDesc: 'Bu parsel üzerinde, onaylanmış bir kamu yararı kararı doğrultusunda tam kamulaştırma işlemi başlatılmıştır. Mülkiyet devri kısıtlanmıştır.',
+            riskMedTitle: 'KISITLAMA / ŞERH MEVCUT', riskMedAuth: 'Eski Eserler ve Müzeler Genel Müdürlüğü', riskMedDesc: 'Parsel, koruma altındaki tarihi sit alanı içerisinde kalmaktadır. Her türlü inşai faaliyet ve devir işlemi kurum iznine tabidir.',
+            riskCleanTitle: 'TEMİZ / KISITLAMA BULUNMAMAKTADIR', riskCleanAuth: 'Tapu ve Kadastro Müdürlüğü', riskCleanDesc: 'Yapılan sorgulamada, parsel üzerinde herhangi bir kamulaştırma kararı, haciz, ipotek veya kısıtlayıcı şerh kaydına rastlanmamıştır.',
             step1: 'Veritabanına Bağlanılıyor...', step2: 'Kayıtlar Taranıyor...', step3: 'Bakanlık Kararları Kontrol Ediliyor...', step4: 'Rapor Hazırlanıyor...',
-            parcelPrefix: 'Parsel', btnUploadKMZ: 'KMZ Yükle'
+            parcelPrefix: 'Parsel', btnUploadKMZ: 'KMZ Yükle',
+            // New/Updated Translations
+            transferSubtitle: 'Mülkiyet devri ve hissedar işlemleri', step1Title: 'Mülk ve Satıcı Bilgileri', step2Title: 'Alıcı ve Hisse Bilgileri', step3Title: 'İşlem Onayı ve Tamamlama',
+            buyerName: 'Alıcı Adı Soyadı', buyerID: 'Alıcı Kimlik/Pasaport No', transferAmount: 'İşlem Bedeli (TL)', share: 'Hisse Payı', addShareholder: 'Hissedar Ekle',
+            totalTransactionValue: 'Toplam İşlem Değeri', transferTax: 'Tapu Harcı', serviceFee: 'Döner Sermaye Ücreti', btnCompleteTransfer: 'Devir İşlemini Tamamla',
+            syrianRepublic: 'SURİYE ARAP CUMHURİYETİ', cadastreDirectorate: 'TAPU VE KADASTRO GENEL MÜDÜRLÜĞÜ', propertyInfo: 'TAŞINMAZIN BİLGİLERİ', colDistrict: 'İlçe',
+            ownerInfo: 'MALİKİN BİLGİLERİ', ownerName: 'Adı Soyadı / Unvanı', acquisitionReason: 'Edinme Sebebi', electronicValidation: 'Elektronik Doğrulama Kodu',
+            cadastreOfficial: 'Tapu Sicil Müdürü', officialTitle: 'Yetkili İmza', btnPrint: 'YAZDIR', btnDownloadPDF: 'PDF İNDİR',
+            seller: 'Satıcı (Mevcut Malik)', decisionNo: 'Karar No', legalBasis: 'Yasal Dayanak', legalBasisValue: 'Kamulaştırma Kanunu Md. 7', viewOfficialDoc: 'Resmi Belgeyi Görüntüle (PDF)', propertySummary: 'Mülk Özeti', decisionDetails: 'Karar Detayları'
         },
         en: {
-            loading: 'LOADING...', loadingMsg: 'Connecting to Damascus GIS Core...', menuGeneral: 'OPERATIONS', menuServices: 'SERVICES', navMap: 'Map & GIS', navProperties: 'Properties', navTransfer: 'Transfer', navValuation: 'Valuation', navExpropriation: 'Inquiry', searchPlaceholder: 'Search Parcel...', totalProperties: 'PROPERTIES', pendingApps: 'PENDING', riskCount: 'AT RISK', dashboardTitle: 'GIS Dashboard', propertyListTitle: 'Property Records', transferTitle: 'Transfer Ops', colParcel: 'Parcel', colLocation: 'Location', colType: 'Type', colValue: 'Value', colAction: 'Action', owner: 'Owner', btnViewDeed: 'Deed', exportPdf: 'Export PDF', typeSale: 'Sale', typeInheritance: 'Inheritance', labelSelectProp: 'Select Property', labelBuyerID: 'Buyer ID', btnStartApp: 'Apply', modalDeedTitle: 'TITLE DEED', colCity: 'Region', modalAppTitle: 'Appointment', labelDate: 'Select Date', btnConfirm: 'Confirm', btnCheck: 'CHECK', btnRecalculate: 'Recalculate', estValue: 'Est. Value', area: 'Area', age: 'Building Age', expSubtitle: 'Official Restriction Inquiry', decisionDate: 'Decision Date', authority: 'Authority', logout: 'Logout', activeRegion: 'ACTIVE REGION',
+            loading: 'LOADING...', loadingMsg: 'Connecting to Damascus GIS Core...', menuGeneral: 'OPERATIONS', menuServices: 'SERVICES', navMap: 'Map & GIS', navProperties: 'Properties', navTransfer: 'Transfer', navValuation: 'Valuation', navExpropriation: 'Inquiry', searchPlaceholder: 'Search Parcel...', totalProperties: 'PROPERTIES', pendingApps: 'PENDING', riskCount: 'AT RISK', dashboardTitle: 'GIS Dashboard', propertyListTitle: 'Property Records', transferTitle: 'OFFICIAL TITLE TRANSFER', colParcel: 'Parcel', colLocation: 'Location', colType: 'Type', colValue: 'Value', colAction: 'Action', owner: 'Owner', btnViewDeed: 'Deed', exportPdf: 'Export PDF', typeSale: 'Sale', typeInheritance: 'Inheritance', labelSelectProp: 'Select Property', labelBuyerID: 'Buyer ID', btnStartApp: 'Apply', modalDeedTitle: 'TITLE DEED', colCity: 'City/District', modalAppTitle: 'Appointment', labelDate: 'Select Date', btnConfirm: 'Confirm', btnCheck: 'CHECK', btnRecalculate: 'Recalculate', estValue: 'Est. Value', area: 'Area', age: 'Building Age', expSubtitle: 'Official Restriction Inquiry', decisionDate: 'Decision Date', authority: 'Authority', logout: 'Logout', activeRegion: 'ACTIVE REGION',
             typeResidential: 'Residential', typeCommercial: 'Commercial', typeHistorical: 'Historical', typeLand: 'Land', typeProject: 'Project',
             loginSystemName: 'E-TAPU SYSTEM', loginSubtitle: 'Syrian Arab Republic - Cadastre Directorate', lblUsername: 'ID / Passport', lblPassword: 'Password', btnLogin: 'LOGIN', loginFooter: '© 2025 General Directorate of Cadastre',
-            riskHighTitle: 'EXPROPRIATION ORDER', riskHighAuth: 'Ministry of Local Admin', riskHighDesc: 'Full expropriation order for road expansion.',
-            riskMedTitle: 'RESTRICTION FOUND', riskMedAuth: 'Antiquities Directorate', riskMedDesc: 'Located in historical zone. Renovation restricted.',
-            riskCleanTitle: 'CLEAN / NO RESTRICTION', riskCleanAuth: 'Land Registry', riskCleanDesc: 'No liens or restrictions found on this property.',
+            riskHighTitle: 'EXPROPRIATION ORDER EXISTS', riskHighAuth: 'Ministry of Local Administration', riskHighDesc: 'A full expropriation process has been initiated on this parcel based on an approved public interest decision. Ownership transfer is restricted.',
+            riskMedTitle: 'RESTRICTION / LIEN EXISTS', riskMedAuth: 'General Directorate of Antiquities', riskMedDesc: 'The parcel is located within a protected historical zone. All construction activities and transfer operations are subject to institutional approval.',
+            riskCleanTitle: 'CLEAN / NO RESTRICTIONS', riskCleanAuth: 'Land Registry & Cadastre', riskCleanDesc: 'The inquiry revealed no expropriation orders, liens, mortgages, or restrictive annotations on the parcel.',
             step1: 'Connecting Database...', step2: 'Scanning Records...', step3: 'Checking Decrees...', step4: 'Generating Report...',
-            parcelPrefix: 'Parcel', btnUploadKMZ: 'Upload KMZ'
+            parcelPrefix: 'Parcel', btnUploadKMZ: 'Upload KMZ',
+            // New/Updated Translations
+            transferSubtitle: 'Ownership transfer and shareholder operations', step1Title: 'Property & Seller Info', step2Title: 'Buyer & Share Info', step3Title: 'Confirmation & Completion',
+            buyerName: 'Buyer Full Name', buyerID: 'Buyer ID/Passport No', transferAmount: 'Transaction Amount (SYP)', share: 'Share', addShareholder: 'Add Shareholder',
+            totalTransactionValue: 'Total Transaction Value', transferTax: 'Title Deed Tax', serviceFee: 'Service Fee', btnCompleteTransfer: 'Complete Transfer',
+            syrianRepublic: 'SYRIAN ARAB REPUBLIC', cadastreDirectorate: 'GENERAL DIRECTORATE OF CADASTRE', propertyInfo: 'PROPERTY INFORMATION', colDistrict: 'District',
+            ownerInfo: 'OWNER INFORMATION', ownerName: 'Full Name / Title', acquisitionReason: 'Acquisition Reason', electronicValidation: 'Electronic Validation Code',
+            cadastreOfficial: 'Land Registry Director', officialTitle: 'Authorized Signature', btnPrint: 'PRINT', btnDownloadPDF: 'DOWNLOAD PDF',
+            seller: 'Seller (Current Owner)', decisionNo: 'Decision No', legalBasis: 'Legal Basis', legalBasisValue: 'Expropriation Law Art. 7', viewOfficialDoc: 'View Official Document (PDF)', propertySummary: 'Property Summary', decisionDetails: 'Decision Details'
         },
         ar: {
-            loading: 'جار التحميل...', loadingMsg: 'جاري الاتصال بنظام المعلومات الجغرافي...', menuGeneral: 'العمليات', menuServices: 'الخدمات', navMap: 'الخريطة', navProperties: 'قائمة العقارات', navTransfer: 'نقل الملكية', navValuation: 'التقييم العقاري', navExpropriation: 'الاستعلام', searchPlaceholder: 'بحث عن عقار...', totalProperties: 'إجمالي العقارات', pendingApps: 'قيد الانتظار', riskCount: 'خطر', dashboardTitle: 'لوحة التحكم', propertyListTitle: 'سجلات العقارات', transferTitle: 'عمليات النقل', colParcel: 'القطعة', colLocation: 'الموقع', colType: 'النوع', colValue: 'القيمة', colAction: 'إجراء', owner: 'المالك', btnViewDeed: 'سند', exportPdf: 'تحميل PDF', typeSale: 'بيع', typeInheritance: 'ميراث', labelSelectProp: 'اختر العقار', labelBuyerID: 'رقم الهوية', btnStartApp: 'تقديم الطلب', modalDeedTitle: 'سند ملكية', colCity: 'المنطقة', modalAppTitle: 'حجز موعد', labelDate: 'اختر التاريخ', btnConfirm: 'تأكيد', btnCheck: 'استعلام', btnRecalculate: 'إعادة الحساب', estValue: 'القيمة التقديرية', area: 'المساحة', age: 'عمر البناء', expSubtitle: 'الاستعلام الرسمي عن القيود والاستملاك', decisionDate: 'تاريخ القرار', authority: 'الجهة', logout: 'خروج', activeRegion: 'المنطقة النشطة',
+            loading: 'جار التحميل...', loadingMsg: 'جاري الاتصال بنظام المعلومات الجغرافي...', menuGeneral: 'العمليات', menuServices: 'الخدمات', navMap: 'الخريطة', navProperties: 'قائمة العقارات', navTransfer: 'نقل الملكية', navValuation: 'التقييم العقاري', navExpropriation: 'الاستعلام', searchPlaceholder: 'بحث عن عقار...', totalProperties: 'إجمالي العقارات', pendingApps: 'قيد الانتظار', riskCount: 'خطر', dashboardTitle: 'لوحة التحكم', propertyListTitle: 'سجلات العقارات', transferTitle: 'عملية نقل الملكية الرسمية', colParcel: 'القطعة', colLocation: 'الموقع', colType: 'النوع', colValue: 'القيمة', colAction: 'إجراء', owner: 'المالك', btnViewDeed: 'سند', exportPdf: 'تحميل PDF', typeSale: 'بيع', typeInheritance: 'ميراث', labelSelectProp: 'اختر العقار', labelBuyerID: 'رقم الهوية', btnStartApp: 'تقديم الطلب', modalDeedTitle: 'سند ملكية', colCity: 'المحافظة/المنطقة', modalAppTitle: 'حجز موعد', labelDate: 'اختر التاريخ', btnConfirm: 'تأكيد', btnCheck: 'استعلام', btnRecalculate: 'إعادة الحساب', estValue: 'القيمة التقديرية', area: 'المساحة', age: 'عمر البناء', expSubtitle: 'الاستعلام الرسمي عن القيود والاستملاك', decisionDate: 'تاريخ القرار', authority: 'الجهة', logout: 'خروج', activeRegion: 'المنطقة النشطة',
             typeResidential: 'سكني', typeCommercial: 'تجاري', typeHistorical: 'تاريخي', typeLand: 'أرض', typeProject: 'مشروع',
             loginSystemName: 'بوابة السجل العقاري', loginSubtitle: 'الجمهورية العربية السورية - المصالح العقارية', lblUsername: 'رقم الهوية / الجواز', lblPassword: 'كلمة المرور', btnLogin: 'دخول', loginFooter: '© 2025 المديرية العامة للمصالح العقارية',
-            riskHighTitle: 'قرار استملاك', riskHighAuth: 'وزارة الإدارة المحلية', riskHighDesc: 'قرار استملاك كامل لغرض توسيع الطريق العام.',
-            riskMedTitle: 'يوجد قيد', riskMedAuth: 'مديرية الآثار', riskMedDesc: 'يقع العقار ضمن منطقة أثرية. الترميم يحتاج موافقة.',
-            riskCleanTitle: 'سليم / لا قيود', riskCleanAuth: 'السجل العقاري', riskCleanDesc: 'لا توجد أي إشارات حجز أو رهن على العقار.',
+            riskHighTitle: 'يوجد قرار استملاك', riskHighAuth: 'وزارة الإدارة المحلية', riskHighDesc: 'تم البدء بإجراءات استملاك كاملة على هذا العقار بناءً على قرار نفع عام مصدق. نقل الملكية مقيد.',
+            riskMedTitle: 'يوجد قيد / إشارة', riskMedAuth: 'المديرية العامة للآثار والمتاحف', riskMedDesc: 'يقع العقار ضمن منطقة أثرية محمية. جميع أعمال البناء وعمليات النقل تخضع لموافقة المؤسسة.',
+            riskCleanTitle: 'سليم / لا توجد قيود', riskCleanAuth: 'المصالح العقارية', riskCleanDesc: 'لم يظهر الاستعلام أي قرارات استملاك، حجوزات، رهون، أو إشارات مقيدة على العقار.',
             step1: 'الاتصال بقاعدة البيانات...', step2: 'فحص السجلات...', step3: 'تدقيق القرارات...', step4: 'إعداد التقرير...',
-            parcelPrefix: 'قطعة', btnUploadKMZ: 'تحميل KMZ'
+            parcelPrefix: 'قطعة', btnUploadKMZ: 'تحميل KMZ',
+            // New/Updated Translations
+            transferSubtitle: 'عمليات نقل الملكية والشركاء', step1Title: 'بيانات العقار والبائع', step2Title: 'بيانات المشتري والحصص', step3Title: 'تأكيد وإتمام العملية',
+            buyerName: 'اسم المشتري الكامل', buyerID: 'رقم هوية/جواز المشتري', transferAmount: 'قيمة الصفقة (ل.س)', share: 'الحصة السهمية', addShareholder: 'إضافة شريك',
+            totalTransactionValue: 'إجمالي قيمة الصفقة', transferTax: 'رسوم التسجيل', serviceFee: 'رسوم الخدمة', btnCompleteTransfer: 'إتمام عملية النقل',
+            syrianRepublic: 'الجمهورية العربية السورية', cadastreDirectorate: 'المديرية العامة للمصالح العقارية', propertyInfo: 'بيانات العقار', colDistrict: 'المنطقة العقارية',
+            ownerInfo: 'بيانات المالك', ownerName: 'الاسم الكامل / الصفة', acquisitionReason: 'سبب الاكتساب', electronicValidation: 'رمز التحقق الإلكتروني',
+            cadastreOfficial: 'أمين السجل العقاري', officialTitle: 'التوقيع المعتمد', btnPrint: 'طباعة', btnDownloadPDF: 'تحميل PDF',
+            seller: 'البائع (المالك الحالي)', decisionNo: 'رقم القرار', legalBasis: 'الأساس القانوني', legalBasisValue: 'قانون الاستملاك مادة 7', viewOfficialDoc: 'عرض الوثيقة الرسمية (PDF)', propertySummary: 'ملخص العقار', decisionDetails: 'تفاصيل القرار'
         }
     };
 
@@ -365,8 +573,8 @@
             const map = ref(null);
             const searchQuery = ref('');
             const selectedPropertyId = ref(1);
-            const properties = ref([]); // Main Reactive Data Source
-            const mapLayers = [];
+            const properties = ref([]);
+            const geoJsonLayer = ref(null);
             
             const valRegion = ref('mezzeh');
             const valArea = ref(150);
@@ -380,7 +588,16 @@
             const modals = ref({ deed: false, appointment: false, activeProp: null });
             const toast = ref({ show: false, title: '', message: '' });
             const t = computed(() => translations[lang.value]);
-            
+
+            // Transfer Data State
+            const transferData = ref({
+                buyerName: '',
+                buyerID: '',
+                amount: '5000000',
+                shareNumerator: 1,
+                shareDenominator: 1
+            });
+
             const totalValue = computed(() => {
                 const sum = properties.value.reduce((acc, p) => acc + (p.price || 0), 0);
                 if(sum > 1000000) return '$' + (sum / 1000000).toFixed(1) + 'M';
@@ -397,35 +614,43 @@
                 );
             });
 
-            // Mock Data Generator (Initial)
+            // Mock Data Generator
             const generateMockParcels = () => {
                 const centerLat = 33.5138;
                 const centerLng = 36.2900;
-                const owners = ["Ahmet Al-Hassan", "Mehmet Yılmaz", "Salim Kassar", "Noura Al-Jafari"];
+                const owners = ["Ahmed Al-Hassan", "Mehmet Yılmaz", "Salim Kassar", "Noura Al-Jafari", "Ali Hamdan", "Khaled Osman"];
                 const types = ["Residential", "Commercial", "Land"];
                 const newProps = [];
                 for(let i=0; i<40; i++) {
                     const lat = centerLat + (Math.random() - 0.5) * 0.02;
                     const lng = centerLng + (Math.random() - 0.5) * 0.03;
-                    const s = 0.0005;
-                    const coords = [[lat - s, lng - s], [lat + s, lng - s], [lat + s, lng + s], [lat - s, lng + s]];
                     const area = Math.floor(Math.random() * 200) + 100;
                     const price = area * 1500;
                     
                     newProps.push({
                         id: i + 1, ada: 100 + Math.floor(i/10), parsel: i+1,
-                        location: 'Damascus / Mock', regionCode: 'mezzeh',
-                        lat: lat, lng: lng, coords: coords,
+                        location: 'Damascus / Mezzeh', regionCode: 'mezzeh',
+                        lat: lat, lng: lng,
                         price: price, priceStr: '$' + price.toLocaleString(),
                         type: types[Math.floor(Math.random() * types.length)],
                         owner: owners[Math.floor(Math.random() * owners.length)],
                         area: area, age: 5,
-                        isPoint: false
+                        geometry: {
+                            type: "Polygon",
+                            coordinates: [[
+                                [lng - 0.0005, lat - 0.0005],
+                                [lng + 0.0005, lat - 0.0005],
+                                [lng + 0.0005, lat + 0.0005],
+                                [lng - 0.0005, lat + 0.0005],
+                                [lng - 0.0005, lat - 0.0005]
+                            ]]
+                        }
                     });
                 }
                 properties.value = newProps;
                 selectedPropertyId.value = newProps[0].id;
-                activeRegionName.value = 'Damascus / Mock Data';
+                activeRegionName.value = 'Damascus / Mezzeh';
+                renderGeoJSON();
             };
 
             // KMZ/KML PARSER
@@ -440,7 +665,6 @@
                     let kmlString = '';
                     if (file.name.toLowerCase().endsWith('.kmz')) {
                         const zip = await JSZip.loadAsync(file);
-                        // Find the first .kml file
                         const kmlFileName = Object.keys(zip.files).find(n => n.toLowerCase().endsWith('.kml'));
                         if (kmlFileName) {
                             kmlString = await zip.files[kmlFileName].async('string');
@@ -483,94 +707,26 @@
                 const owners = ["State Property", "Ahmed Al-Ali", "Fatima Zein", "Hassan Kassar", "Damascus Construction"];
                 const types = ["Residential", "Commercial", "Land", "Historical"];
 
-                // Bounding Box calculation
-                let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
-
                 geojson.features.forEach(f => {
                     if (!f.geometry) return;
                     
-                    let coords = [];
-                    let centerLat = 0, centerLng = 0;
-                    let isPoint = false;
-
-                    const type = f.geometry.type;
-                    const gCoords = f.geometry.coordinates;
-
-                    // Handle different geometries
-                    if (type === 'Polygon') {
-                        // GeoJSON is [Lng, Lat], Leaflet needs [Lat, Lng]
-                        // Standard Polygon: [ [ [lng,lat], [lng,lat]... ] ] (Outer ring)
-                        coords = gCoords[0].map(c => [c[1], c[0]]); 
-                    } else if (type === 'MultiPolygon') {
-                        // Take the first polygon of the multipolygon
-                        coords = gCoords[0][0].map(c => [c[1], c[0]]);
-                    } else if (type === 'LineString') {
-                        // Convert Line to Polygon (close it) or just show as line
-                        coords = gCoords.map(c => [c[1], c[0]]);
-                    } else if (type === 'Point') {
-                        // Point: [lng, lat]
-                        isPoint = true;
-                        centerLat = gCoords[1];
-                        centerLng = gCoords[0];
-                        // Make a small box around it to render as polygon if needed, or render as marker
-                        const s = 0.0002;
-                        coords = [[centerLat-s, centerLng-s], [centerLat+s, centerLng-s], [centerLat+s, centerLng+s], [centerLat-s, centerLng+s]];
-                    } else if (type === 'GeometryCollection') {
-                        // Just take the first geometry if possible
-                        if(f.geometry.geometries && f.geometry.geometries.length > 0) {
-                            const subG = f.geometry.geometries[0];
-                            if(subG.type === 'Point') {
-                                isPoint = true;
-                                centerLat = subG.coordinates[1];
-                                centerLng = subG.coordinates[0];
-                                const s = 0.0002;
-                                coords = [[centerLat-s, centerLng-s], [centerLat+s, centerLng-s], [centerLat+s, centerLng+s], [centerLat-s, centerLng+s]];
-                            }
-                        }
-                    }
-
-                    if (coords.length === 0 && !isPoint) return;
-
-                    // Calculate centroid if not point
-                    if (!isPoint) {
-                        const lats = coords.map(c => c[0]);
-                        const lngs = coords.map(c => c[1]);
-                        const lMin = Math.min(...lats), lMax = Math.max(...lats);
-                        const gMin = Math.min(...lngs), gMax = Math.max(...lngs);
-                        centerLat = (lMin + lMax) / 2;
-                        centerLng = (gMin + gMax) / 2;
-                        
-                        // Update global bounds
-                        if (lMin < minLat) minLat = lMin;
-                        if (lMax > maxLat) maxLat = lMax;
-                        if (gMin < minLng) minLng = gMin;
-                        if (gMax > maxLng) maxLng = gMax;
-                    } else {
-                        if (centerLat < minLat) minLat = centerLat;
-                        if (centerLat > maxLat) maxLat = centerLat;
-                        if (centerLng < minLng) minLng = centerLng;
-                        if (centerLng > maxLng) maxLng = centerLng;
-                    }
-
-                    // Metadata Generation
                     const name = f.properties && f.properties.name ? f.properties.name : `Parcel ${idCounter}`;
                     const randomType = types[Math.floor(Math.random() * types.length)];
                     const randomArea = Math.floor(Math.random() * 800) + 150;
                     const randomPrice = Math.floor(randomArea * (Math.random() * 2000 + 500));
-
+                    
                     newProps.push({
                         id: idCounter++,
                         ada: 500 + Math.floor(idCounter/100),
                         parsel: idCounter % 1000,
                         location: 'Imported Region',
                         regionCode: 'imported',
-                        lat: centerLat, lng: centerLng, coords: coords,
                         price: randomPrice, priceStr: '$' + randomPrice.toLocaleString(),
                         type: randomType,
                         owner: owners[Math.floor(Math.random() * owners.length)],
                         area: randomArea, age: Math.floor(Math.random() * 40),
                         title: name,
-                        isPoint: isPoint
+                        geometry: f.geometry
                     });
                 });
 
@@ -578,16 +734,7 @@
                     properties.value = newProps;
                     selectedPropertyId.value = newProps[0].id;
                     activeRegionName.value = `Imported Data (${newProps.length} Items)`;
-                    
-                    // Render to Map
-                    renderParcels();
-                    
-                    // Fit Bounds
-                    if (minLat !== 90) {
-                        nextTick(() => {
-                            if(map.value) map.value.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [20, 20] });
-                        });
-                    }
+                    renderGeoJSON();
                     showSuccess('Success', `${newProps.length} parcels imported and active.`);
                 } else {
                     showSuccess('Error', 'No valid geometries found in file.', true);
@@ -597,18 +744,15 @@
 
             const selectedProperty = computed(() => properties.value.find(p => p.id === selectedPropertyId.value));
 
-            // Logic functions same as before but using dynamic properties
             const fillValuationData = () => { if(selectedProperty.value) { valArea.value = selectedProperty.value.area; valAge.value = selectedProperty.value.age; } };
             const startExpropriationCheck = () => { if(!selectedPropertyId.value) return; expLoading.value = true; expResult.value = null; setTimeout(() => { expLoading.value = false; finalizeCheck(); }, 2000); };
             const finalizeCheck = () => { 
                 const prop = selectedProperty.value; 
-                // Logic based on ID even/odd for demo
-                if (prop.id % 7 === 0) expResult.value = { riskLevel: 'high', icon: 'fa-solid fa-triangle-exclamation', titleKey: 'riskHighTitle', refNo: `EXP-${prop.id}`, date: '12/10/2024', authKey: 'riskHighAuth', descKey: 'riskHighDesc' };
-                else if (prop.id % 5 === 0) expResult.value = { riskLevel: 'medium', icon: 'fa-solid fa-circle-exclamation', titleKey: 'riskMedTitle', refNo: `RES-${prop.id}`, date: '05/03/2023', authKey: 'riskMedAuth', descKey: 'riskMedDesc' };
-                else expResult.value = { riskLevel: 'clean', icon: 'fa-solid fa-circle-check', titleKey: 'riskCleanTitle', refNo: `CLR-${prop.id}`, date: new Date().toLocaleDateString(), authKey: 'riskCleanAuth', descKey: 'riskCleanDesc' };
+                if (prop.id % 7 === 0) expResult.value = { riskLevel: 'high', icon: 'fa-solid fa-triangle-exclamation', titleKey: 'riskHighTitle', refNo: `EXP-${prop.id}/2024`, date: '12/10/2024', authKey: 'riskHighAuth', descKey: 'riskHighDesc' };
+                else if (prop.id % 5 === 0) expResult.value = { riskLevel: 'medium', icon: 'fa-solid fa-circle-exclamation', titleKey: 'riskMedTitle', refNo: `RES-${prop.id}/ANT`, date: '05/03/2023', authKey: 'riskMedAuth', descKey: 'riskMedDesc' };
+                else expResult.value = { riskLevel: 'clean', icon: 'fa-solid fa-circle-check', titleKey: 'riskCleanTitle', refNo: `CLR-${prop.id}/${new Date().getFullYear()}`, date: new Date().toLocaleDateString(), authKey: 'riskCleanAuth', descKey: 'riskCleanDesc' };
             };
 
-            // Added valuationResult computation
             const valuationResult = computed(() => {
                 let base = 2000;
                 if(valRegion.value === 'mezzeh') base = 3500;
@@ -620,57 +764,92 @@
                 return `$${Math.floor(val).toLocaleString()}`;
             });
 
+            const completeTransfer = () => {
+                if (!selectedProperty.value || !transferData.value.buyerName) {
+                    showSuccess('Error', 'Lütfen mülk seçin ve alıcı bilgilerini girin.', true);
+                    return;
+                }
+                loading.value = true;
+                loadingMsg.value = 'Devir işlemi gerçekleştiriliyor...';
+                
+                setTimeout(() => {
+                    // Simulate transfer
+                    const propIndex = properties.value.findIndex(p => p.id === selectedProperty.value.id);
+                    if (propIndex !== -1) {
+                        properties.value[propIndex].owner = transferData.value.buyerName;
+                        // Reset form
+                        transferData.value = { buyerName: '', buyerID: '', amount: '5000000', shareNumerator: 1, shareDenominator: 1 };
+                        loading.value = false;
+                        showSuccess('Başarılı', 'Mülkiyet devri başarıyla tamamlandı ve sicile işlendi.');
+                        renderGeoJSON(); // Re-render to update popup info if needed
+                    }
+                }, 2000);
+            };
+
             const initMap = () => {
                 if(map.value) return;
                 const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' });
                 const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-                map.value = markRaw(L.map('map', { center: [33.5138, 36.29], zoom: 14, layers: [satelliteLayer] }));
+                
+                map.value = markRaw(L.map('map', { 
+                    center: [33.5138, 36.29], 
+                    zoom: 14, 
+                    layers: [satelliteLayer],
+                    renderer: L.canvas(),
+                    zoomControl: false // Move zoom control
+                }));
+                
+                L.control.zoom({ position: 'bottomright' }).addTo(map.value); // Add zoom to bottom right
+                
                 L.control.layers({"Satellite": satelliteLayer, "Street": osmLayer}).addTo(map.value);
-                renderParcels();
+                
+                if (properties.value.length > 0) renderGeoJSON();
             };
 
-            const renderParcels = () => {
+            const renderGeoJSON = () => {
                 if (!map.value) return;
-                mapLayers.forEach(l => map.value.removeLayer(l));
-                mapLayers.length = 0;
+                if (geoJsonLayer.value) map.value.removeLayer(geoJsonLayer.value);
 
-                // Optimization: If too many parcels, maybe render simplified or only markers at high zoom
-                // For demo, we render all but use simple styles
-                properties.value.forEach(prop => {
-                    const polygon = L.polygon(prop.coords, { 
-                        color: prop.isPoint ? '#f59e0b' : '#10b981', 
-                        fillColor: prop.isPoint ? '#f59e0b' : '#10b981', 
-                        fillOpacity: 0.4, weight: 1 
-                    }).addTo(map.value);
-                    
-                    mapLayers.push(polygon);
-                    
-                    polygon.on('click', () => { 
-                        selectedPropertyId.value = prop.id; 
-                        openDeedModal(prop); 
-                    });
-                    
-                    polygon.bindPopup(() => `
-                        <div style="font-family: sans-serif; text-align: ${lang.value === 'ar' ? 'right' : 'left'}">
-                            <h3 style="font-weight:bold; margin:0; font-size:12px">${t.value.parcelPrefix} #${prop.ada}/${prop.parsel}</h3>
-                            <p style="margin:2px 0 5px; font-size:10px; color:#64748b">${prop.location}</p>
-                            <p style="margin:0; font-weight:bold; color:#059669; font-size:12px">${prop.priceStr}</p>
-                            <button onclick="document.dispatchEvent(new CustomEvent('open-deed', {detail:${prop.id}}))" 
-                            style="margin-top:5px; width:100%; background:#0f172a; color:white; border:none; padding:4px; border-radius:3px; cursor:pointer; font-size:10px">${t.value.btnViewDeed}</button>
-                        </div>
-                    `);
-                });
+                const featureCollection = {
+                    type: "FeatureCollection",
+                    features: properties.value.map(p => ({
+                        type: "Feature",
+                        properties: { id: p.id, title: p.title, ...p },
+                        geometry: p.geometry
+                    }))
+                };
+
+                geoJsonLayer.value = L.geoJSON(featureCollection, {
+                    style: (feature) => { return { color: '#10b981', weight: 1, fillOpacity: 0.4, fillColor: '#10b981' }; },
+                    pointToLayer: (feature, latlng) => { return L.circleMarker(latlng, { radius: 6, fillColor: "#f59e0b", color: "#fff", weight: 1, opacity: 1, fillOpacity: 0.8 }); },
+                    onEachFeature: (feature, layer) => {
+                        layer.on('click', () => {
+                            selectedPropertyId.value = feature.properties.id;
+                            const fullProp = properties.value.find(p => p.id === feature.properties.id);
+                            if (fullProp) openDeedModal(fullProp);
+                        });
+                        const p = feature.properties;
+                        const label = `<div style="font-family:sans-serif; text-align:${lang.value==='ar'?'right':'left'}"><b>${t.value.parcelPrefix} #${p.ada}/${p.parsel}</b><br><span style="color:#059669; font-weight:bold">${p.priceStr}</span></div>`;
+                        layer.bindPopup(label);
+                    }
+                }).addTo(map.value);
+
+                try {
+                    const bounds = geoJsonLayer.value.getBounds();
+                    if (bounds.isValid()) { map.value.fitBounds(bounds, { padding: [50, 50] }); }
+                } catch (e) { console.log("Bounds error", e); }
             };
 
-            // ... (Rest of UI logic: locateProperty, openDeedModal, confirmAppointment, showSuccess, setLang, handleLogin, changeTab, getIcon, capitalize)
             const locateProperty = () => {
                 const target = filteredProperties.value[0];
-                if(target) {
-                    map.value.flyTo([target.lat, target.lng], 17);
+                if(target && geoJsonLayer.value) {
+                    const tempLayer = L.geoJSON(target.geometry);
+                    map.value.fitBounds(tempLayer.getBounds(), { maxZoom: 18 });
                     selectedPropertyId.value = target.id;
                     if(window.innerWidth < 768) isMobileMenuOpen.value = false;
                 }
             };
+
             const openDeedModal = (prop) => { modals.value.activeProp = prop; modals.value.deed = true; };
             const confirmAppointment = () => { modals.value.appointment = false; showSuccess('Success', 'Transaction Approved.'); };
             const showSuccess = (title, msg, isError=false) => { toast.value = { show: true, title, message: msg }; setTimeout(() => toast.value.show = false, 3000); };
@@ -696,7 +875,8 @@
                 valRegion, valArea, valAge, valuationResult, fillValuationData, totalValue,
                 expLoading, expStep, expResult, startExpropriationCheck,
                 modals, toast, locateProperty, openDeedModal, confirmAppointment,
-                isMobileMenuOpen, changeTab, getIcon, capitalize, handleFileUpload, activeRegionName
+                isMobileMenuOpen, changeTab, getIcon, capitalize, handleFileUpload, activeRegionName,
+                transferData, completeTransfer
             };
         }
     }).mount('#app');
