@@ -195,7 +195,7 @@
                         <!-- Search Bar is Z-400, but now modals are Z-9999 -->
                         <div class="absolute top-3 start-3 z-[400] w-full max-w-[200px] md:max-w-xs flex gap-2">
                             <div class="flex gap-2 bg-white/95 backdrop-blur p-1.5 rounded-lg shadow-xl border border-slate-200 flex-1">
-                                <input v-model="searchQuery" :placeholder="t.searchPlaceholder" class="flex-1 bg-transparent border-none outline-none px-2 text-xs md:text-sm w-full">
+                                <input v-model="searchQuery" @keyup.enter="locateProperty" :placeholder="t.searchPlaceholder" class="flex-1 bg-transparent border-none outline-none px-2 text-xs md:text-sm w-full">
                                 <button @click="locateProperty" class="bg-emerald-600 text-white px-3 py-1 rounded text-xs md:text-sm font-bold"><i class="fa-solid fa-search"></i></button>
                             </div>
                         </div>
@@ -505,18 +505,18 @@
 </div>
 
 <script>
-    const { createApp, ref, computed, onMounted, nextTick, watch, markRaw } = Vue;
+    const { createApp, ref, computed, onMounted, nextTick, watch, markRaw, toRaw } = Vue;
 
     const translations = {
         tr: {
-            loading: 'YÜKLENİYOR...', loadingMsg: 'Suriye CBS Çekirdeğine Bağlanılıyor...', menuGeneral: 'GENEL İŞLEMLER', menuServices: 'HİZMETLER', navMap: 'Harita & CBS', navProperties: 'Mülk Listesi', navTransfer: 'Tapu Devir/Satış', navValuation: 'Değer Hesapla', navExpropriation: 'Kamulaştırma', searchPlaceholder: 'Ada/Parsel Ara...', totalProperties: 'TOPLAM MÜLK', pendingApps: 'BEKLEYEN', riskCount: 'RİSKLİ', dashboardTitle: 'CBS Paneli', propertyListTitle: 'Taşınmaz Kayıtları', transferTitle: 'RESMİ TAPU DEVİR İŞLEMİ', colParcel: 'Ada/Parsel', colLocation: 'Konum', colType: 'Nitelik', colValue: 'Rayiç Bedel', colAction: 'İşlem', owner: 'Malik', btnViewDeed: 'Tapu', exportPdf: 'PDF İndir', typeSale: 'Satış', typeInheritance: 'Miras', labelSelectProp: 'Mülk Seçiniz', labelBuyerID: 'Alıcı Kimlik No', btnStartApp: 'Başvuru Yap', modalDeedTitle: 'TAPU SENEDİ', colCity: 'İl/İlçe', modalAppTitle: 'Randevu Oluştur', labelDate: 'Tarih Seçiniz', btnConfirm: 'Onayla', btnCheck: 'SORGULA', btnRecalculate: 'Yeniden Hesapla', estValue: 'Tahmini Değer', area: 'Yüzölçümü', age: 'Bina Yaşı', expSubtitle: 'Resmi Kısıtlama ve Kamulaştırma Sorgusu', decisionDate: 'Karar Tarihi', authority: 'İlgili Kurum', logout: 'Çıkış Yap', activeRegion: 'AKTİF BÖLGE',
+            loading: 'YÜKLENİYOR...', loadingMsg: 'Suriye CBS Çekirdeğine Bağlanılıyor...', menuGeneral: 'GENEL İŞLEMLER', menuServices: 'HİZMETLER', navMap: 'Harita & CBS', navProperties: 'Mülk Listesi', navTransfer: 'Tapu Devir/Satış', navValuation: 'Değer Hesapla', navExpropriation: 'Kamulaştırma', searchPlaceholder: 'Ada/Parsel, Koordinat, Konum...', totalProperties: 'TOPLAM MÜLK', pendingApps: 'BEKLEYEN', riskCount: 'RİSKLİ', dashboardTitle: 'CBS Paneli', propertyListTitle: 'Taşınmaz Kayıtları', transferTitle: 'RESMİ TAPU DEVİR İŞLEMİ', colParcel: 'Ada/Parsel', colLocation: 'Konum', colType: 'Nitelik', colValue: 'Rayiç Bedel', colAction: 'İşlem', owner: 'Malik', btnViewDeed: 'Tapu', exportPdf: 'PDF İndir', typeSale: 'Satış', typeInheritance: 'Miras', labelSelectProp: 'Mülk Seçiniz', labelBuyerID: 'Alıcı Kimlik No', btnStartApp: 'Başvuru Yap', modalDeedTitle: 'TAPU SENEDİ', colCity: 'İl/İlçe', modalAppTitle: 'Randevu Oluştur', labelDate: 'Tarih Seçiniz', btnConfirm: 'Onayla', btnCheck: 'SORGULA', btnRecalculate: 'Yeniden Hesapla', estValue: 'Tahmini Değer', area: 'Yüzölçümü', age: 'Bina Yaşı', expSubtitle: 'Resmi Kısıtlama ve Kamulaştırma Sorgusu', decisionDate: 'Karar Tarihi', authority: 'İlgili Kurum', logout: 'Çıkış Yap', activeRegion: 'AKTİF BÖLGE',
             typeResidential: 'Konut', typeCommercial: 'Ticari', typeHistorical: 'Tarihi', typeLand: 'Arsa', typeProject: 'Proje',
             loginSystemName: 'E-TAPU SİSTEMİ', loginSubtitle: 'Suriye Arap Cumhuriyeti - Tapu ve Kadastro', lblUsername: 'TC / Pasaport No', lblPassword: 'Şifre', btnLogin: 'GİRİŞ YAP', loginFooter: '© 2025 Tapu ve Kadastro Genel Müdürlüğü',
             riskHighTitle: 'KAMULAŞTIRMA KARARI MEVCUT', riskHighAuth: 'Yerel Yönetim Bakanlığı', riskHighDesc: 'Bu parsel üzerinde, onaylanmış bir kamu yararı kararı doğrultusunda tam kamulaştırma işlemi başlatılmıştır. Mülkiyet devri kısıtlanmıştır.',
             riskMedTitle: 'KISITLAMA / ŞERH MEVCUT', riskMedAuth: 'Eski Eserler ve Müzeler Genel Müdürlüğü', riskMedDesc: 'Parsel, koruma altındaki tarihi sit alanı içerisinde kalmaktadır. Her türlü inşai faaliyet ve devir işlemi kurum iznine tabidir.',
             riskCleanTitle: 'TEMİZ / KISITLAMA BULUNMAMAKTADIR', riskCleanAuth: 'Tapu ve Kadastro Müdürlüğü', riskCleanDesc: 'Yapılan sorgulamada, parsel üzerinde herhangi bir kamulaştırma kararı, haciz, ipotek veya kısıtlayıcı şerh kaydına rastlanmamıştır.',
             step1: 'Veritabanına Bağlanılıyor...', step2: 'Kayıtlar Taranıyor...', step3: 'Bakanlık Kararları Kontrol Ediliyor...', step4: 'Rapor Hazırlanıyor...',
-            parcelPrefix: 'Parsel', btnUploadKMZ: 'KMZ Yükle',
+            parcelPrefix: 'Parsel', btnUploadKMZ: 'KMZ Yükle', searchResult: 'Arama Sonucu',
             // New/Updated Translations
             transferSubtitle: 'Mülkiyet devri ve hissedar işlemleri', step1Title: 'Mülk ve Satıcı Bilgileri', step2Title: 'Alıcı ve Hisse Bilgileri', step3Title: 'İşlem Onayı ve Tamamlama',
             buyerName: 'Alıcı Adı Soyadı', buyerID: 'Alıcı Kimlik/Pasaport No', transferAmount: 'İşlem Bedeli (TL)', share: 'Hisse Payı', addShareholder: 'Hissedar Ekle',
@@ -527,14 +527,14 @@
             seller: 'Satıcı (Mevcut Malik)', decisionNo: 'Karar No', legalBasis: 'Yasal Dayanak', legalBasisValue: 'Kamulaştırma Kanunu Md. 7', viewOfficialDoc: 'Resmi Belgeyi Görüntüle (PDF)', propertySummary: 'Mülk Özeti', decisionDetails: 'Karar Detayları'
         },
         en: {
-            loading: 'LOADING...', loadingMsg: 'Connecting to Damascus GIS Core...', menuGeneral: 'OPERATIONS', menuServices: 'SERVICES', navMap: 'Map & GIS', navProperties: 'Properties', navTransfer: 'Transfer', navValuation: 'Valuation', navExpropriation: 'Inquiry', searchPlaceholder: 'Search Parcel...', totalProperties: 'PROPERTIES', pendingApps: 'PENDING', riskCount: 'AT RISK', dashboardTitle: 'GIS Dashboard', propertyListTitle: 'Property Records', transferTitle: 'OFFICIAL TITLE TRANSFER', colParcel: 'Parcel', colLocation: 'Location', colType: 'Type', colValue: 'Value', colAction: 'Action', owner: 'Owner', btnViewDeed: 'Deed', exportPdf: 'Export PDF', typeSale: 'Sale', typeInheritance: 'Inheritance', labelSelectProp: 'Select Property', labelBuyerID: 'Buyer ID', btnStartApp: 'Apply', modalDeedTitle: 'TITLE DEED', colCity: 'City/District', modalAppTitle: 'Appointment', labelDate: 'Select Date', btnConfirm: 'Confirm', btnCheck: 'CHECK', btnRecalculate: 'Recalculate', estValue: 'Est. Value', area: 'Area', age: 'Building Age', expSubtitle: 'Official Restriction Inquiry', decisionDate: 'Decision Date', authority: 'Authority', logout: 'Logout', activeRegion: 'ACTIVE REGION',
+            loading: 'LOADING...', loadingMsg: 'Connecting to Damascus GIS Core...', menuGeneral: 'OPERATIONS', menuServices: 'SERVICES', navMap: 'Map & GIS', navProperties: 'Properties', navTransfer: 'Transfer', navValuation: 'Valuation', navExpropriation: 'Inquiry', searchPlaceholder: 'Search Parcel, Coords, Location...', totalProperties: 'PROPERTIES', pendingApps: 'PENDING', riskCount: 'AT RISK', dashboardTitle: 'GIS Dashboard', propertyListTitle: 'Property Records', transferTitle: 'OFFICIAL TITLE TRANSFER', colParcel: 'Parcel', colLocation: 'Location', colType: 'Type', colValue: 'Value', colAction: 'Action', owner: 'Owner', btnViewDeed: 'Deed', exportPdf: 'Export PDF', typeSale: 'Sale', typeInheritance: 'Inheritance', labelSelectProp: 'Select Property', labelBuyerID: 'Buyer ID', btnStartApp: 'Apply', modalDeedTitle: 'TITLE DEED', colCity: 'City/District', modalAppTitle: 'Appointment', labelDate: 'Select Date', btnConfirm: 'Confirm', btnCheck: 'CHECK', btnRecalculate: 'Recalculate', estValue: 'Est. Value', area: 'Area', age: 'Building Age', expSubtitle: 'Official Restriction Inquiry', decisionDate: 'Decision Date', authority: 'Authority', logout: 'Logout', activeRegion: 'ACTIVE REGION',
             typeResidential: 'Residential', typeCommercial: 'Commercial', typeHistorical: 'Historical', typeLand: 'Land', typeProject: 'Project',
             loginSystemName: 'E-TAPU SYSTEM', loginSubtitle: 'Syrian Arab Republic - Cadastre Directorate', lblUsername: 'ID / Passport', lblPassword: 'Password', btnLogin: 'LOGIN', loginFooter: '© 2025 General Directorate of Cadastre',
             riskHighTitle: 'EXPROPRIATION ORDER EXISTS', riskHighAuth: 'Ministry of Local Administration', riskHighDesc: 'A full expropriation process has been initiated on this parcel based on an approved public interest decision. Ownership transfer is restricted.',
             riskMedTitle: 'RESTRICTION / LIEN EXISTS', riskMedAuth: 'General Directorate of Antiquities', riskMedDesc: 'The parcel is located within a protected historical zone. All construction activities and transfer operations are subject to institutional approval.',
             riskCleanTitle: 'CLEAN / NO RESTRICTIONS', riskCleanAuth: 'Land Registry & Cadastre', riskCleanDesc: 'The inquiry revealed no expropriation orders, liens, mortgages, or restrictive annotations on the parcel.',
             step1: 'Connecting Database...', step2: 'Scanning Records...', step3: 'Checking Decrees...', step4: 'Generating Report...',
-            parcelPrefix: 'Parcel', btnUploadKMZ: 'Upload KMZ',
+            parcelPrefix: 'Parcel', btnUploadKMZ: 'Upload KMZ', searchResult: 'Search Result',
             // New/Updated Translations
             transferSubtitle: 'Ownership transfer and shareholder operations', step1Title: 'Property & Seller Info', step2Title: 'Buyer & Share Info', step3Title: 'Confirmation & Completion',
             buyerName: 'Buyer Full Name', buyerID: 'Buyer ID/Passport No', transferAmount: 'Transaction Amount (SYP)', share: 'Share', addShareholder: 'Add Shareholder',
@@ -545,14 +545,14 @@
             seller: 'Seller (Current Owner)', decisionNo: 'Decision No', legalBasis: 'Legal Basis', legalBasisValue: 'Expropriation Law Art. 7', viewOfficialDoc: 'View Official Document (PDF)', propertySummary: 'Property Summary', decisionDetails: 'Decision Details'
         },
         ar: {
-            loading: 'جار التحميل...', loadingMsg: 'جاري الاتصال بنظام المعلومات الجغرافي...', menuGeneral: 'العمليات', menuServices: 'الخدمات', navMap: 'الخريطة', navProperties: 'قائمة العقارات', navTransfer: 'نقل الملكية', navValuation: 'التقييم العقاري', navExpropriation: 'الاستعلام', searchPlaceholder: 'بحث عن عقار...', totalProperties: 'إجمالي العقارات', pendingApps: 'قيد الانتظار', riskCount: 'خطر', dashboardTitle: 'لوحة التحكم', propertyListTitle: 'سجلات العقارات', transferTitle: 'عملية نقل الملكية الرسمية', colParcel: 'القطعة', colLocation: 'الموقع', colType: 'النوع', colValue: 'القيمة', colAction: 'إجراء', owner: 'المالك', btnViewDeed: 'سند', exportPdf: 'تحميل PDF', typeSale: 'بيع', typeInheritance: 'ميراث', labelSelectProp: 'اختر العقار', labelBuyerID: 'رقم الهوية', btnStartApp: 'تقديم الطلب', modalDeedTitle: 'سند ملكية', colCity: 'المحافظة/المنطقة', modalAppTitle: 'حجز موعد', labelDate: 'اختر التاريخ', btnConfirm: 'تأكيد', btnCheck: 'استعلام', btnRecalculate: 'إعادة الحساب', estValue: 'القيمة التقديرية', area: 'المساحة', age: 'عمر البناء', expSubtitle: 'الاستعلام الرسمي عن القيود والاستملاك', decisionDate: 'تاريخ القرار', authority: 'الجهة', logout: 'خروج', activeRegion: 'المنطقة النشطة',
+            loading: 'جار التحميل...', loadingMsg: 'جاري الاتصال بنظام المعلومات الجغرافي...', menuGeneral: 'العمليات', menuServices: 'الخدمات', navMap: 'الخريطة', navProperties: 'قائمة العقارات', navTransfer: 'نقل الملكية', navValuation: 'التقييم العقاري', navExpropriation: 'الاستعلام', searchPlaceholder: 'البحث عن عقار، إحداثيات، موقع...', totalProperties: 'إجمالي العقارات', pendingApps: 'قيد الانتظار', riskCount: 'خطر', dashboardTitle: 'لوحة التحكم', propertyListTitle: 'سجلات العقارات', transferTitle: 'عملية نقل الملكية الرسمية', colParcel: 'القطعة', colLocation: 'الموقع', colType: 'النوع', colValue: 'القيمة', colAction: 'إجراء', owner: 'المالك', btnViewDeed: 'سند', exportPdf: 'تحميل PDF', typeSale: 'بيع', typeInheritance: 'ميراث', labelSelectProp: 'اختر العقار', labelBuyerID: 'رقم الهوية', btnStartApp: 'تقديم الطلب', modalDeedTitle: 'سند ملكية', colCity: 'المحافظة/المنطقة', modalAppTitle: 'حجز موعد', labelDate: 'اختر التاريخ', btnConfirm: 'تأكيد', btnCheck: 'استعلام', btnRecalculate: 'إعادة الحساب', estValue: 'القيمة التقديرية', area: 'المساحة', age: 'عمر البناء', expSubtitle: 'الاستعلام الرسمي عن القيود والاستملاك', decisionDate: 'تاريخ القرار', authority: 'الجهة', logout: 'خروج', activeRegion: 'المنطقة النشطة',
             typeResidential: 'سكني', typeCommercial: 'تجاري', typeHistorical: 'تاريخي', typeLand: 'أرض', typeProject: 'مشروع',
             loginSystemName: 'بوابة السجل العقاري', loginSubtitle: 'الجمهورية العربية السورية - المصالح العقارية', lblUsername: 'رقم الهوية / الجواز', lblPassword: 'كلمة المرور', btnLogin: 'دخول', loginFooter: '© 2025 المديرية العامة للمصالح العقارية',
             riskHighTitle: 'يوجد قرار استملاك', riskHighAuth: 'وزارة الإدارة المحلية', riskHighDesc: 'تم البدء بإجراءات استملاك كاملة على هذا العقار بناءً على قرار نفع عام مصدق. نقل الملكية مقيد.',
             riskMedTitle: 'يوجد قيد / إشارة', riskMedAuth: 'المديرية العامة للآثار والمتاحف', riskMedDesc: 'يقع العقار ضمن منطقة أثرية محمية. جميع أعمال البناء وعمليات النقل تخضع لموافقة المؤسسة.',
             riskCleanTitle: 'سليم / لا توجد قيود', riskCleanAuth: 'المصالح العقارية', riskCleanDesc: 'لم يظهر الاستعلام أي قرارات استملاك، حجوزات، رهون، أو إشارات مقيدة على العقار.',
             step1: 'الاتصال بقاعدة البيانات...', step2: 'فحص السجلات...', step3: 'تدقيق القرارات...', step4: 'إعداد التقرير...',
-            parcelPrefix: 'قطعة', btnUploadKMZ: 'تحميل KMZ',
+            parcelPrefix: 'قطعة', btnUploadKMZ: 'تحميل KMZ', searchResult: 'نتيجة البحث',
             // New/Updated Translations
             transferSubtitle: 'عمليات نقل الملكية والشركاء', step1Title: 'بيانات العقار والبائع', step2Title: 'بيانات المشتري والحصص', step3Title: 'تأكيد وإتمام العملية',
             buyerName: 'اسم المشتري الكامل', buyerID: 'رقم هوية/جواز المشتري', transferAmount: 'قيمة الصفقة (ل.س)', share: 'الحصة السهمية', addShareholder: 'إضافة شريك',
@@ -611,12 +611,23 @@
 
             const filteredProperties = computed(() => {
                 if(!searchQuery.value) return properties.value;
-                const q = searchQuery.value.toLowerCase();
-                return properties.value.filter(p => 
-                    p.ada.toString().includes(q) || 
-                    p.parsel.toString().includes(q) || 
-                    (p.owner && p.owner.toLowerCase().includes(q))
-                );
+                const q = searchQuery.value.toLowerCase().trim();
+                
+                return properties.value.filter(p => {
+                    // Ada/Parsel combination (e.g. "101/5" or "101 5")
+                    const adaParsel = `${p.ada}/${p.parsel}`;
+                    const adaParselSpace = `${p.ada} ${p.parsel}`;
+                    
+                    return (
+                        p.ada.toString().includes(q) || 
+                        p.parsel.toString().includes(q) ||
+                        adaParsel.includes(q) ||
+                        adaParselSpace.includes(q) ||
+                        (p.owner && p.owner.toLowerCase().includes(q)) ||
+                        (p.location && p.location.toLowerCase().includes(q)) ||
+                        (p.title && p.title.toLowerCase().includes(q))
+                    );
+                });
             });
 
             // Mock Data Generator
@@ -814,13 +825,16 @@
             const renderGeoJSON = () => {
                 if (!map.value) return;
                 if (geoJsonLayer.value) map.value.removeLayer(geoJsonLayer.value);
+                
+                // Unproxy properties to avoid Leaflet reactivity issues
+                const rawProperties = toRaw(properties.value);
 
                 const featureCollection = {
                     type: "FeatureCollection",
-                    features: properties.value.map(p => ({
+                    features: rawProperties.map(p => ({
                         type: "Feature",
                         properties: { id: p.id, title: p.title, ...p },
-                        geometry: p.geometry
+                        geometry: toRaw(p.geometry)
                     }))
                 };
 
@@ -846,12 +860,38 @@
             };
 
             const locateProperty = () => {
+                const query = searchQuery.value.trim();
+                if (!query) return;
+
+                // 1. Coordinate Search (Lat, Lng)
+                const coordMatch = query.match(/^(\d+(\.\d+)?)[,\s]+(\d+(\.\d+)?)$/);
+                if (coordMatch) {
+                    const lat = parseFloat(coordMatch[1]);
+                    const lng = parseFloat(coordMatch[3]);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        map.value.flyTo([lat, lng], 18);
+                        showSuccess(t.value.searchResult, `${lat}, ${lng}`);
+                        if(window.innerWidth < 768) isMobileMenuOpen.value = false;
+                        return;
+                    }
+                }
+
                 const target = filteredProperties.value[0];
-                if(target && geoJsonLayer.value) {
-                    const tempLayer = L.geoJSON(target.geometry);
-                    map.value.fitBounds(tempLayer.getBounds(), { maxZoom: 18 });
+                if(target) {
+                     if (target.geometry && geoJsonLayer.value) {
+                         // Create a temp layer to get bounds for the geometry
+                         const tempLayer = L.geoJSON(toRaw(target.geometry));
+                         map.value.fitBounds(tempLayer.getBounds(), { maxZoom: 19 });
+                     } else if (target.lat && target.lng) {
+                        map.value.flyTo([target.lat, target.lng], 18);
+                     }
+                    
                     selectedPropertyId.value = target.id;
+                    openDeedModal(target);
+                    showSuccess(t.value.searchResult, `${t.value.parcelPrefix} #${target.ada}/${target.parsel}`);
                     if(window.innerWidth < 768) isMobileMenuOpen.value = false;
+                } else {
+                    showSuccess('Uyarı', 'Kriterlere uygun kayıt bulunamadı.', true);
                 }
             };
 
