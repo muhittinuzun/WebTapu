@@ -402,8 +402,8 @@
 
     <!-- MODALS (Z-Index Increased & Professional Deed) -->
     <transition name="modal">
-        <div v-if="modals.deed" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div class="bg-white w-full max-w-3xl rounded-none shadow-2xl overflow-hidden relative tapu-bg border-8 border-double border-gold-600 parchment-bg tapu-font text-slate-900" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+        <div v-if="modals.deed" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click.self="modals.deed = false">
+            <div class="bg-white w-full max-w-3xl rounded-none shadow-2xl overflow-hidden relative tapu-bg border-8 border-double border-gold-600 parchment-bg tapu-font text-slate-900 overflow-y-auto max-h-[90vh]" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
                 <button @click="modals.deed = false" class="absolute top-4 end-4 w-10 h-10 bg-red-800 text-white rounded-full flex items-center justify-center z-10 shadow-lg hover:bg-red-900 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
                 
                 <!-- Header -->
