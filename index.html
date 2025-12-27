@@ -72,7 +72,8 @@
 
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-emerald-600 relative overflow-hidden">
             <div class="text-center mb-8 relative z-10">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="h-12 mx-auto mb-4 drop-shadow-md">
+                <!-- YENİ ARMA -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="h-20 mx-auto mb-4 drop-shadow-md object-contain">
                 <h1 class="text-xl md:text-2xl font-bold text-slate-800">{{ t.loginSystemName }}</h1>
                 <p class="text-slate-500 text-xs md:text-sm mt-1">{{ t.loginSubtitle }}</p>
             </div>
@@ -108,6 +109,8 @@
 
         <!-- LOADING (Z-Index Increased) -->
         <div v-if="loading" class="absolute inset-0 z-[10000] bg-slate-950 flex flex-col items-center justify-center text-white">
+            <!-- YENİ ARMA -->
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="h-24 mb-6 drop-shadow-2xl animate-pulse object-contain">
             <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-500 mb-4"></div>
             <h2 class="text-xl font-bold tracking-widest animate-pulse">{{ t.loading }}</h2>
             <p class="text-slate-400 text-xs mt-2 font-mono">{{ loadingMsg || t.loadingMsg }}</p>
@@ -119,7 +122,10 @@
         <!-- SIDEBAR (Z-Index Increased) -->
         <aside :class="['fixed md:static inset-y-0 z-[9001] w-64 bg-slate-950 text-slate-300 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out border-e border-slate-800', isMobileMenuOpen ? 'translate-x-0' : (lang === 'ar' ? 'translate-x-full' : '-translate-x-full'), 'md:translate-x-0']">
             <div class="p-6 border-b border-slate-800 flex items-center gap-3 shrink-0">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="w-10 h-7 rounded shadow-sm border border-slate-600 object-cover">
+                <!-- YENİ ARMA -->
+                <div class="w-10 h-10 flex items-center justify-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="max-w-full max-h-full object-contain drop-shadow">
+                </div>
                 <div>
                     <h1 class="font-bold text-white tracking-wide text-base leading-tight">E-TAPU</h1>
                     <p class="text-[9px] text-emerald-500 uppercase tracking-widest font-bold">DAMASCUS / ALEPPO</p>
@@ -247,7 +253,6 @@
                             <i class="fa-solid fa-handshake-simple text-4xl text-emerald-400"></i>
                         </div>
                         <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <!-- Step 1: Property & Seller Info -->
                             <div class="md:col-span-1 space-y-6">
                                 <h4 class="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-1 text-emerald-600"></i> {{ t.step1Title }}</h4>
                                 <div>
@@ -266,8 +271,6 @@
                                     <div class="flex justify-between"><span class="text-slate-500">{{ t.share }}:</span><span class="font-bold">Tam (1/1)</span></div>
                                 </div>
                             </div>
-
-                            <!-- Step 2: Buyer & Share Info -->
                             <div class="md:col-span-2 space-y-6">
                                 <h4 class="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-2 text-emerald-600"></i> {{ t.step2Title }}</h4>
                                 <div class="space-y-4">
@@ -288,8 +291,6 @@
                                     </div>
                                     <button class="text-emerald-600 font-bold text-sm flex items-center gap-1 hover:text-emerald-800 transition"><i class="fa-solid fa-plus-circle"></i> {{ t.addShareholder }}</button>
                                 </div>
-
-                                <!-- Step 3: Confirmation -->
                                 <h4 class="font-bold text-lg text-slate-800 border-b pb-2 flex items-center gap-2 mt-8"><i class="fa-solid fa-3 text-emerald-600"></i> {{ t.step3Title }}</h4>
                                 <div class="bg-emerald-50 p-6 rounded-xl border border-emerald-200">
                                     <div class="flex justify-between items-center mb-4">
@@ -332,7 +333,7 @@
                     </div>
                 </div>
 
-                <!-- EXPROPRIATION (PROFESSIONAL REDESIGN) -->
+                <!-- EXPROPRIATION -->
                 <div v-if="currentTab === 'expropriation'" class="max-w-4xl mx-auto">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-red-600">
                         <div class="bg-slate-900 p-6 text-white flex items-center justify-between">
@@ -354,12 +355,10 @@
                                     <i class="fa-solid fa-magnifying-glass"></i> {{ t.btnCheck }}
                                 </button>
                             </div>
-
                             <div v-if="expLoading" class="text-center py-12">
                                 <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-red-600 mx-auto mb-4"></div>
                                 <p class="text-slate-600 font-bold animate-pulse">{{ t.loadingMsg }}</p>
                             </div>
-
                             <div v-if="expResult && !expLoading" class="animate-fade-in">
                                 <div :class="expResult.riskLevel === 'high' ? 'bg-red-50 border-red-200' : (expResult.riskLevel === 'medium' ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200')" class="border-l-8 p-6 rounded-r-xl mb-6 shadow-sm">
                                     <h4 :class="expResult.riskLevel === 'high' ? 'text-red-700' : (expResult.riskLevel === 'medium' ? 'text-amber-700' : 'text-emerald-700')" class="font-bold text-xl flex items-center gap-3 mb-2">
@@ -367,7 +366,6 @@
                                     </h4>
                                     <p class="text-slate-600">{{ t[expResult.descKey] }}</p>
                                 </div>
-
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                                         <h5 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-600"></i> {{ t.propertySummary }}</h5>
@@ -404,23 +402,29 @@
     <transition name="modal">
         <div v-if="modals.deed" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click.self="modals.deed = false">
             <div class="bg-white w-full max-w-3xl rounded-none shadow-2xl overflow-hidden relative tapu-bg border-8 border-double border-gold-600 parchment-bg tapu-font text-slate-900 overflow-y-auto max-h-[90vh]" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+                <!-- WATERMARK ADDED HERE -->
+                <div class="absolute top-0 right-0 opacity-10 pointer-events-none z-0 transform translate-x-20 -translate-y-10">
+                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="w-[600px] h-[600px] object-contain">
+                </div>
+
                 <button @click="modals.deed = false" class="absolute top-4 end-4 w-10 h-10 bg-red-800 text-white rounded-full flex items-center justify-center z-10 shadow-lg hover:bg-red-900 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
                 
                 <!-- Header -->
-                <div class="text-center pt-10 pb-6 border-b-4 border-gold-600 mx-8 relative">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Syria_%282025-%29.svg/1200px-Flag_of_Syria_%282025-%29.svg.png" class="h-16 mx-auto mb-4 drop-shadow-md absolute top-6 start-0 opacity-20">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Emblem_of_Syria_%282025-%29.svg/1200px-Emblem_of_Syria_%282025-%29.svg.png" class="h-24 mx-auto mb-4 drop-shadow-lg">
+                <div class="text-center pt-10 pb-6 border-b-4 border-gold-600 mx-8 relative z-10">
+                    <!-- YENİ ARMA -->
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="h-16 mx-auto mb-4 drop-shadow-md absolute top-6 start-0 opacity-20 object-contain">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="h-24 mx-auto mb-4 drop-shadow-lg object-contain">
                     <h1 class="text-3xl font-bold text-slate-900 uppercase tracking-wider mb-2">{{ t.syrianRepublic }}</h1>
                     <h2 class="text-xl font-bold text-slate-800">{{ t.cadastreDirectorate }}</h2>
                     <h3 class="text-4xl font-bold text-red-800 mt-4 border-t-2 border-b-2 border-red-800 inline-block px-8 py-2">{{ t.modalDeedTitle }}</h3>
                 </div>
 
                 <!-- Content -->
-                <div class="p-8 space-y-8">
+                <div class="p-8 space-y-8 relative z-10">
                     <!-- Property Info Table -->
                     <div>
                         <h4 class="font-bold text-xl text-slate-900 mb-4 border-b-2 border-slate-800 pb-1 flex items-center gap-2"><i class="fa-solid fa-location-dot text-gold-600"></i> {{ t.propertyInfo }}</h4>
-                        <table class="w-full border-2 border-slate-800 text-lg">
+                        <table class="w-full border-2 border-slate-800 text-lg bg-white/80">
                             <tr class="border-b border-slate-800">
                                 <th class="bg-slate-100 p-3 text-start w-1/4 border-e border-slate-800">{{ t.colCity }} / {{ t.colDistrict }}</th>
                                 <td class="p-3 font-bold">{{ activeRegionName }}</td>
@@ -439,7 +443,7 @@
                     <!-- Owner Info Table -->
                     <div>
                         <h4 class="font-bold text-xl text-slate-900 mb-4 border-b-2 border-slate-800 pb-1 flex items-center gap-2"><i class="fa-solid fa-user-tie text-gold-600"></i> {{ t.ownerInfo }}</h4>
-                        <table class="w-full border-2 border-slate-800 text-lg">
+                        <table class="w-full border-2 border-slate-800 text-lg bg-white/80">
                             <tr class="bg-slate-100 border-b border-slate-800">
                                 <th class="p-3 text-start border-e border-slate-800">{{ t.ownerName }}</th>
                                 <th class="p-3 text-start border-e border-slate-800">{{ t.share }}</th>
@@ -454,7 +458,7 @@
                     </div>
 
                     <!-- Footer & Validation -->
-                    <div class="flex justify-between items-end mt-12 pt-8 border-t-4 border-gold-600">
+                    <div class="flex justify-between items-end mt-12 pt-8 border-t-4 border-gold-600 bg-white/50">
                         <div class="text-center">
                              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SY-KADASTRO-TAPU-ID:${modals.activeProp.id}-HASH:${Date.now()}`" class="w-32 h-32 mx-auto border-4 border-slate-800 p-2 bg-white">
                              <p class="text-sm font-bold mt-2">{{ t.electronicValidation }}</p>
@@ -463,7 +467,8 @@
                         <div class="text-center relative">
                             <p class="font-bold text-lg mb-8">{{ t.cadastreOfficial }}</p>
                             <div class="absolute -top-12 start-1/2 -translate-x-1/2 opacity-30 pointer-events-none">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Emblem_of_Syria_%282025-%29.svg/1200px-Emblem_of_Syria_%282025-%29.svg.png" class="h-40 grayscale">
+                                <!-- YENİ ARMA -->
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="h-40 grayscale object-contain">
                             </div>
                             <p class="font-bold text-xl text-red-900 border-t-2 border-slate-800 pt-4 inline-block px-8 relative z-10">Ahmad Al-Faruqi</p>
                             <p class="text-sm">{{ t.officialTitle }}</p>
