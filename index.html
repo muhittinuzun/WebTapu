@@ -56,6 +56,9 @@
             background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
             background-color: #fdfbf7;
         }
+        /* Settings Panel Animation - Bottom Up */
+        .settings-enter-active, .settings-leave-active { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .settings-enter-from, .settings-leave-to { opacity: 0; transform: translateY(10px) scale(0.95); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen overflow-hidden selection:bg-emerald-200" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
@@ -192,13 +195,53 @@
                     </div>
 
                     <div class="flex-1 bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden relative min-h-[400px]">
-                        <!-- Search Bar is Z-400, but now modals are Z-9999 -->
+                        <!-- Search Bar -->
                         <div class="absolute top-3 start-3 z-[400] w-full max-w-[200px] md:max-w-xs flex gap-2">
                             <div class="flex gap-2 bg-white/95 backdrop-blur p-1.5 rounded-lg shadow-xl border border-slate-200 flex-1">
                                 <input v-model="searchQuery" @keyup.enter="locateProperty" :placeholder="t.searchPlaceholder" class="flex-1 bg-transparent border-none outline-none px-2 text-xs md:text-sm w-full">
                                 <button @click="locateProperty" class="bg-emerald-600 text-white px-3 py-1 rounded text-xs md:text-sm font-bold"><i class="fa-solid fa-search"></i></button>
                             </div>
                         </div>
+
+                        <!-- Map Settings Button (Bottom Left) -->
+                        <div class="absolute bottom-8 left-4 z-[400]">
+                             <button @click="showMapSettings = !showMapSettings" class="bg-white text-slate-700 p-2 rounded-lg shadow-xl border border-slate-200 hover:bg-slate-50 transition-colors" :title="t.mapSettings">
+                                 <i class="fa-solid fa-gear text-lg"></i>
+                             </button>
+                             <!-- Settings Dropdown (Opens Upwards) -->
+                             <transition name="settings">
+                                 <div v-if="showMapSettings" class="absolute bottom-12 left-0 mb-2 bg-white p-4 rounded-xl shadow-2xl border border-slate-200 w-64 z-[500] text-sm origin-bottom-left">
+                                     <h4 class="font-bold text-slate-800 mb-3 border-b pb-2 flex justify-between items-center">
+                                         {{ t.mapSettingsTitle }}
+                                         <button @click="showMapSettings = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                                     </h4>
+                                     
+                                     <div class="mb-4">
+                                         <label class="block text-xs font-bold text-slate-500 mb-1">{{ t.lineColor }}</label>
+                                         <div class="flex gap-2 flex-wrap">
+                                             <button v-for="color in colors" :key="color.value" @click="mapSettings.color = color.value" 
+                                                :class="['w-6 h-6 rounded-full border-2 transition-transform hover:scale-110', mapSettings.color === color.value ? 'border-slate-800 scale-110 ring-1 ring-slate-300' : 'border-transparent']"
+                                                :style="{ backgroundColor: color.value }"></button>
+                                         </div>
+                                     </div>
+
+                                     <div class="mb-4">
+                                         <label class="block text-xs font-bold text-slate-500 mb-1">{{ t.lineWeight }}</label>
+                                         <div class="flex gap-2 bg-slate-100 p-1 rounded-lg">
+                                             <button v-for="w in [1, 2, 3, 4, 5]" :key="w" @click="mapSettings.weight = w" 
+                                                :class="['flex-1 py-1 rounded text-xs font-bold transition-all', mapSettings.weight === w ? 'bg-white shadow text-slate-800' : 'text-slate-400 hover:text-slate-600']">{{ w }}px</button>
+                                         </div>
+                                     </div>
+
+                                     <div>
+                                         <label class="block text-xs font-bold text-slate-500 mb-1">{{ t.fillOpacity }}</label>
+                                         <input type="range" v-model.number="mapSettings.opacity" min="0" max="0.8" step="0.1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                                         <div class="text-right text-xs text-slate-400 mt-1 font-mono">{{ Math.round(mapSettings.opacity * 100) }}%</div>
+                                     </div>
+                                 </div>
+                             </transition>
+                        </div>
+
                         <div id="map"></div>
                     </div>
                 </div>
@@ -211,7 +254,7 @@
                             <button class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-emerald-700"><i class="fa-solid fa-download me-1"></i> PDF</button>
                         </div>
                         <div class="overflow-x-auto h-[600px]">
-                            <table class="w-full text-xs md:text-sm text-left rtl:text-right text-slate-500 whitespace-nowrap">
+                             <table class="w-full text-xs md:text-sm text-left rtl:text-right text-slate-500 whitespace-nowrap">
                                 <thead class="text-xs text-slate-700 uppercase bg-slate-100 sticky top-0 z-10 shadow-sm">
                                     <tr>
                                         <th class="px-4 py-3">{{ t.colParcel }}</th>
@@ -235,16 +278,12 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <div v-if="filteredProperties.length > 100" class="text-center p-2 text-xs text-slate-400 bg-slate-50">
-                                ... {{ filteredProperties.length - 100 }} more records hidden for performance ...
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TRANSFER (PROFESSIONAL REDESIGN) -->
                 <div v-if="currentTab === 'transfer'" class="max-w-5xl mx-auto">
-                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-emerald-600">
+                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-emerald-600">
                         <div class="bg-slate-900 p-6 text-white flex items-center justify-between">
                             <div>
                                 <h3 class="text-xl font-bold">{{ t.transferTitle }}</h3>
@@ -266,9 +305,6 @@
                                     <div class="flex justify-between"><span class="text-slate-500">{{ t.colLocation }}:</span><span class="font-bold">{{ selectedProperty.location }}</span></div>
                                     <div class="flex justify-between"><span class="text-slate-500">{{ t.colType }}:</span><span class="font-bold">{{ t['type' + selectedProperty.type] }}</span></div>
                                     <div class="flex justify-between"><span class="text-slate-500">{{ t.area }}:</span><span class="font-bold">{{ selectedProperty.area }} m²</span></div>
-                                    <hr class="border-slate-200">
-                                    <div class="flex justify-between"><span class="text-slate-500">{{ t.seller }}:</span><span class="font-bold text-slate-900">{{ selectedProperty.owner }}</span></div>
-                                    <div class="flex justify-between"><span class="text-slate-500">{{ t.share }}:</span><span class="font-bold">Tam (1/1)</span></div>
                                 </div>
                             </div>
                             <div class="md:col-span-2 space-y-6">
@@ -310,8 +346,7 @@
                     </div>
                 </div>
                 
-                <!-- VALUATION -->
-                <div v-if="currentTab === 'valuation'" class="max-w-2xl mx-auto">
+                 <div v-if="currentTab === 'valuation'" class="max-w-2xl mx-auto">
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-blue-600">
                         <div class="bg-slate-900 p-6 text-white text-center">
                             <h3 class="text-lg font-bold">{{ t.navValuation }}</h3>
@@ -333,72 +368,30 @@
                     </div>
                 </div>
 
-                <!-- EXPROPRIATION -->
                 <div v-if="currentTab === 'expropriation'" class="max-w-4xl mx-auto">
-                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-red-600">
-                        <div class="bg-slate-900 p-6 text-white flex items-center justify-between">
-                            <div>
-                                <h3 class="text-xl font-bold">{{ t.navExpropriation }}</h3>
-                                <p class="text-sm text-slate-400">{{ t.expSubtitle }}</p>
-                            </div>
+                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-t-8 border-red-600">
+                         <div class="bg-slate-900 p-6 text-white flex items-center justify-between">
+                            <div><h3 class="text-xl font-bold">{{ t.navExpropriation }}</h3><p class="text-sm text-slate-400">{{ t.expSubtitle }}</p></div>
                             <i class="fa-solid fa-gavel text-4xl text-red-400"></i>
-                        </div>
-                        <div class="p-6 md:p-8">
-                            <div class="flex flex-col md:flex-row gap-4 mb-8 items-end">
-                                <div class="flex-1">
-                                    <label class="block mb-2 text-sm font-bold text-slate-700">{{ t.labelSelectProp }}</label>
-                                    <select v-model="selectedPropertyId" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl outline-none text-sm focus:border-emerald-500 transition">
-                                        <option v-for="prop in properties.slice(0,50)" :key="prop.id" :value="prop.id">{{ t.parcelPrefix }} #{{ prop.ada }}/{{ prop.parsel }} - {{ prop.location }}</option>
-                                    </select>
-                                </div>
-                                <button @click="startExpropriationCheck" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-900 shadow-lg transition flex items-center gap-2 h-[46px]">
-                                    <i class="fa-solid fa-magnifying-glass"></i> {{ t.btnCheck }}
-                                </button>
-                            </div>
-                            <div v-if="expLoading" class="text-center py-12">
-                                <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-red-600 mx-auto mb-4"></div>
-                                <p class="text-slate-600 font-bold animate-pulse">{{ t.loadingMsg }}</p>
-                            </div>
-                            <div v-if="expResult && !expLoading" class="animate-fade-in">
-                                <div :class="expResult.riskLevel === 'high' ? 'bg-red-50 border-red-200' : (expResult.riskLevel === 'medium' ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200')" class="border-l-8 p-6 rounded-r-xl mb-6 shadow-sm">
-                                    <h4 :class="expResult.riskLevel === 'high' ? 'text-red-700' : (expResult.riskLevel === 'medium' ? 'text-amber-700' : 'text-emerald-700')" class="font-bold text-xl flex items-center gap-3 mb-2">
-                                        <i :class="expResult.icon" class="text-2xl"></i> {{ t[expResult.titleKey] }}
-                                    </h4>
-                                    <p class="text-slate-600">{{ t[expResult.descKey] }}</p>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                                        <h5 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-info text-blue-600"></i> {{ t.propertySummary }}</h5>
-                                        <div v-if="selectedProperty" class="space-y-2 text-sm">
-                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.colParcel }}:</span><span class="font-bold">{{ selectedProperty.ada }}/{{ selectedProperty.parsel }}</span></div>
-                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.colLocation }}:</span><span class="font-bold">{{ selectedProperty.location }}</span></div>
-                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.area }}:</span><span class="font-bold">{{ selectedProperty.area }} m²</span></div>
-                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.owner }}:</span><span class="font-bold">{{ selectedProperty.owner }}</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm" v-if="expResult.riskLevel !== 'clean'">
-                                        <h5 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-file-contract text-slate-600"></i> {{ t.decisionDetails }}</h5>
-                                        <div class="space-y-2 text-sm">
-                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.decisionDate }}:</span><span class="font-bold">{{ expResult.date }}</span></div>
-                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.decisionNo }}:</span><span class="font-bold font-mono">{{ expResult.refNo }}</span></div>
-                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.authority }}:</span><span class="font-bold">{{ t[expResult.authKey] }}</span></div>
-                                            <div class="flex justify-between"><span class="text-slate-500">{{ t.legalBasis }}:</span><span class="font-bold">{{ t.legalBasisValue }}</span></div>
-                                        </div>
-                                        <button class="mt-4 w-full border-2 border-slate-800 text-slate-800 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 hover:text-white transition flex items-center justify-center gap-2">
-                                            <i class="fa-solid fa-file-pdf"></i> {{ t.viewOfficialDoc }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                         </div>
+                         <div class="p-6 md:p-8">
+                             <div class="flex gap-4 mb-8 items-end">
+                                 <div class="flex-1"><label class="block mb-2 text-sm font-bold text-slate-700">{{ t.labelSelectProp }}</label><select v-model="selectedPropertyId" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl outline-none text-sm"><option v-for="prop in properties.slice(0,50)" :key="prop.id" :value="prop.id">{{ t.parcelPrefix }} #{{ prop.ada }}/{{ prop.parsel }}</option></select></div>
+                                 <button @click="startExpropriationCheck" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold">{{ t.btnCheck }}</button>
+                             </div>
+                             <div v-if="expResult" class="border-l-8 p-6 rounded-r-xl mb-6 shadow-sm" :class="expResult.riskLevel === 'high' ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'">
+                                 <h4 class="font-bold text-xl mb-2">{{ t[expResult.titleKey] }}</h4>
+                                 <p class="text-slate-600">{{ t[expResult.descKey] }}</p>
+                             </div>
+                         </div>
+                     </div>
                 </div>
 
             </div>
         </main>
     </div>
 
-    <!-- MODALS (Z-Index Increased & Professional Deed) -->
+    <!-- MODALS -->
     <transition name="modal">
         <div v-if="modals.deed" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click.self="modals.deed = false">
             <div class="bg-white w-full max-w-3xl rounded-none shadow-2xl overflow-hidden relative tapu-bg border-8 border-double border-gold-600 parchment-bg tapu-font text-slate-900 overflow-y-auto max-h-[90vh]" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
@@ -507,6 +500,11 @@
 <script>
     const { createApp, ref, computed, onMounted, nextTick, watch, markRaw, toRaw } = Vue;
 
+    // ... (Helpers and Translations same as previous)
+    const firstNames = ["Ahmed", "Mohamed", "Ali", "Omar", "Hassan", "Khaled", "Youssef", "Ibrahim", "Mustafa", "Hussein", "Abdullah", "Said", "Mahmoud", "Tarek", "Ziad"];
+    const lastNames = ["Al-Hassan", "Al-Ali", "Kassar", "Zein", "Osman", "Hamdan", "Halabi", "Najjar", "Haddad", "Khoury", "Maalouf", "Assad", "Fares", "Qassem"];
+    const generateRandomName = () => `${firstNames[Math.floor(Math.random()*firstNames.length)]} ${lastNames[Math.floor(Math.random()*lastNames.length)]}`;
+
     const translations = {
         tr: {
             loading: 'YÜKLENİYOR...', loadingMsg: 'Suriye CBS Çekirdeğine Bağlanılıyor...', menuGeneral: 'GENEL İŞLEMLER', menuServices: 'HİZMETLER', navMap: 'Harita & CBS', navProperties: 'Mülk Listesi', navTransfer: 'Tapu Devir/Satış', navValuation: 'Değer Hesapla', navExpropriation: 'Kamulaştırma', searchPlaceholder: 'Ada/Parsel, Koordinat, Konum...', totalProperties: 'TOPLAM MÜLK', pendingApps: 'BEKLEYEN', riskCount: 'RİSKLİ', dashboardTitle: 'CBS Paneli', propertyListTitle: 'Taşınmaz Kayıtları', transferTitle: 'RESMİ TAPU DEVİR İŞLEMİ', colParcel: 'Ada/Parsel', colLocation: 'Konum', colType: 'Nitelik', colValue: 'Rayiç Bedel', colAction: 'İşlem', owner: 'Malik', btnViewDeed: 'Tapu', exportPdf: 'PDF İndir', typeSale: 'Satış', typeInheritance: 'Miras', labelSelectProp: 'Mülk Seçiniz', labelBuyerID: 'Alıcı Kimlik No', btnStartApp: 'Başvuru Yap', modalDeedTitle: 'TAPU SENEDİ', colCity: 'İl/İlçe', modalAppTitle: 'Randevu Oluştur', labelDate: 'Tarih Seçiniz', btnConfirm: 'Onayla', btnCheck: 'SORGULA', btnRecalculate: 'Yeniden Hesapla', estValue: 'Tahmini Değer', area: 'Yüzölçümü', age: 'Bina Yaşı', expSubtitle: 'Resmi Kısıtlama ve Kamulaştırma Sorgusu', decisionDate: 'Karar Tarihi', authority: 'İlgili Kurum', logout: 'Çıkış Yap', activeRegion: 'AKTİF BÖLGE',
@@ -517,14 +515,14 @@
             riskCleanTitle: 'TEMİZ / KISITLAMA BULUNMAMAKTADIR', riskCleanAuth: 'Tapu ve Kadastro Müdürlüğü', riskCleanDesc: 'Yapılan sorgulamada, parsel üzerinde herhangi bir kamulaştırma kararı, haciz, ipotek veya kısıtlayıcı şerh kaydına rastlanmamıştır.',
             step1: 'Veritabanına Bağlanılıyor...', step2: 'Kayıtlar Taranıyor...', step3: 'Bakanlık Kararları Kontrol Ediliyor...', step4: 'Rapor Hazırlanıyor...',
             parcelPrefix: 'Parsel', btnUploadKMZ: 'KMZ Yükle', searchResult: 'Arama Sonucu',
-            // New/Updated Translations
             transferSubtitle: 'Mülkiyet devri ve hissedar işlemleri', step1Title: 'Mülk ve Satıcı Bilgileri', step2Title: 'Alıcı ve Hisse Bilgileri', step3Title: 'İşlem Onayı ve Tamamlama',
             buyerName: 'Alıcı Adı Soyadı', buyerID: 'Alıcı Kimlik/Pasaport No', transferAmount: 'İşlem Bedeli (TL)', share: 'Hisse Payı', addShareholder: 'Hissedar Ekle',
             totalTransactionValue: 'Toplam İşlem Değeri', transferTax: 'Tapu Harcı', serviceFee: 'Döner Sermaye Ücreti', btnCompleteTransfer: 'Devir İşlemini Tamamla',
             syrianRepublic: 'SURİYE ARAP CUMHURİYETİ', cadastreDirectorate: 'TAPU VE KADASTRO GENEL MÜDÜRLÜĞÜ', propertyInfo: 'TAŞINMAZIN BİLGİLERİ', colDistrict: 'İlçe',
             ownerInfo: 'MALİKİN BİLGİLERİ', ownerName: 'Adı Soyadı / Unvanı', acquisitionReason: 'Edinme Sebebi', electronicValidation: 'Elektronik Doğrulama Kodu',
             cadastreOfficial: 'Tapu Sicil Müdürü', officialTitle: 'Yetkili İmza', btnPrint: 'YAZDIR', btnDownloadPDF: 'PDF İNDİR',
-            seller: 'Satıcı (Mevcut Malik)', decisionNo: 'Karar No', legalBasis: 'Yasal Dayanak', legalBasisValue: 'Kamulaştırma Kanunu Md. 7', viewOfficialDoc: 'Resmi Belgeyi Görüntüle (PDF)', propertySummary: 'Mülk Özeti', decisionDetails: 'Karar Detayları'
+            seller: 'Satıcı (Mevcut Malik)', decisionNo: 'Karar No', legalBasis: 'Yasal Dayanak', legalBasisValue: 'Kamulaştırma Kanunu Md. 7', viewOfficialDoc: 'Resmi Belgeyi Görüntüle (PDF)', propertySummary: 'Mülk Özeti', decisionDetails: 'Karar Detayları',
+            mapSettings: 'Harita Ayarları', mapSettingsTitle: 'Görünüm Ayarları', lineColor: 'Çizgi Rengi', lineWeight: 'Çizgi Kalınlığı', fillOpacity: 'Dolgu Opaklığı'
         },
         en: {
             loading: 'LOADING...', loadingMsg: 'Connecting to Damascus GIS Core...', menuGeneral: 'OPERATIONS', menuServices: 'SERVICES', navMap: 'Map & GIS', navProperties: 'Properties', navTransfer: 'Transfer', navValuation: 'Valuation', navExpropriation: 'Inquiry', searchPlaceholder: 'Search Parcel, Coords, Location...', totalProperties: 'PROPERTIES', pendingApps: 'PENDING', riskCount: 'AT RISK', dashboardTitle: 'GIS Dashboard', propertyListTitle: 'Property Records', transferTitle: 'OFFICIAL TITLE TRANSFER', colParcel: 'Parcel', colLocation: 'Location', colType: 'Type', colValue: 'Value', colAction: 'Action', owner: 'Owner', btnViewDeed: 'Deed', exportPdf: 'Export PDF', typeSale: 'Sale', typeInheritance: 'Inheritance', labelSelectProp: 'Select Property', labelBuyerID: 'Buyer ID', btnStartApp: 'Apply', modalDeedTitle: 'TITLE DEED', colCity: 'City/District', modalAppTitle: 'Appointment', labelDate: 'Select Date', btnConfirm: 'Confirm', btnCheck: 'CHECK', btnRecalculate: 'Recalculate', estValue: 'Est. Value', area: 'Area', age: 'Building Age', expSubtitle: 'Official Restriction Inquiry', decisionDate: 'Decision Date', authority: 'Authority', logout: 'Logout', activeRegion: 'ACTIVE REGION',
@@ -535,17 +533,17 @@
             riskCleanTitle: 'CLEAN / NO RESTRICTIONS', riskCleanAuth: 'Land Registry & Cadastre', riskCleanDesc: 'The inquiry revealed no expropriation orders, liens, mortgages, or restrictive annotations on the parcel.',
             step1: 'Connecting Database...', step2: 'Scanning Records...', step3: 'Checking Decrees...', step4: 'Generating Report...',
             parcelPrefix: 'Parcel', btnUploadKMZ: 'Upload KMZ', searchResult: 'Search Result',
-            // New/Updated Translations
             transferSubtitle: 'Ownership transfer and shareholder operations', step1Title: 'Property & Seller Info', step2Title: 'Buyer & Share Info', step3Title: 'Confirmation & Completion',
             buyerName: 'Buyer Full Name', buyerID: 'Buyer ID/Passport No', transferAmount: 'Transaction Amount (SYP)', share: 'Share', addShareholder: 'Add Shareholder',
             totalTransactionValue: 'Total Transaction Value', transferTax: 'Title Deed Tax', serviceFee: 'Service Fee', btnCompleteTransfer: 'Complete Transfer',
             syrianRepublic: 'SYRIAN ARAB REPUBLIC', cadastreDirectorate: 'GENERAL DIRECTORATE OF CADASTRE', propertyInfo: 'PROPERTY INFORMATION', colDistrict: 'District',
             ownerInfo: 'OWNER INFORMATION', ownerName: 'Full Name / Title', acquisitionReason: 'Acquisition Reason', electronicValidation: 'Electronic Validation Code',
             cadastreOfficial: 'Land Registry Director', officialTitle: 'Authorized Signature', btnPrint: 'PRINT', btnDownloadPDF: 'DOWNLOAD PDF',
-            seller: 'Seller (Current Owner)', decisionNo: 'Decision No', legalBasis: 'Legal Basis', legalBasisValue: 'Expropriation Law Art. 7', viewOfficialDoc: 'View Official Document (PDF)', propertySummary: 'Property Summary', decisionDetails: 'Decision Details'
+            seller: 'Seller (Current Owner)', decisionNo: 'Decision No', legalBasis: 'Legal Basis', legalBasisValue: 'Expropriation Law Art. 7', viewOfficialDoc: 'View Official Document (PDF)', propertySummary: 'Property Summary', decisionDetails: 'Decision Details',
+            mapSettings: 'Map Settings', mapSettingsTitle: 'Display Options', lineColor: 'Line Color', lineWeight: 'Line Weight', fillOpacity: 'Fill Opacity'
         },
         ar: {
-            loading: 'جار التحميل...', loadingMsg: 'جاري الاتصال بنظام المعلومات الجغرافي...', menuGeneral: 'العمليات', menuServices: 'الخدمات', navMap: 'الخريطة', navProperties: 'قائمة العقارات', navTransfer: 'نقل الملكية', navValuation: 'التقييم العقاري', navExpropriation: 'الاستعلام', searchPlaceholder: 'البحث عن عقار، إحداثيات، موقع...', totalProperties: 'إجمالي العقارات', pendingApps: 'قيد الانتظار', riskCount: 'خطر', dashboardTitle: 'لوحة التحكم', propertyListTitle: 'سجلات العقارات', transferTitle: 'عملية نقل الملكية الرسمية', colParcel: 'القطعة', colLocation: 'الموقع', colType: 'النوع', colValue: 'القيمة', colAction: 'إجراء', owner: 'المالك', btnViewDeed: 'سند', exportPdf: 'تحميل PDF', typeSale: 'بيع', typeInheritance: 'ميراث', labelSelectProp: 'اختر العقار', labelBuyerID: 'رقم الهوية', btnStartApp: 'تقديم الطلب', modalDeedTitle: 'سند ملكية', colCity: 'المحافظة/المنطقة', modalAppTitle: 'حجز موعد', labelDate: 'اختر التاريخ', btnConfirm: 'تأكيد', btnCheck: 'استعلام', btnRecalculate: 'إعادة الحساب', estValue: 'القيمة التقديرية', area: 'المساحة', age: 'عمر البناء', expSubtitle: 'الاستعلام الرسمي عن القيود والاستملاك', decisionDate: 'تاريخ القرار', authority: 'الجهة', logout: 'خروج', activeRegion: 'المنطقة النشطة',
+            loading: 'جار التحميل...', loadingMsg: 'جاري الاتصال بنظام المعلومات الجغرافي...', menuGeneral: 'العمليات', menuServices: 'الخدمات', navMap: 'الخريطة', navProperties: 'قائمة العقارات', navTransfer: 'نقل الملكية', navValuation: 'التقييم العقاري', navExpropriation: 'الاستعلام', searchPlaceholder: 'البحث عن عقار، إحداثيات، موقع...', totalProperties: 'إجمالي العقارات', pendingApps: 'قيد الانتظار', riskCount: 'خطر', dashboardTitle: 'لوحة التحكم', propertyListTitle: 'سجلات العقارات', transferTitle: 'عملية نقل الملكية الرسمية', colParcel: 'القطعة', colLocation: 'الموقع', colType: 'النوع', colValue: 'القيمة', colAction: 'إجراء', owner: 'المالك', btnViewDeed: 'سند', exportPdf: 'تحميل PDF', typeSale: 'بيع', typeInheritance: 'ميراث', labelSelectProp: 'اختر العقار', labelBuyerID: 'رقم الهوية', btnStartApp: 'تقديم الطلب', modalDeedTitle: 'سند ملكية', colCity: 'المنطقة', modalAppTitle: 'حجز موعد', labelDate: 'اختر التاريخ', btnConfirm: 'تأكيد', btnCheck: 'استعلام', btnRecalculate: 'إعادة الحساب', estValue: 'القيمة التقديرية', area: 'المساحة', age: 'عمر البناء', expSubtitle: 'الاستعلام الرسمي عن القيود والاستملاك', decisionDate: 'تاريخ القرار', authority: 'الجهة', logout: 'خروج', activeRegion: 'المنطقة النشطة',
             typeResidential: 'سكني', typeCommercial: 'تجاري', typeHistorical: 'تاريخي', typeLand: 'أرض', typeProject: 'مشروع',
             loginSystemName: 'بوابة السجل العقاري', loginSubtitle: 'الجمهورية العربية السورية - المصالح العقارية', lblUsername: 'رقم الهوية / الجواز', lblPassword: 'كلمة المرور', btnLogin: 'دخول', loginFooter: '© 2025 المديرية العامة للمصالح العقارية',
             riskHighTitle: 'يوجد قرار استملاك', riskHighAuth: 'وزارة الإدارة المحلية', riskHighDesc: 'تم البدء بإجراءات استملاك كاملة على هذا العقار بناءً على قرار نفع عام مصدق. نقل الملكية مقيد.',
@@ -553,14 +551,14 @@
             riskCleanTitle: 'سليم / لا توجد قيود', riskCleanAuth: 'المصالح العقارية', riskCleanDesc: 'لم يظهر الاستعلام أي قرارات استملاك، حجوزات، رهون، أو إشارات مقيدة على العقار.',
             step1: 'الاتصال بقاعدة البيانات...', step2: 'فحص السجلات...', step3: 'تدقيق القرارات...', step4: 'إعداد التقرير...',
             parcelPrefix: 'قطعة', btnUploadKMZ: 'تحميل KMZ', searchResult: 'نتيجة البحث',
-            // New/Updated Translations
             transferSubtitle: 'عمليات نقل الملكية والشركاء', step1Title: 'بيانات العقار والبائع', step2Title: 'بيانات المشتري والحصص', step3Title: 'تأكيد وإتمام العملية',
             buyerName: 'اسم المشتري الكامل', buyerID: 'رقم هوية/جواز المشتري', transferAmount: 'قيمة الصفقة (ل.س)', share: 'الحصة السهمية', addShareholder: 'إضافة شريك',
             totalTransactionValue: 'إجمالي قيمة الصفقة', transferTax: 'رسوم التسجيل', serviceFee: 'رسوم الخدمة', btnCompleteTransfer: 'إتمام عملية النقل',
             syrianRepublic: 'الجمهورية العربية السورية', cadastreDirectorate: 'المديرية العامة للمصالح العقارية', propertyInfo: 'بيانات العقار', colDistrict: 'المنطقة العقارية',
             ownerInfo: 'بيانات المالك', ownerName: 'الاسم الكامل / الصفة', acquisitionReason: 'سبب الاكتساب', electronicValidation: 'رمز التحقق الإلكتروني',
             cadastreOfficial: 'أمين السجل العقاري', officialTitle: 'التوقيع المعتمد', btnPrint: 'طباعة', btnDownloadPDF: 'تحميل PDF',
-            seller: 'البائع (المالك الحالي)', decisionNo: 'رقم القرار', legalBasis: 'الأساس القانوني', legalBasisValue: 'قانون الاستملاك مادة 7', viewOfficialDoc: 'عرض الوثيقة الرسمية (PDF)', propertySummary: 'ملخص العقار', decisionDetails: 'تفاصيل القرار'
+            seller: 'البائع (المالك الحالي)', decisionNo: 'رقم القرار', legalBasis: 'الأساس القانوني', legalBasisValue: 'قانون الاستملاك مادة 7', viewOfficialDoc: 'عرض الوثيقة الرسمية (PDF)', propertySummary: 'ملخص العقار', decisionDetails: 'تفاصيل القرار',
+            mapSettings: 'إعدادات الخريطة', mapSettingsTitle: 'خيارات العرض', lineColor: 'لون الخط', lineWeight: 'سماكة الخط', fillOpacity: 'شفافية التعبئة'
         }
     };
 
@@ -580,6 +578,7 @@
             const selectedPropertyId = ref(1);
             const properties = ref([]);
             const geoJsonLayer = ref(null);
+            const selectedLayer = ref(null); 
             
             const valRegion = ref('mezzeh');
             const valArea = ref(150);
@@ -594,14 +593,49 @@
             const toast = ref({ show: false, title: '', message: '' });
             const t = computed(() => translations[lang.value]);
 
-            // Transfer Data State
-            const transferData = ref({
-                buyerName: '',
-                buyerID: '',
-                amount: '5000000',
-                shareNumerator: 1,
-                shareDenominator: 1
+            const transferData = ref({ buyerName: '', buyerID: '', amount: '5000000', shareNumerator: 1, shareDenominator: 1 });
+
+            // MAP SETTINGS STATE
+            const showMapSettings = ref(false);
+            const mapSettings = ref({
+                color: '#dc2626', // Default Red
+                weight: 2,        // Default Medium
+                opacity: 0.2      // Default 20%
             });
+
+            const colors = [
+                { name: 'Red', value: '#dc2626' },
+                { name: 'Blue', value: '#2563eb' },
+                { name: 'Green', value: '#16a34a' },
+                { name: 'Yellow', value: '#eab308' },
+                { name: 'Black', value: '#000000' },
+                { name: 'White', value: '#ffffff' }
+            ];
+
+            // Watch for settings changes to update map styles instantly
+            watch(mapSettings, () => {
+                if (geoJsonLayer.value && map.value) {
+                    // Update style for GeoJSON layer, but we must handle it properly as it is not reactive directly
+                    // Leaflet's setStyle works on the layer
+                    toRaw(geoJsonLayer.value).setStyle({
+                        color: mapSettings.value.color,
+                        weight: mapSettings.value.weight,
+                        fillOpacity: mapSettings.value.opacity,
+                        fillColor: mapSettings.value.color
+                    });
+                    
+                    // Re-apply highlight if needed, or clear it if style overrides it?
+                    // Actually, if we set style on the group, it overrides individual layers. 
+                    // We might need to re-highlight the selected layer if exists.
+                    if (selectedLayer.value) {
+                         toRaw(selectedLayer.value).setStyle({
+                            weight: mapSettings.value.weight + 3,
+                            color: '#3b82f6', // Highlight stays blue
+                            fillOpacity: 0.7
+                        });
+                    }
+                }
+            }, { deep: true });
 
             const totalValue = computed(() => {
                 const sum = properties.value.reduce((acc, p) => acc + (p.price || 0), 0);
@@ -612,29 +646,17 @@
             const filteredProperties = computed(() => {
                 if(!searchQuery.value) return properties.value;
                 const q = searchQuery.value.toLowerCase().trim();
-                
                 return properties.value.filter(p => {
-                    // Ada/Parsel combination (e.g. "101/5" or "101 5")
                     const adaParsel = `${p.ada}/${p.parsel}`;
                     const adaParselSpace = `${p.ada} ${p.parsel}`;
-                    
-                    return (
-                        p.ada.toString().includes(q) || 
-                        p.parsel.toString().includes(q) ||
-                        adaParsel.includes(q) ||
-                        adaParselSpace.includes(q) ||
-                        (p.owner && p.owner.toLowerCase().includes(q)) ||
-                        (p.location && p.location.toLowerCase().includes(q)) ||
-                        (p.title && p.title.toLowerCase().includes(q))
-                    );
+                    return (p.ada.toString().includes(q) || p.parsel.toString().includes(q) || adaParsel.includes(q) || adaParselSpace.includes(q) || (p.owner && p.owner.toLowerCase().includes(q)) || (p.location && p.location.toLowerCase().includes(q)) || (p.title && p.title.toLowerCase().includes(q)));
                 });
             });
 
-            // Mock Data Generator
+            // Mock Generator
             const generateMockParcels = () => {
                 const centerLat = 33.5138;
                 const centerLng = 36.2900;
-                const owners = ["Ahmed Al-Hassan", "Mehmet Yılmaz", "Salim Kassar", "Noura Al-Jafari", "Ali Hamdan", "Khaled Osman"];
                 const types = ["Residential", "Commercial", "Land"];
                 const newProps = [];
                 for(let i=0; i<40; i++) {
@@ -642,14 +664,13 @@
                     const lng = centerLng + (Math.random() - 0.5) * 0.03;
                     const area = Math.floor(Math.random() * 200) + 100;
                     const price = area * 1500;
-                    
                     newProps.push({
                         id: i + 1, ada: 100 + Math.floor(i/10), parsel: i+1,
                         location: 'Damascus / Mezzeh', regionCode: 'mezzeh',
                         lat: lat, lng: lng,
                         price: price, priceStr: '$' + price.toLocaleString(),
                         type: types[Math.floor(Math.random() * types.length)],
-                        owner: owners[Math.floor(Math.random() * owners.length)],
+                        owner: generateRandomName(),
                         area: area, age: 5,
                         geometry: {
                             type: "Polygon",
@@ -669,7 +690,6 @@
                 renderGeoJSON();
             };
 
-            // KMZ/KML PARSER
             const handleFileUpload = async (event) => {
                 const file = event.target.files[0];
                 if (!file) return;
@@ -720,8 +740,8 @@
                 
                 const newProps = [];
                 let idCounter = 1000;
-                const owners = ["State Property", "Ahmed Al-Ali", "Fatima Zein", "Hassan Kassar", "Damascus Construction"];
                 const types = ["Residential", "Commercial", "Land", "Historical"];
+                let avgLat = 0, avgLng = 0;
 
                 geojson.features.forEach(f => {
                     if (!f.geometry) return;
@@ -731,6 +751,16 @@
                     const randomArea = Math.floor(Math.random() * 800) + 150;
                     const randomPrice = Math.floor(randomArea * (Math.random() * 2000 + 500));
                     
+                    let centerLat = 0, centerLng = 0;
+                    if(f.geometry.type === "Polygon") {
+                        centerLat = f.geometry.coordinates[0][0][1];
+                        centerLng = f.geometry.coordinates[0][0][0];
+                    } else if(f.geometry.type === "Point") {
+                        centerLat = f.geometry.coordinates[1];
+                        centerLng = f.geometry.coordinates[0];
+                    }
+                    if(centerLat !== 0) { avgLat += centerLat; avgLng += centerLng; }
+
                     newProps.push({
                         id: idCounter++,
                         ada: 500 + Math.floor(idCounter/100),
@@ -739,19 +769,32 @@
                         regionCode: 'imported',
                         price: randomPrice, priceStr: '$' + randomPrice.toLocaleString(),
                         type: randomType,
-                        owner: owners[Math.floor(Math.random() * owners.length)],
+                        owner: (name && name.length > 5 && name.includes(' ')) ? name : generateRandomName(),
                         area: randomArea, age: Math.floor(Math.random() * 40),
                         title: name,
-                        geometry: f.geometry
+                        geometry: f.geometry,
+                        lat: centerLat, lng: centerLng
                     });
                 });
 
                 if (newProps.length > 0) {
+                    avgLat = avgLat / newProps.length;
+                    avgLng = avgLng / newProps.length;
+                    
+                    if (Math.abs(avgLat - 36.2) < 0.5 && Math.abs(avgLng - 37.1) < 0.5) {
+                        activeRegionName.value = "Aleppo / City Center";
+                    } else if (Math.abs(avgLat - 33.5) < 0.5 && Math.abs(avgLng - 36.3) < 0.5) {
+                         activeRegionName.value = "Damascus / City Center";
+                    } else {
+                         activeRegionName.value = "Homs / Regional"; 
+                    }
+                    
+                    newProps.forEach(p => p.location = activeRegionName.value);
+
                     properties.value = newProps;
                     selectedPropertyId.value = newProps[0].id;
-                    activeRegionName.value = `Imported Data (${newProps.length} Items)`;
                     renderGeoJSON();
-                    showSuccess('Success', `${newProps.length} parcels imported and active.`);
+                    showSuccess('Success', `${newProps.length} parcels imported.`);
                 } else {
                     showSuccess('Error', 'No valid geometries found in file.', true);
                 }
@@ -772,9 +815,6 @@
             const valuationResult = computed(() => {
                 let base = 2000;
                 if(valRegion.value === 'mezzeh') base = 3500;
-                if(valRegion.value === 'oldcity') base = 4000;
-                if(valRegion.value === 'baramkeh') base = 2500;
-                
                 let val = (base * valArea.value) * (1 - (valAge.value * 0.01));
                 if (val < 0) val = 0;
                 return `$${Math.floor(val).toLocaleString()}`;
@@ -789,15 +829,13 @@
                 loadingMsg.value = 'Devir işlemi gerçekleştiriliyor...';
                 
                 setTimeout(() => {
-                    // Simulate transfer
                     const propIndex = properties.value.findIndex(p => p.id === selectedProperty.value.id);
                     if (propIndex !== -1) {
                         properties.value[propIndex].owner = transferData.value.buyerName;
-                        // Reset form
                         transferData.value = { buyerName: '', buyerID: '', amount: '5000000', shareNumerator: 1, shareDenominator: 1 };
                         loading.value = false;
                         showSuccess('Başarılı', 'Mülkiyet devri başarıyla tamamlandı ve sicile işlendi.');
-                        renderGeoJSON(); // Re-render to update popup info if needed
+                        renderGeoJSON(); 
                     }
                 }, 2000);
             };
@@ -812,10 +850,10 @@
                     zoom: 14, 
                     layers: [satelliteLayer],
                     renderer: L.canvas(),
-                    zoomControl: false // Move zoom control
+                    zoomControl: false 
                 }));
                 
-                L.control.zoom({ position: 'bottomright' }).addTo(map.value); // Add zoom to bottom right
+                L.control.zoom({ position: 'bottomright' }).addTo(map.value);
                 
                 L.control.layers({"Satellite": satelliteLayer, "Street": osmLayer}).addTo(map.value);
                 
@@ -824,52 +862,53 @@
 
             const renderGeoJSON = () => {
                 if (!map.value) return;
-                if (geoJsonLayer.value) map.value.removeLayer(geoJsonLayer.value);
+                if (geoJsonLayer.value) toRaw(map.value).removeLayer(toRaw(geoJsonLayer.value));
                 
-                // Unproxy properties to avoid Leaflet reactivity issues
                 const rawProperties = toRaw(properties.value);
+                const featureCollection = { type: "FeatureCollection", features: rawProperties.map(p => ({ type: "Feature", properties: { id: p.id, title: p.title, ...p }, geometry: toRaw(p.geometry) })) };
 
-                const featureCollection = {
-                    type: "FeatureCollection",
-                    features: rawProperties.map(p => ({
-                        type: "Feature",
-                        properties: { id: p.id, title: p.title, ...p },
-                        geometry: toRaw(p.geometry)
-                    }))
-                };
-
-                geoJsonLayer.value = L.geoJSON(featureCollection, {
-                    style: (feature) => { return { color: '#10b981', weight: 1, fillOpacity: 0.4, fillColor: '#10b981' }; },
-                    pointToLayer: (feature, latlng) => { return L.circleMarker(latlng, { radius: 6, fillColor: "#f59e0b", color: "#fff", weight: 1, opacity: 1, fillOpacity: 0.8 }); },
+                geoJsonLayer.value = markRaw(L.geoJSON(featureCollection, {
+                    style: (feature) => { 
+                        return { 
+                            color: mapSettings.value.color, 
+                            weight: mapSettings.value.weight, 
+                            fillOpacity: mapSettings.value.opacity, 
+                            fillColor: mapSettings.value.color 
+                        }; 
+                    },
+                    pointToLayer: (feature, latlng) => { return L.circleMarker(latlng, { radius: 6, fillColor: mapSettings.value.color, color: "#fff", weight: 1, opacity: 1, fillOpacity: 0.8 }); },
                     onEachFeature: (feature, layer) => {
                         layer.on('click', () => {
                             selectedPropertyId.value = feature.properties.id;
                             const fullProp = properties.value.find(p => p.id === feature.properties.id);
-                            if (fullProp) openDeedModal(fullProp);
+                            if (fullProp) { highlightFeature(layer); openDeedModal(fullProp); }
                         });
                         const p = feature.properties;
-                        const label = `<div style="font-family:sans-serif; text-align:${lang.value==='ar'?'right':'left'}"><b>${t.value.parcelPrefix} #${p.ada}/${p.parsel}</b><br><span style="color:#059669; font-weight:bold">${p.priceStr}</span></div>`;
+                        const label = `<div style="font-family:sans-serif; text-align:${lang.value==='ar'?'right':'left'}"><b>${t.value.parcelPrefix} #${p.ada}/${p.parsel}</b><br><span style="color:${mapSettings.value.color}; font-weight:bold">${p.priceStr}</span></div>`;
                         layer.bindPopup(label);
                     }
-                }).addTo(map.value);
+                }).addTo(toRaw(map.value)));
 
-                try {
-                    const bounds = geoJsonLayer.value.getBounds();
-                    if (bounds.isValid()) { map.value.fitBounds(bounds, { padding: [50, 50] }); }
-                } catch (e) { console.log("Bounds error", e); }
+                try { const bounds = toRaw(geoJsonLayer.value).getBounds(); if (bounds.isValid()) { toRaw(map.value).fitBounds(bounds, { padding: [50, 50] }); } } catch (e) { console.log("Bounds error", e); }
+            };
+            
+            const highlightFeature = (layer) => {
+                if (selectedLayer.value) { if(geoJsonLayer.value) toRaw(geoJsonLayer.value).resetStyle(toRaw(selectedLayer.value)); }
+                selectedLayer.value = layer;
+                toRaw(layer).setStyle({ weight: mapSettings.value.weight + 3, color: '#3b82f6', fillOpacity: 0.7, fillColor: '#60a5fa' });
+                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) { toRaw(layer).bringToFront(); }
             };
 
             const locateProperty = () => {
                 const query = searchQuery.value.trim();
                 if (!query) return;
 
-                // 1. Coordinate Search (Lat, Lng)
                 const coordMatch = query.match(/^(\d+(\.\d+)?)[,\s]+(\d+(\.\d+)?)$/);
                 if (coordMatch) {
                     const lat = parseFloat(coordMatch[1]);
                     const lng = parseFloat(coordMatch[3]);
                     if (!isNaN(lat) && !isNaN(lng)) {
-                        map.value.flyTo([lat, lng], 18);
+                        toRaw(map.value).flyTo([lat, lng], 18);
                         showSuccess(t.value.searchResult, `${lat}, ${lng}`);
                         if(window.innerWidth < 768) isMobileMenuOpen.value = false;
                         return;
@@ -878,12 +917,19 @@
 
                 const target = filteredProperties.value[0];
                 if(target) {
-                     if (target.geometry && geoJsonLayer.value) {
-                         // Create a temp layer to get bounds for the geometry
-                         const tempLayer = L.geoJSON(toRaw(target.geometry));
-                         map.value.fitBounds(tempLayer.getBounds(), { maxZoom: 19 });
+                     // Find the layer associated with this target ID
+                     let targetLayer = null;
+                     toRaw(geoJsonLayer.value).eachLayer(layer => {
+                         if(layer.feature.properties.id === target.id) {
+                             targetLayer = layer;
+                         }
+                     });
+
+                     if(targetLayer) {
+                         highlightFeature(targetLayer);
+                         toRaw(map.value).fitBounds(targetLayer.getBounds(), { maxZoom: 19 });
                      } else if (target.lat && target.lng) {
-                        map.value.flyTo([target.lat, target.lng], 18);
+                        toRaw(map.value).flyTo([target.lat, target.lng], 18);
                      }
                     
                     selectedPropertyId.value = target.id;
@@ -921,7 +967,8 @@
                 expLoading, expStep, expResult, startExpropriationCheck,
                 modals, toast, locateProperty, openDeedModal, confirmAppointment,
                 isMobileMenuOpen, changeTab, getIcon, capitalize, handleFileUpload, activeRegionName,
-                transferData, completeTransfer
+                transferData, completeTransfer,
+                showMapSettings, mapSettings, colors
             };
         }
     }).mount('#app');
