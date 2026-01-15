@@ -845,13 +845,22 @@
                             const data = Array.isArray(result) ? result[0] : result;
                             let parsed = { baslik: {}, kimlik: {}, mulkiyet: {} };
 
-                            // Helper to find field value in sections
+                            // Helper to find field value in sections (data object or array)
                             const findVal = (key) => {
                                 if (data.pages) {
                                     for (const p of data.pages) {
                                         for (const s of p.sections) {
-                                            for (const f of s.fields) {
-                                                if (f[key] !== undefined) return f[key];
+                                            if (s.data) {
+                                                // If data is an array (like in page 1)
+                                                if (Array.isArray(s.data)) {
+                                                    for (const item of s.data) {
+                                                        if (item[key] !== undefined && item[key] !== null) return item[key];
+                                                    }
+                                                }
+                                                // If data is an object (like in page 2)
+                                                else if (typeof s.data === 'object') {
+                                                    if (s.data[key] !== undefined && s.data[key] !== null) return s.data[key];
+                                                }
                                             }
                                         }
                                     }
@@ -860,9 +869,10 @@
                             };
 
                             parsed.mulkiyet.malik = findVal('owner_name') || 'Unknown';
-                            parsed.mulkiyet.tarih = findVal('transaction_date') || findVal('signature_date');
-                            parsed.baslik.bolge = findVal('province');
-                            parsed.kimlik.bolge_semt = findVal('district');
+                            parsed.mulkiyet.tarih = findVal('signature_date') || findVal('transaction_date');
+                            parsed.mulkiyet.hisse = findVal('share_text');
+                            parsed.baslik.bolge = findVal('province') || findVal('directorate');
+                            parsed.kimlik.bolge_semt = findVal('district') || findVal('office_or_circle');
                             parsed.kimlik.parsel_no = findVal('property_number');
                             parsed.kimlik.cins_kisa = findVal('property_type');
                             parsed.kimlik.aciklama = findVal('description');
@@ -872,6 +882,7 @@
                             ocrForm.value = {
                                 owner_name: parsed.mulkiyet.malik || '',
                                 signature_date: parsed.mulkiyet.tarih || '',
+                                share_text: parsed.mulkiyet.hisse || '',
                                 province: parsed.baslik.bolge || '',
                                 district: parsed.kimlik.bolge_semt || '',
                                 property_number: parsed.kimlik.parsel_no || '',
