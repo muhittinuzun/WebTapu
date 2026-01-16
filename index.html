@@ -41,124 +41,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        body[dir="ltr"] {
-            font-family: 'Inter', sans-serif;
-        }
-
-        body[dir="rtl"] {
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .tapu-font {
-            font-family: 'Amiri', serif;
-        }
-
-        #map {
-            height: 100%;
-            width: 100%;
-            z-index: 1;
-            background: #e2e8f0;
-        }
-
+        body[dir="ltr"] { font-family: 'Inter', sans-serif; }
+        body[dir="rtl"] { font-family: 'Cairo', sans-serif; }
+        .tapu-font { font-family: 'Amiri', serif; }
+        #map { height: 100%; width: 100%; z-index: 1; background: #e2e8f0; }
         .login-pattern {
             background-color: #0f172a;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231e293b' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
-
-        .leaflet-popup-content-wrapper {
-            border-radius: 0.5rem;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        .leaflet-popup-content {
-            margin: 0;
-            width: 260px !important;
-        }
-
-        select {
-            background-position: left 0.5rem center;
-        }
-
-        [dir="rtl"] select {
-            background-position: right 0.5rem center;
-        }
-
-        @keyframes scan {
-            0% {
-                top: 0;
-                opacity: 0;
-            }
-
-            5% {
-                opacity: 1;
-            }
-
-            95% {
-                opacity: 1;
-            }
-
-            100% {
-                top: 100%;
-                opacity: 0;
-            }
-        }
-
-        .animate-scan {
-            animation: scan 3s ease-in-out infinite;
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .kmz-loader {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        .leaflet-popup-content-wrapper { border-radius: 0.5rem; padding: 0; overflow: hidden; }
+        .leaflet-popup-content { margin: 0; width: 260px !important; }
+        select { background-position: left 0.5rem center; }
+        [dir="rtl"] select { background-position: right 0.5rem center; }
+        @keyframes scan { 0% { top: 0; opacity: 0; } 5% { opacity: 1; } 95% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        .animate-scan { animation: scan 3s ease-in-out infinite; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .kmz-loader { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden selection:bg-emerald-200"
-    :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden selection:bg-emerald-200" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
 
     <div id="app" class="h-full relative overflow-hidden flex flex-col md:flex-row">
 
         <!-- LOGIN SCREEN -->
-        <div v-if="!isLoggedIn" class="fixed inset-0 z-[10000] flex items-center justify-center login-pattern p-4"
-            :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+        <div v-if="!isLoggedIn" class="fixed inset-0 z-[10000] flex items-center justify-center login-pattern p-4" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
             <div class="absolute top-6 right-6 flex gap-2 z-20">
-                <button @click="setLang('ar')"
-                    class="px-3 py-1 rounded text-xs font-bold transition bg-emerald-600 text-white">AR</button>
-                <button @click="setLang('tr')"
-                    class="px-3 py-1 rounded text-xs font-bold transition bg-slate-800 text-slate-400">TR</button>
-                <button @click="setLang('en')"
-                    class="px-3 py-1 rounded text-xs font-bold transition bg-slate-800 text-slate-400">EN</button>
+                <button @click="setLang('ar')" class="px-3 py-1 rounded text-xs font-bold transition bg-emerald-600 text-white">AR</button>
+                <button @click="setLang('tr')" class="px-3 py-1 rounded text-xs font-bold transition bg-slate-800 text-slate-400">TR</button>
+                <button @click="setLang('en')" class="px-3 py-1 rounded text-xs font-bold transition bg-slate-800 text-slate-400">EN</button>
             </div>
 
-            <div
-                class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-emerald-600 relative overflow-hidden">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-emerald-600 relative overflow-hidden">
                 <div class="text-center mb-8 relative z-10">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png"
-                        class="h-20 mx-auto mb-4 drop-shadow-md object-contain">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="h-20 mx-auto mb-4 drop-shadow-md object-contain">
                     <h1 class="text-xl md:text-2xl font-bold text-slate-800">{{ t.loginSystemName }}</h1>
                     <p class="text-slate-500 text-xs md:text-sm mt-1">{{ t.loginSubtitle }}</p>
                 </div>
@@ -166,19 +86,14 @@
                 <form @submit.prevent="handleLogin" class="space-y-5 relative z-10">
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-1">{{ t.lblUsername }}</label>
-                        <input v-model="loginCreds.username" type="text"
-                            class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-emerald-500 transition text-sm"
-                            placeholder="ID Number">
+                        <input v-model="loginCreds.username" type="text" class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-emerald-500 transition text-sm" placeholder="ID Number">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-1">{{ t.lblPassword }}</label>
-                        <input v-model="loginCreds.password" type="password"
-                            class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-emerald-500 transition text-sm"
-                            placeholder="********">
+                        <input v-model="loginCreds.password" type="password" class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-emerald-500 transition text-sm" placeholder="********">
                     </div>
 
-                    <button type="submit" :disabled="loginProcessing"
-                        class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2">
+                    <button type="submit" :disabled="loginProcessing" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2">
                         <span v-if="loginProcessing"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
                         <span v-else>{{ t.btnLogin }}</span>
                     </button>
@@ -192,26 +107,22 @@
             <aside :class="sidebarClasses">
                 <div class="p-6 border-b border-slate-800 flex items-center gap-3 shrink-0">
                     <div class="w-10 h-10 flex items-center justify-center">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png"
-                            class="max-w-full max-h-full object-contain drop-shadow">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="max-w-full max-h-full object-contain drop-shadow">
                     </div>
                     <div>
                         <h1 class="font-bold text-white tracking-wide text-base leading-tight">E-TAPU</h1>
                         <p class="text-[9px] text-emerald-500 uppercase tracking-widest font-bold">DAMASCUS / ALEPPO</p>
                     </div>
-                    <button @click="isMobileMenuOpen = false" class="md:hidden ms-auto text-slate-400"><i
-                            class="fa-solid fa-xmark text-xl"></i></button>
+                    <button @click="isMobileMenuOpen = false" class="md:hidden ms-auto text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
 
                 <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
                     <p class="px-3 text-[10px] font-bold text-slate-500 uppercase mb-2 mt-2">{{ t.menuGeneral }}</p>
-                    <button v-for="tab in mainTabs" :key="tab" @click="changeTab(tab)" :class="getTabClass(tab)"
-                        class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm font-medium">
+                    <button v-for="tab in mainTabs" :key="tab" @click="changeTab(tab)" :class="getTabClass(tab)" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm font-medium">
                         <i :class="getIcon(tab)" class="w-5 text-center text-lg"></i> {{ getNavLabel(tab) }}
                     </button>
                     <p class="px-3 text-[10px] font-bold text-slate-500 uppercase mb-2 mt-6">{{ t.menuServices }}</p>
-                    <button v-for="tab in serviceTabs" :key="tab" @click="changeTab(tab)" :class="getTabClass(tab)"
-                        class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm font-medium">
+                    <button v-for="tab in serviceTabs" :key="tab" @click="changeTab(tab)" :class="getTabClass(tab)" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm font-medium">
                         <i :class="getIcon(tab)" class="w-5 text-center text-lg"></i> {{ getNavLabel(tab) }}
                     </button>
                 </nav>
@@ -219,21 +130,17 @@
 
             <!-- MAIN CONTENT -->
             <main class="flex-1 flex flex-col bg-slate-50 h-full overflow-hidden w-full">
-                <header
-                    class="h-16 bg-white shadow-sm border-b px-4 md:px-6 flex justify-between items-center z-10 shrink-0">
+                <header class="h-16 bg-white shadow-sm border-b px-4 md:px-6 flex justify-between items-center z-10 shrink-0">
                     <div class="flex items-center gap-3">
-                        <button @click="isMobileMenuOpen = !isMobileMenuOpen"
-                            class="md:hidden text-slate-600 text-xl p-1"><i class="fa-solid fa-bars"></i></button>
+                        <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="md:hidden text-slate-600 text-xl p-1"><i class="fa-solid fa-bars"></i></button>
                         <h2 class="text-sm md:text-lg font-bold text-slate-800 flex items-center gap-2 truncate">
                             <span class="w-1.5 h-5 bg-red-600 rounded-full hidden md:block"></span> {{ getPageTitle() }}
                         </h2>
                     </div>
                     <div class="flex items-center gap-3" v-if="currentTab === 'dashboard'">
                         <div class="relative group">
-                            <input type="file" ref="fileInput" @change="handleFileUpload"
-                                accept=".kmz,.kml,.json,.geojson" class="hidden">
-                            <button @click="triggerFileInput"
-                                class="bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-slate-900 transition flex items-center gap-2 text-xs md:text-sm font-bold border border-slate-600">
+                            <input type="file" ref="fileInput" @change="handleFileUpload" accept=".kmz,.kml,.json,.geojson" class="hidden">
+                            <button @click="triggerFileInput" class="bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-slate-900 transition flex items-center gap-2 text-xs md:text-sm font-bold border border-slate-600">
                                 <i class="fa-solid fa-cloud-arrow-up"></i> <span>{{ t.btnUploadKMZ }}</span>
                             </button>
                         </div>
@@ -243,75 +150,51 @@
                 <div class="flex-1 overflow-y-auto p-2 md:p-6 relative">
                     <!-- DASHBOARD (Map) -->
                     <div v-show="currentTab === 'dashboard'" class="h-full flex flex-col gap-4">
-                        <div
-                            class="flex-1 bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden relative min-h-[400px]">
+                        <div class="flex-1 bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden relative min-h-[400px]">
                             <div class="absolute top-3 start-3 z-[400] w-full max-w-[200px] md:max-w-xs flex gap-2">
-                                <div
-                                    class="flex gap-2 bg-white/95 backdrop-blur p-1.5 rounded-lg shadow-xl border border-slate-200 flex-1">
-                                    <input v-model="searchQuery" @keyup.enter="locateProperty"
-                                        :placeholder="t.searchPlaceholder"
-                                        class="flex-1 bg-transparent border-none outline-none px-2 text-xs md:text-sm w-full">
-                                    <button @click="locateProperty"
-                                        class="bg-emerald-600 text-white px-3 py-1 rounded text-xs md:text-sm font-bold"><i
-                                            class="fa-solid fa-search"></i></button>
+                                <div class="flex gap-2 bg-white/95 backdrop-blur p-1.5 rounded-lg shadow-xl border border-slate-200 flex-1">
+                                    <input v-model="searchQuery" @keyup.enter="locateProperty" :placeholder="t.searchPlaceholder" class="flex-1 bg-transparent border-none outline-none px-2 text-xs md:text-sm w-full">
+                                    <button @click="locateProperty" class="bg-emerald-600 text-white px-3 py-1 rounded text-xs md:text-sm font-bold"><i class="fa-solid fa-search"></i></button>
                                 </div>
                             </div>
                             <div id="map"></div>
 
                             <!-- Map Settings -->
                             <div class="absolute bottom-6 start-6 z-[1000] flex flex-col items-start gap-2">
-                                <button @click="showMapSettings = !showMapSettings"
-                                    class="bg-white/95 backdrop-blur p-3 rounded-xl shadow-xl border border-slate-200 text-slate-700 hover:text-emerald-600 transition flex items-center gap-2 font-bold text-xs ring-1 ring-slate-200">
+                                <button @click="showMapSettings = !showMapSettings" class="bg-white/95 backdrop-blur p-3 rounded-xl shadow-xl border border-slate-200 text-slate-700 hover:text-emerald-600 transition flex items-center gap-2 font-bold text-xs ring-1 ring-slate-200">
                                     <i class="fa-solid fa-palette text-lg"></i>
                                     <span>Gorunum Ayarlari</span>
                                 </button>
 
                                 <transition name="modal">
-                                    <div v-if="showMapSettings"
-                                        class="bg-white/95 backdrop-blur p-5 rounded-2xl shadow-2xl border border-slate-200 w-64 animate-fade-in ring-1 ring-slate-200">
-                                        <div
-                                            class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-                                            <h4 class="font-bold text-xs text-slate-800 uppercase tracking-wider">Harita
-                                                Stili</h4>
-                                            <button @click="showMapSettings = false"
-                                                class="text-slate-400 hover:text-red-500"><i
-                                                    class="fa-solid fa-xmark"></i></button>
+                                    <div v-if="showMapSettings" class="bg-white/95 backdrop-blur p-5 rounded-2xl shadow-2xl border border-slate-200 w-64 animate-fade-in ring-1 ring-slate-200">
+                                        <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                                            <h4 class="font-bold text-xs text-slate-800 uppercase tracking-wider">Harita Stili</h4>
+                                            <button @click="showMapSettings = false" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
                                         </div>
 
                                         <div class="space-y-4">
                                             <div>
-                                                <label
-                                                    class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Cizgi
-                                                    Rengi</label>
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Cizgi Rengi</label>
                                                 <div class="flex flex-wrap gap-2">
-                                                    <button v-for="c in colorOptions" :key="c"
-                                                        @click="mapStyle.color = c" :style="{ backgroundColor: c }"
-                                                        :class="getColorButtonClass(c)"></button>
+                                                    <button v-for="c in colorOptions" :key="c" @click="mapStyle.color = c" :style="{ backgroundColor: c }" :class="getColorButtonClass(c)"></button>
                                                 </div>
                                             </div>
 
                                             <div>
                                                 <div class="flex justify-between mb-1">
-                                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Cizgi
-                                                        Kalinligi</label>
-                                                    <span class="text-[10px] font-mono text-slate-400">{{
-                                                        mapStyle.weight }}px</span>
+                                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Cizgi Kalinligi</label>
+                                                    <span class="text-[10px] font-mono text-slate-400">{{ mapStyle.weight }}px</span>
                                                 </div>
-                                                <input type="range" v-model.number="mapStyle.weight" min="1" max="10"
-                                                    step="1"
-                                                    class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                                                <input type="range" v-model.number="mapStyle.weight" min="1" max="10" step="1" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
                                             </div>
 
                                             <div>
                                                 <div class="flex justify-between mb-1">
-                                                    <label
-                                                        class="text-[10px] font-bold text-slate-500 uppercase">Seffaflik</label>
-                                                    <span class="text-[10px] font-mono text-slate-400">{{
-                                                        fillOpacityPercent }}%</span>
+                                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Seffaflik</label>
+                                                    <span class="text-[10px] font-mono text-slate-400">{{ fillOpacityPercent }}%</span>
                                                 </div>
-                                                <input type="range" v-model.number="mapStyle.fillOpacity" min="0"
-                                                    max="1" step="0.1"
-                                                    class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                                                <input type="range" v-model.number="mapStyle.fillOpacity" min="0" max="1" step="0.1" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
                                             </div>
                                         </div>
                                     </div>
@@ -319,17 +202,12 @@
                             </div>
 
                             <!-- KMZ Loading -->
-                            <div v-if="kmzLoading"
-                                class="absolute inset-0 z-[2000] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+                            <div v-if="kmzLoading" class="absolute inset-0 z-[2000] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-fade-in">
                                 <div class="kmz-loader p-6 rounded-2xl flex flex-col items-center gap-4 shadow-2xl">
-                                    <div
-                                        class="w-12 h-12 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin">
-                                    </div>
+                                    <div class="w-12 h-12 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin"></div>
                                     <div class="text-center">
-                                        <p class="text-white font-bold text-sm tracking-widest uppercase mb-1">Katman
-                                            Yukleniyor</p>
-                                        <p class="text-emerald-400 text-xs font-medium">{{ loadingMsg || 'KMZ
-                                            Isleniyor...' }}</p>
+                                        <p class="text-white font-bold text-sm tracking-widest uppercase mb-1">Katman Yukleniyor</p>
+                                        <p class="text-emerald-400 text-xs font-medium">{{ loadingMsg || 'KMZ Isleniyor...' }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -338,68 +216,42 @@
 
                     <!-- OCR Module -->
                     <div v-if="currentTab === 'ocr'" class="animate-fade-in max-w-7xl mx-auto h-full flex flex-col">
-                        <div
-                            class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 flex-1 flex flex-col md:flex-row h-full">
+                        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 flex-1 flex flex-col md:flex-row h-full">
                             <!-- Left: Image Viewer -->
-                            <div
-                                class="w-full md:w-1/2 bg-slate-800 p-4 flex flex-col relative border-e border-slate-700">
+                            <div class="w-full md:w-1/2 bg-slate-800 p-4 flex flex-col relative border-e border-slate-700">
                                 <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-white font-bold flex items-center gap-2"><i
-                                            class="fa-solid fa-file-contract text-emerald-400"></i> {{ t.ocrOriginalDoc
-                                        }}</h3>
+                                    <h3 class="text-white font-bold flex items-center gap-2"><i class="fa-solid fa-file-contract text-emerald-400"></i> {{ t.ocrOriginalDoc }}</h3>
                                     <div class="flex gap-2">
-                                        <input type="file" ref="ocrInput" @change="handleOcrUpload"
-                                            accept="image/*,.pdf" class="hidden">
-                                        <button @click="openOcrPicker"
-                                            class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition shadow-lg border border-blue-500 flex items-center gap-2">
+                                        <input type="file" ref="ocrInput" @change="handleOcrUpload" accept="image/*,.pdf" class="hidden">
+                                        <button @click="openOcrPicker" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition shadow-lg border border-blue-500 flex items-center gap-2">
                                             <i class="fa-solid fa-cloud-arrow-up"></i> {{ t.ocrUpload }}
                                         </button>
                                     </div>
                                 </div>
 
                                 <!-- Viewer Toolbar -->
-                                <div
-                                    class="flex items-center gap-2 mb-2 bg-slate-900/50 p-2 rounded-lg border border-slate-700 overflow-x-auto">
-                                    <button @click="zoomIn" class="p-2 text-white hover:bg-slate-700 rounded transition"
-                                        title="Yakinlas"><i class="fa-solid fa-plus"></i></button>
-                                    <button @click="zoomOut"
-                                        class="p-2 text-white hover:bg-slate-700 rounded transition" title="Uzaklas"><i
-                                            class="fa-solid fa-minus"></i></button>
-                                    <button @click="resetViewer"
-                                        class="p-2 text-white hover:bg-slate-700 rounded transition" title="Sifirla"><i
-                                            class="fa-solid fa-compress"></i></button>
+                                <div class="flex items-center gap-2 mb-2 bg-slate-900/50 p-2 rounded-lg border border-slate-700 overflow-x-auto">
+                                    <button @click="zoomIn" class="p-2 text-white hover:bg-slate-700 rounded transition" title="Yakinlas"><i class="fa-solid fa-plus"></i></button>
+                                    <button @click="zoomOut" class="p-2 text-white hover:bg-slate-700 rounded transition" title="Uzaklas"><i class="fa-solid fa-minus"></i></button>
+                                    <button @click="resetViewer" class="p-2 text-white hover:bg-slate-700 rounded transition" title="Sifirla"><i class="fa-solid fa-compress"></i></button>
                                     <div class="w-px h-4 bg-slate-700 mx-1"></div>
-                                    <button @click="viewerMode = 'pan'" :class="getPanButtonClass()"
-                                        title="Kaydirma Modu"><i class="fa-solid fa-hand"></i></button>
-                                    <button @click="viewerMode = 'select'" :class="getSelectButtonClass()"
-                                        title="Secerek Zoom Modu"><i class="fa-solid fa-vector-square"></i></button>
-                                    <div
-                                        class="ms-auto flex items-center gap-2 text-[10px] text-slate-500 font-mono px-2">
-                                        {{ viewerScalePercent }}%</div>
+                                    <button @click="viewerMode = 'pan'" :class="getPanButtonClass()" title="Kaydirma Modu"><i class="fa-solid fa-hand"></i></button>
+                                    <button @click="viewerMode = 'select'" :class="getSelectButtonClass()" title="Secerek Zoom Modu"><i class="fa-solid fa-vector-square"></i></button>
+                                    <div class="ms-auto flex items-center gap-2 text-[10px] text-slate-500 font-mono px-2">{{ viewerScalePercent }}%</div>
                                 </div>
 
-                                <div ref="viewerContainer" @wheel="handleViewerWheel" @mousedown="handleViewerMouseDown"
-                                    @mousemove="handleViewerMouseMove" @mouseup="handleViewerMouseUp"
-                                    @mouseleave="handleViewerMouseUp"
-                                    class="flex-1 bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center relative overflow-hidden group select-none"
-                                    :style="viewerCursorStyle">
+                                <div ref="viewerContainer" @wheel="handleViewerWheel" @mousedown="handleViewerMouseDown" @mousemove="handleViewerMouseMove" @mouseup="handleViewerMouseUp" @mouseleave="handleViewerMouseUp" class="flex-1 bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center relative overflow-hidden group select-none" :style="viewerCursorStyle">
                                     <div v-if="!ocrImage" class="text-slate-500 flex flex-col items-center">
                                         <i class="fa-solid fa-file-invoice text-5xl mb-4 opacity-50"></i>
                                         <p class="text-sm font-medium">{{ t.ocrPlaceholder }}</p>
                                     </div>
 
-                                    <div v-else class="relative transition-transform duration-75 ease-out"
-                                        :style="viewerTransformStyle">
-                                        <img :src="ocrImage"
-                                            class="max-w-full max-h-[80vh] shadow-2xl pointer-events-none">
+                                    <div v-else class="relative transition-transform duration-75 ease-out" :style="viewerTransformStyle">
+                                        <img :src="ocrImage" class="max-w-full max-h-[80vh] shadow-2xl pointer-events-none">
                                     </div>
 
-                                    <div v-if="isSelecting"
-                                        class="absolute border-2 border-emerald-400 bg-emerald-400/20 z-20 pointer-events-none"
-                                        :style="selectionBoxStyle"></div>
-                                    <div v-if="ocrScanning"
-                                        class="absolute top-0 left-0 w-full h-2 bg-emerald-400/80 shadow-[0_0_20px_rgba(52,211,153,0.8)] animate-scan z-10">
-                                    </div>
+                                    <div v-if="isSelecting" class="absolute border-2 border-emerald-400 bg-emerald-400/20 z-20 pointer-events-none" :style="selectionBoxStyle"></div>
+                                    <div v-if="ocrScanning" class="absolute top-0 left-0 w-full h-2 bg-emerald-400/80 shadow-[0_0_20px_rgba(52,211,153,0.8)] animate-scan z-10"></div>
                                 </div>
                             </div>
 
@@ -407,67 +259,45 @@
                             <div class="w-full md:w-1/2 p-0 flex flex-col bg-slate-50 overflow-hidden">
                                 <div class="p-6 border-b bg-white">
                                     <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                        <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> {{
-                                        t.ocrAnalysisTitle }}
+                                        <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> {{ t.ocrAnalysisTitle }}
                                     </h3>
                                     <p class="text-xs text-slate-500 mt-1">{{ t.ocrAnalysisSubtitle }}</p>
                                 </div>
 
                                 <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                                    <div v-if="ocrScanning"
-                                        class="flex flex-col items-center justify-center h-full text-slate-400 gap-4">
+                                    <div v-if="ocrScanning" class="flex flex-col items-center justify-center h-full text-slate-400 gap-4">
                                         <div class="relative">
-                                            <div
-                                                class="w-16 h-16 border-4 border-slate-200 border-t-emerald-500 rounded-full animate-spin">
-                                            </div>
-                                            <i
-                                                class="fa-solid fa-brain absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-emerald-500 text-xl"></i>
+                                            <div class="w-16 h-16 border-4 border-slate-200 border-t-emerald-500 rounded-full animate-spin"></div>
+                                            <i class="fa-solid fa-brain absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-emerald-500 text-xl"></i>
                                         </div>
                                         <div class="text-center">
                                             <p class="text-sm font-bold text-slate-600">AI Belgeyi Analiz Ediyor...</p>
-                                            <p class="text-xs text-slate-400 mt-1">OCR Motoru: Google Cloud Vision v2
-                                            </p>
+                                            <p class="text-xs text-slate-400 mt-1">OCR Motoru: Google Cloud Vision v2</p>
                                         </div>
                                     </div>
 
                                     <div v-else-if="ocrForm" class="space-y-6 animate-fade-in">
                                         <!-- Mulkiyet Bilgileri -->
                                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative">
-                                            <div
-                                                class="absolute -top-3 right-4 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">
-                                                Mulkiyet</div>
+                                            <div class="absolute -top-3 right-4 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">Mulkiyet</div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <div class="col-span-2">
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Malik
-                                                        Adi Soyadi</label>
-                                                    <input v-model="ocrForm.owner_name"
-                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Malik Adi Soyadi</label>
+                                                    <input v-model="ocrForm.owner_name" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
                                                 </div>
                                                 <div>
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Hisse</label>
-                                                    <input v-model="ocrForm.share_text"
-                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Hisse</label>
+                                                    <input v-model="ocrForm.share_text" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
                                                 <div>
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Islem
-                                                        Tarihi</label>
-                                                    <input v-model="ocrForm.signature_date"
-                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Islem Tarihi</label>
+                                                    <input v-model="ocrForm.signature_date" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
                                                 <div class="col-span-2">
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Yevmiye
-                                                        No / Islem Turu</label>
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Yevmiye No / Islem Turu</label>
                                                     <div class="grid grid-cols-2 gap-2">
-                                                        <input v-model="ocrForm.daily_register_no"
-                                                            placeholder="Yevmiye No"
-                                                            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
-                                                        <input v-model="ocrForm.transaction_type"
-                                                            placeholder="Islem Turu"
-                                                            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                        <input v-model="ocrForm.daily_register_no" placeholder="Yevmiye No" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                        <input v-model="ocrForm.transaction_type" placeholder="Islem Turu" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                     </div>
                                                 </div>
                                             </div>
@@ -475,75 +305,51 @@
 
                                         <!-- Tasinmaz Kimligi -->
                                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative">
-                                            <div
-                                                class="absolute -top-3 right-4 bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200">
-                                                Tasinmaz Kimligi</div>
+                                            <div class="absolute -top-3 right-4 bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200">Tasinmaz Kimligi</div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Il
-                                                        / Bolge</label>
-                                                    <input v-model="ocrForm.province"
-                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Il / Bolge</label>
+                                                    <input v-model="ocrForm.province" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
                                                 <div>
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ilce
-                                                        / Semt</label>
-                                                    <input v-model="ocrForm.district"
-                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ilce / Semt</label>
+                                                    <input v-model="ocrForm.district" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
                                                 <div class="col-span-2">
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Mudurluk
-                                                        / Daire</label>
-                                                    <input v-model="ocrForm.directorate"
-                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Mudurluk / Daire</label>
+                                                    <input v-model="ocrForm.directorate" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
                                                 <div class="col-span-2 relative">
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ada
-                                                        / Parsel No</label>
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ada / Parsel No</label>
                                                     <div class="flex gap-2">
-                                                        <input v-model="ocrForm.property_number"
-                                                            class="flex-1 p-2.5 bg-yellow-50 border border-yellow-300 rounded-lg text-sm font-black text-slate-900 tracking-wider">
-                                                        <button @click="openOcrMapModal"
-                                                            class="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700 transition shadow flex items-center justify-center gap-2 text-xs font-bold"
-                                                            title="Haritada Eslestir">
+                                                        <input v-model="ocrForm.property_number" class="flex-1 p-2.5 bg-yellow-50 border border-yellow-300 rounded-lg text-sm font-black text-slate-900 tracking-wider">
+                                                        <button @click="openOcrMapModal" class="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700 transition shadow flex items-center justify-center gap-2 text-xs font-bold" title="Haritada Eslestir">
                                                             <i class="fa-solid fa-map-location-dot"></i> Eslestir
                                                         </button>
                                                     </div>
                                                 </div>
                                                 <div class="col-span-2">
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nitelik
-                                                        / Cins / Yuzolcumu</label>
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nitelik / Cins / Yuzolcumu</label>
                                                     <div class="grid grid-cols-2 gap-2">
-                                                        <input v-model="ocrForm.property_type" placeholder="Nitelik"
-                                                            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
-                                                        <input v-model="ocrForm.area_text" placeholder="Yuzolcumu"
-                                                            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                        <input v-model="ocrForm.property_type" placeholder="Nitelik" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                        <input v-model="ocrForm.area_text" placeholder="Yuzolcumu" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                     </div>
                                                 </div>
                                                 <div class="col-span-2">
-                                                    <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Aciklama</label>
-                                                    <textarea v-model="ocrForm.description" rows="2"
-                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 resize-none"></textarea>
+                                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Aciklama</label>
+                                                    <textarea v-model="ocrForm.description" rows="2" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 resize-none"></textarea>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="pt-2">
-                                            <button @click="saveAndGenerateDeed"
-                                                class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition flex items-center justify-center gap-3 shadow-lg transform active:scale-95">
+                                            <button @click="saveAndGenerateDeed" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition flex items-center justify-center gap-3 shadow-lg transform active:scale-95">
                                                 <i class="fa-solid fa-file-signature"></i> Onayla ve Tapu Olustur
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div v-else
-                                        class="flex flex-col items-center justify-center h-full text-slate-400 opacity-50">
+                                    <div v-else class="flex flex-col items-center justify-center h-full text-slate-400 opacity-50">
                                         <i class="fa-solid fa-arrow-right-to-bracket text-4xl mb-4 text-slate-300"></i>
                                         <p>Analiz icin soldan bir belge yukleyin.</p>
                                     </div>
@@ -553,73 +359,51 @@
                     </div>
 
                     <!-- PROPERTIES LIST TAB -->
-                    <div v-if="currentTab === 'properties'"
-                        class="animate-fade-in space-y-6 max-w-7xl mx-auto h-full flex flex-col">
+                    <div v-if="currentTab === 'properties'" class="animate-fade-in space-y-6 max-w-7xl mx-auto h-full flex flex-col">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 shrink-0">
-                            <div
-                                class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">
-                                    <i class="fa-solid fa-hotel"></i></div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+                                <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600"><i class="fa-solid fa-hotel"></i></div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">{{
-                                        t.totalProperties }}</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">{{ t.totalProperties }}</p>
                                     <p class="text-xl font-black text-slate-800">{{ properties.length }}</p>
                                 </div>
                             </div>
-                            <div
-                                class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-                                    <i class="fa-solid fa-coins"></i></div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600"><i class="fa-solid fa-coins"></i></div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">TOPLAM
-                                        DEGER</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">TOPLAM DEGER</p>
                                     <p class="text-xl font-black text-slate-800">{{ totalValue }}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div
-                            class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 flex flex-col">
+                        <div class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 flex flex-col">
                             <div class="overflow-x-auto h-full">
                                 <table class="w-full text-start border-collapse min-w-[700px]">
                                     <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                                         <tr>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.colParcel }}</th>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.colLocation }}</th>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.colType }}</th>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.owner }}</th>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.colValue }}</th>
-                                            <th class="p-4 text-center text-[10px] font-bold text-slate-500 uppercase">
-                                                {{ t.colAction }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.colParcel }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.colLocation }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.colType }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.owner }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.colValue }}</th>
+                                            <th class="p-4 text-center text-[10px] font-bold text-slate-500 uppercase">{{ t.colAction }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 italic font-medium">
-                                        <tr v-for="p in filteredProperties" :key="p.id"
-                                            class="hover:bg-slate-50/80 transition-colors group">
+                                        <tr v-for="p in filteredProperties" :key="p.id" class="hover:bg-slate-50/80 transition-colors group">
                                             <td class="p-4">
                                                 <div class="flex items-center gap-2">
                                                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                                                    <span class="text-sm font-bold text-slate-800">{{ p.ada }}/{{
-                                                        p.parsel }}</span>
+                                                    <span class="text-sm font-bold text-slate-800">{{ p.ada }}/{{ p.parsel }}</span>
                                                 </div>
                                             </td>
                                             <td class="p-4 text-xs text-slate-600">{{ p.location }}</td>
-                                            <td class="p-4 text-xs"><span
-                                                    class="bg-slate-100 px-2 py-0.5 rounded-full text-slate-600">{{
-                                                    p.type }}</span></td>
+                                            <td class="p-4 text-xs"><span class="bg-slate-100 px-2 py-0.5 rounded-full text-slate-600">{{ p.type }}</span></td>
                                             <td class="p-4 text-xs font-bold text-slate-800">{{ p.owner }}</td>
-                                            <td class="p-4 text-sm font-black text-emerald-700">{{ formatPrice(p.price)
-                                                }}</td>
+                                            <td class="p-4 text-sm font-black text-emerald-700">{{ formatPrice(p.price) }}</td>
                                             <td class="p-4 text-center">
-                                                <button @click="openDeedModal(p)"
-                                                    class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-900 transition flex items-center gap-2 mx-auto">
+                                                <button @click="openDeedModal(p)" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-900 transition flex items-center gap-2 mx-auto">
                                                     <i class="fa-solid fa-file-invoice"></i> {{ t.btnViewDeed }}
                                                 </button>
                                             </td>
@@ -634,38 +418,28 @@
                     <div v-if="currentTab === 'transfer'" class="animate-fade-in max-w-4xl mx-auto space-y-6">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200">
                             <div class="flex items-center gap-4 mb-8">
-                                <div
-                                    class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl">
-                                    <i class="fa-solid fa-handshake-simple"></i></div>
+                                <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl"><i class="fa-solid fa-handshake-simple"></i></div>
                                 <div>
                                     <h3 class="text-2xl font-black text-slate-800">{{ t.transferTitle }}</h3>
-                                    <p class="text-slate-500 text-sm">Resmi mulkiyet devri baslatmak icin bilgileri
-                                        doldurun.</p>
+                                    <p class="text-slate-500 text-sm">Resmi mulkiyet devri baslatmak icin bilgileri doldurun.</p>
                                 </div>
                             </div>
                             <div class="space-y-6">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{
-                                            t.labelSelectProp }}</label>
-                                        <select v-model="selectedPropertyId"
-                                            class="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 outline-none focus:border-emerald-500 transition font-bold text-slate-800">
-                                            <option v-for="p in properties" :key="p.id" :value="p.id">{{ p.ada }}/{{
-                                                p.parsel }} - {{ p.location }}</option>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.labelSelectProp }}</label>
+                                        <select v-model="selectedPropertyId" class="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 outline-none focus:border-emerald-500 transition font-bold text-slate-800">
+                                            <option v-for="p in properties" :key="p.id" :value="p.id">{{ p.ada }}/{{ p.parsel }} - {{ p.location }}</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{
-                                            t.labelBuyerID }}</label>
-                                        <input type="text" placeholder="9XXXXXXXXXX"
-                                            class="w-full border-2 border-slate-100 rounded-xl p-3 text-slate-800 outline-none focus:border-emerald-500 transition font-bold">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.labelBuyerID }}</label>
+                                        <input type="text" placeholder="9XXXXXXXXXX" class="w-full border-2 border-slate-100 rounded-xl p-3 text-slate-800 outline-none focus:border-emerald-500 transition font-bold">
                                     </div>
                                 </div>
 
-                                <div v-if="selectedProperty"
-                                    class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 space-y-4 animate-fade-in">
-                                    <h4 class="font-bold text-emerald-900 flex items-center gap-2"><i
-                                            class="fa-solid fa-circle-info"></i> Secili Mulk Ozeti</h4>
+                                <div v-if="selectedProperty" class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 space-y-4 animate-fade-in">
+                                    <h4 class="font-bold text-emerald-900 flex items-center gap-2"><i class="fa-solid fa-circle-info"></i> Secili Mulk Ozeti</h4>
                                     <div class="grid grid-cols-3 gap-4 text-xs">
                                         <div>
                                             <p class="text-emerald-600/60 font-bold uppercase">MALIK</p>
@@ -677,14 +451,12 @@
                                         </div>
                                         <div>
                                             <p class="text-emerald-600/60 font-bold uppercase">RAYIC</p>
-                                            <p class="font-bold text-emerald-900">{{ formatPrice(selectedProperty.price)
-                                                }}</p>
+                                            <p class="font-bold text-emerald-900">{{ formatPrice(selectedProperty.price) }}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <button
-                                    class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-3">
+                                <button class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-3">
                                     <i class="fa-solid fa-shield-check"></i> {{ t.btnStartApp }}
                                 </button>
                             </div>
@@ -693,39 +465,29 @@
 
                     <!-- VALUATION TAB -->
                     <div v-if="currentTab === 'valuation'" class="animate-fade-in max-w-4xl mx-auto">
-                        <div
-                            class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-12">
                             <div class="space-y-6">
                                 <h3 class="text-2xl font-black text-slate-800 flex items-center gap-3">
                                     <i class="fa-solid fa-calculator text-emerald-600"></i> {{ t.navValuation }}
                                 </h3>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.colCity
-                                        }}</label>
-                                    <select v-model="valRegion"
-                                        class="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 font-bold">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.colCity }}</label>
+                                    <select v-model="valRegion" class="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 font-bold">
                                         <option value="mezzeh">Damascus / Mezzeh</option>
                                         <option value="kafr-souseh">Damascus / Kafr Souseh</option>
                                         <option value="shahba">Aleppo / Shahba</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.area }}
-                                        (m2)</label>
-                                    <input v-model.number="valArea" type="number"
-                                        class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.area }} (m2)</label>
+                                    <input v-model.number="valArea" type="number" class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
                                 </div>
-                                <button
-                                    class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition shadow-lg">{{
-                                    t.btnRecalculate }}</button>
+                                <button class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition shadow-lg">{{ t.btnRecalculate }}</button>
                             </div>
-                            <div
-                                class="bg-slate-950 p-8 rounded-3xl text-white flex flex-col items-center justify-center text-center space-y-4">
-                                <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest">{{ t.estValue }}
-                                </p>
+                            <div class="bg-slate-950 p-8 rounded-3xl text-white flex flex-col items-center justify-center text-center space-y-4">
+                                <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest">{{ t.estValue }}</p>
                                 <p class="text-5xl font-black text-white">{{ valuationResult }}</p>
-                                <p class="text-[10px] text-slate-500 max-w-[200px] italic">Bu deger piyasa ortalamalari
-                                    ve konuma gore otomatik hesaplanmistir.</p>
+                                <p class="text-[10px] text-slate-500 max-w-[200px] italic">Bu deger piyasa ortalamalari ve konuma gore otomatik hesaplanmistir.</p>
                             </div>
                         </div>
                     </div>
@@ -734,9 +496,7 @@
                     <div v-if="currentTab === 'expropriation'" class="animate-fade-in max-w-5xl mx-auto space-y-6">
                         <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200">
                             <div class="flex items-center gap-4 mb-8">
-                                <div
-                                    class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-red-600 text-2xl">
-                                    <i class="fa-solid fa-gavel"></i></div>
+                                <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-red-600 text-2xl"><i class="fa-solid fa-gavel"></i></div>
                                 <div>
                                     <h3 class="text-2xl font-black text-slate-800">{{ t.navExpropriation }}</h3>
                                     <p class="text-slate-500 text-sm">{{ t.expSubtitle }}</p>
@@ -744,8 +504,7 @@
                             </div>
                             <div class="bg-red-50 p-8 rounded-2xl border-2 border-dashed border-red-200 text-center">
                                 <i class="fa-solid fa-shield-slash text-4xl text-red-300 mb-4"></i>
-                                <p class="text-slate-600 font-bold italic">Sorgulanan bolgede aktif bir kamulastirma
-                                    karari veya mulkiyet serhi bulunmamaktadir.</p>
+                                <p class="text-slate-600 font-bold italic">Sorgulanan bolgede aktif bir kamulastirma karari veya mulkiyet serhi bulunmamaktadir.</p>
                             </div>
                         </div>
                     </div>
@@ -755,26 +514,18 @@
 
         <!-- OCR Map Modal -->
         <transition name="modal">
-            <div v-if="modals.ocrMap"
-                class="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                <div
-                    class="bg-white w-full max-w-4xl h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col relative">
+            <div v-if="modals.ocrMap" class="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                <div class="bg-white w-full max-w-4xl h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col relative">
                     <div class="p-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
-                        <h3 class="font-bold flex items-center gap-2"><i
-                                class="fa-solid fa-map-pin text-emerald-400"></i> Parsel Secimi</h3>
-                        <button @click="modals.ocrMap = false" class="hover:text-red-400 transition"><i
-                                class="fa-solid fa-xmark text-xl"></i></button>
+                        <h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-map-pin text-emerald-400"></i> Parsel Secimi</h3>
+                        <button @click="modals.ocrMap = false" class="hover:text-red-400 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
                     </div>
                     <div class="flex-1 relative bg-slate-100">
                         <div id="ocr-map-picker" class="w-full h-full z-10"></div>
-                        <div
-                            class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[500] bg-white px-6 py-3 rounded-full shadow-xl border border-slate-200 flex gap-4 items-center">
-                            <p class="text-sm font-bold text-slate-700" v-if="tempSelectedParcel">Secili: <span
-                                    class="text-emerald-600">#{{ tempSelectedParcel }}</span></p>
+                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[500] bg-white px-6 py-3 rounded-full shadow-xl border border-slate-200 flex gap-4 items-center">
+                            <p class="text-sm font-bold text-slate-700" v-if="tempSelectedParcel">Secili: <span class="text-emerald-600">#{{ tempSelectedParcel }}</span></p>
                             <p class="text-sm text-slate-400" v-else>Lutfen haritadan bir parsel secin</p>
-                            <button @click="confirmOcrMapSelection" :disabled="!tempSelectedParcel"
-                                class="bg-slate-900 text-white px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50 hover:bg-slate-800 transition">Secimi
-                                Onayla</button>
+                            <button @click="confirmOcrMapSelection" :disabled="!tempSelectedParcel" class="bg-slate-900 text-white px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50 hover:bg-slate-800 transition">Secimi Onayla</button>
                         </div>
                     </div>
                 </div>
@@ -783,51 +534,37 @@
 
         <!-- Parcel Action Modal -->
         <transition name="modal">
-            <div v-if="modals.parcelAction"
-                class="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md"
-                @click.self="modals.parcelAction = false">
+            <div v-if="modals.parcelAction" class="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" @click.self="modals.parcelAction = false">
                 <div class="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden animate-scale-up">
                     <div class="p-8 text-center space-y-6">
-                        <div
-                            class="w-20 h-20 bg-emerald-100 rounded-3xl mx-auto flex items-center justify-center text-emerald-600 text-3xl">
-                            <i class="fa-solid fa-location-crosshairs"></i></div>
+                        <div class="w-20 h-20 bg-emerald-100 rounded-3xl mx-auto flex items-center justify-center text-emerald-600 text-3xl"><i class="fa-solid fa-location-crosshairs"></i></div>
                         <div>
                             <h3 class="text-xl font-black text-slate-800">Parsel Islemi Secin</h3>
-                            <p class="text-slate-500 text-sm mt-1" v-if="modals.activeProp">#{{ modals.activeProp.ada
-                                }}/{{ modals.activeProp.parsel }} nolu parsel icin ne yapmak istersiniz?</p>
+                            <p class="text-slate-500 text-sm mt-1" v-if="modals.activeProp">#{{ modals.activeProp.ada }}/{{ modals.activeProp.parsel }} nolu parsel icin ne yapmak istersiniz?</p>
                         </div>
                         <div class="grid grid-cols-1 gap-3">
-                            <button @click="modals.parcelAction = false; modals.deed = true"
-                                class="flex items-center justify-between p-4 bg-slate-50 hover:bg-emerald-50 border-2 border-slate-100 hover:border-emerald-200 rounded-2xl transition-all group text-start">
+                            <button @click="modals.parcelAction = false; modals.deed = true" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-emerald-50 border-2 border-slate-100 hover:border-emerald-200 rounded-2xl transition-all group text-start">
                                 <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition">
-                                        <i class="fa-solid fa-file-invoice"></i></div>
+                                    <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition"><i class="fa-solid fa-file-invoice"></i></div>
                                     <div>
                                         <p class="text-xs font-bold text-slate-800">Tapu Senedi</p>
                                         <p class="text-[10px] text-slate-400">Resmi kayitlari goruntule</p>
                                     </div>
                                 </div>
-                                <i
-                                    class="fa-solid fa-chevron-right text-slate-300 group-hover:text-emerald-300 transition"></i>
+                                <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-emerald-300 transition"></i>
                             </button>
-                            <button @click="modals.parcelAction = false; modals.aiAnalysis = true"
-                                class="flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 hover:border-blue-200 rounded-2xl transition-all group text-start">
+                            <button @click="modals.parcelAction = false; modals.aiAnalysis = true" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 hover:border-blue-200 rounded-2xl transition-all group text-start">
                                 <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                    <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                                     <div>
                                         <p class="text-xs font-bold text-slate-800">Yapay Zeka Analizi</p>
                                         <p class="text-[10px] text-slate-400">Yatirim ve cevre analizi</p>
                                     </div>
                                 </div>
-                                <i
-                                    class="fa-solid fa-chevron-right text-slate-300 group-hover:text-blue-300 transition"></i>
+                                <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-blue-300 transition"></i>
                             </button>
                         </div>
-                        <button @click="modals.parcelAction = false"
-                            class="text-xs font-bold text-slate-400 hover:text-slate-600 transition tracking-widest uppercase">Kapat</button>
+                        <button @click="modals.parcelAction = false" class="text-xs font-bold text-slate-400 hover:text-slate-600 transition tracking-widest uppercase">Kapat</button>
                     </div>
                 </div>
             </div>
@@ -835,133 +572,86 @@
 
         <!-- AI Analysis Modal -->
         <transition name="modal">
-            <div v-if="modals.aiAnalysis"
-                class="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl"
-                @click.self="modals.aiAnalysis = false">
-                <div
-                    class="bg-slate-50 w-full max-w-5xl h-[85vh] rounded-[40px] shadow-2xl overflow-hidden flex flex-col relative border border-white/20 animate-scale-up">
-                    <button @click="modals.aiAnalysis = false"
-                        class="absolute top-6 right-6 z-20 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 transition"><i
-                            class="fa-solid fa-xmark"></i></button>
+            <div v-if="modals.aiAnalysis" class="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl" @click.self="modals.aiAnalysis = false">
+                <div class="bg-slate-50 w-full max-w-5xl h-[85vh] rounded-[40px] shadow-2xl overflow-hidden flex flex-col relative border border-white/20 animate-scale-up">
+                    <button @click="modals.aiAnalysis = false" class="absolute top-6 right-6 z-20 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark"></i></button>
                     <div class="p-8 bg-white border-b border-slate-200 shrink-0">
                         <div class="flex items-center gap-4">
-                            <div
-                                class="w-16 h-16 bg-blue-600 text-white rounded-[24px] flex items-center justify-center text-2xl shadow-xl shadow-blue-500/20">
-                                <i class="fa-solid fa-brain"></i></div>
+                            <div class="w-16 h-16 bg-blue-600 text-white rounded-[24px] flex items-center justify-center text-2xl shadow-xl shadow-blue-500/20"><i class="fa-solid fa-brain"></i></div>
                             <div>
                                 <h3 class="text-2xl font-black text-slate-900">Yapay Zeka Gayrimenkul Analizi</h3>
                                 <p class="text-slate-500 font-medium flex items-center gap-2" v-if="modals.activeProp">
                                     <i class="fa-solid fa-location-dot text-blue-500"></i>
-                                    {{ modals.activeProp.location }} | Ada/Parsel: {{ modals.activeProp.ada }}/{{
-                                    modals.activeProp.parsel }}
+                                    {{ modals.activeProp.location }} | Ada/Parsel: {{ modals.activeProp.ada }}/{{ modals.activeProp.parsel }}
                                 </p>
                             </div>
-                            <div
-                                class="ms-auto flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100">
+                            <div class="ms-auto flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100">
                                 <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                                <span class="text-xs font-black text-emerald-700 uppercase tracking-tighter">AI GUNCEL
-                                    VERI</span>
+                                <span class="text-xs font-black text-emerald-700 uppercase tracking-tighter">AI GUNCEL VERI</span>
                             </div>
                         </div>
                     </div>
                     <div class="flex-1 overflow-y-auto p-8 space-y-8">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div
-                                class="md:col-span-2 bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-6">
+                            <div class="md:col-span-2 bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-6">
                                 <div class="flex justify-between items-center">
-                                    <h4 class="font-black text-slate-800 flex items-center gap-2 italic"><i
-                                            class="fa-solid fa-chart-line text-blue-600"></i> Fiyat Degisim Trendi (3
-                                        Yil)</h4>
+                                    <h4 class="font-black text-slate-800 flex items-center gap-2 italic"><i class="fa-solid fa-chart-line text-blue-600"></i> Fiyat Degisim Trendi (3 Yil)</h4>
                                     <span class="text-emerald-500 font-black text-lg">+32.4%</span>
                                 </div>
                                 <div class="h-48 flex items-end justify-between gap-2 px-2">
-                                    <div v-for="(v, i) in aiTrendData" :key="i"
-                                        class="flex-1 bg-blue-500/10 rounded-t-lg relative hover:bg-blue-500 transition-all cursor-help group"
-                                        :style="{ height: v + '%' }">
-                                        <div
-                                            class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
-                                            {{ getTrendPrice(v) }}/m2</div>
+                                    <div v-for="(v, i) in aiTrendData" :key="i" class="flex-1 bg-blue-500/10 rounded-t-lg relative hover:bg-blue-500 transition-all cursor-help group" :style="{ height: v + '%' }">
+                                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">{{ getTrendPrice(v) }}/m2</div>
                                     </div>
                                 </div>
-                                <div
-                                    class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
                                     <span>2023 Q1</span><span>2024 Q1</span><span>2025 Q1</span><span>GUNCEL</span>
                                 </div>
                             </div>
-                            <div
-                                class="bg-slate-900 rounded-[32px] p-8 text-white flex flex-col items-center justify-center text-center space-y-4 relative overflow-hidden">
-                                <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/20 blur-3xl rounded-full">
-                                </div>
-                                <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">YATIRIM PUANI
-                                </p>
+                            <div class="bg-slate-900 rounded-[32px] p-8 text-white flex flex-col items-center justify-center text-center space-y-4 relative overflow-hidden">
+                                <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/20 blur-3xl rounded-full"></div>
+                                <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">YATIRIM PUANI</p>
                                 <div class="relative">
                                     <svg class="w-32 h-32 transform -rotate-90">
-                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8"
-                                            fill="transparent" class="text-slate-800" />
-                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8"
-                                            fill="transparent" class="text-blue-500" stroke-dasharray="364.4"
-                                            stroke-dashoffset="40" stroke-linecap="round" />
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-800" />
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-blue-500" stroke-dasharray="364.4" stroke-dashoffset="40" stroke-linecap="round" />
                                     </svg>
-                                    <div class="absolute inset-0 flex items-center justify-center"><span
-                                            class="text-4xl font-black">8.9</span></div>
+                                    <div class="absolute inset-0 flex items-center justify-center"><span class="text-4xl font-black">8.9</span></div>
                                 </div>
-                                <p class="text-sm font-medium text-slate-400 px-4">Bu bolge onumuzdeki 12 ay icinde
-                                    yuksek deger artis potansiyeli tasiyor.</p>
+                                <p class="text-sm font-medium text-slate-400 px-4">Bu bolge onumuzdeki 12 ay icinde yuksek deger artis potansiyeli tasiyor.</p>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div class="space-y-4">
-                                <h4 class="font-black text-slate-800 flex items-center gap-2"><i
-                                        class="fa-solid fa-map-location text-emerald-600"></i> Cevresel Analiz ve
-                                    Imkanlar</h4>
+                                <h4 class="font-black text-slate-800 flex items-center gap-2"><i class="fa-solid fa-map-location text-emerald-600"></i> Cevresel Analiz ve Imkanlar</h4>
                                 <div class="grid grid-cols-1 gap-3">
-                                    <div v-for="item in aiAmenities" :key="item.label"
-                                        class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between group hover:border-blue-200 transition">
+                                    <div v-for="item in aiAmenities" :key="item.label" class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between group hover:border-blue-200 transition">
                                         <div class="flex items-center gap-4">
-                                            <div
-                                                class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-slate-100 group-hover:scale-110 transition bg-slate-50">
-                                                <i :class="'fa-solid ' + item.icon"></i></div>
-                                            <span class="font-bold text-slate-700 text-sm italic">{{ item.label
-                                                }}</span>
+                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-slate-100 group-hover:scale-110 transition bg-slate-50"><i :class="'fa-solid ' + item.icon"></i></div>
+                                            <span class="font-bold text-slate-700 text-sm italic">{{ item.label }}</span>
                                         </div>
                                         <span class="text-xs font-black text-slate-400">{{ item.dist }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="space-y-4 text-start">
-                                <h4 class="font-black text-slate-800 flex items-center gap-2 italic"><i
-                                        class="fa-solid fa-lightbulb text-amber-500"></i> Yapay Zeka Ongoruleri</h4>
-                                <div
-                                    class="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-4 h-full">
+                                <h4 class="font-black text-slate-800 flex items-center gap-2 italic"><i class="fa-solid fa-lightbulb text-amber-500"></i> Yapay Zeka Ongoruleri</h4>
+                                <div class="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-4 h-full">
                                     <div class="space-y-4">
                                         <div class="flex gap-4">
-                                            <div
-                                                class="shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xs">
-                                                1</div>
-                                            <p class="text-sm text-slate-600 font-medium italic"><span
-                                                    class="font-black text-slate-900">Sehir Plani:</span> Belediyenin
-                                                yeni metro hatti projesi bu parselin 500m ilerisinden gececektir.</p>
+                                            <div class="shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xs">1</div>
+                                            <p class="text-sm text-slate-600 font-medium italic"><span class="font-black text-slate-900">Sehir Plani:</span> Belediyenin yeni metro hatti projesi bu parselin 500m ilerisinden gececektir.</p>
                                         </div>
                                         <div class="flex gap-4">
-                                            <div
-                                                class="shrink-0 w-8 h-8 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-xs">
-                                                2</div>
-                                            <p class="text-sm text-slate-600 font-medium italic"><span
-                                                    class="font-black text-slate-900">Demografik:</span> Bolgede genc
-                                                nufusu orani son 2 yilda %12 artis gostermistir.</p>
+                                            <div class="shrink-0 w-8 h-8 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-xs">2</div>
+                                            <p class="text-sm text-slate-600 font-medium italic"><span class="font-black text-slate-900">Demografik:</span> Bolgede genc nufusu orani son 2 yilda %12 artis gostermistir.</p>
                                         </div>
                                         <div class="flex gap-4">
-                                            <div
-                                                class="shrink-0 w-8 h-8 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center text-xs">
-                                                3</div>
-                                            <p class="text-sm text-slate-600 font-medium italic"><span
-                                                    class="font-black text-slate-900">Risk Analizi:</span> Zemin yapisi
-                                                stabil, sel riski %2nin altindadir.</p>
+                                            <div class="shrink-0 w-8 h-8 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center text-xs">3</div>
+                                            <p class="text-sm text-slate-600 font-medium italic"><span class="font-black text-slate-900">Risk Analizi:</span> Zemin yapisi stabil, sel riski %2nin altindadir.</p>
                                         </div>
                                     </div>
                                     <div class="mt-8 pt-8 border-t border-slate-100 flex items-center justify-between">
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Analiz
-                                            Basari Orani</p>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Analiz Basari Orani</p>
                                         <p class="text-xs font-black text-blue-600">%94 Dogruluk</p>
                                     </div>
                                 </div>
@@ -974,133 +664,61 @@
 
         <!-- Deed Modal -->
         <transition name="modal">
-            <div v-if="modals.deed"
-                class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-                @click.self="modals.deed = false">
-                <div
-                    class="relative w-full max-w-4xl h-[90vh] flex flex-col items-center justify-center pointer-events-none">
-                    <button @click="modals.deed = false"
-                        class="absolute -top-4 -right-4 md:-right-8 w-12 h-12 bg-red-800 text-white rounded-full flex items-center justify-center z-[10000] shadow-2xl hover:bg-red-900 hover:scale-110 transition cursor-pointer pointer-events-auto border-4 border-white"><i
-                            class="fa-solid fa-xmark text-2xl"></i></button>
-                    <div class="bg-white w-full h-full shadow-2xl overflow-y-auto pointer-events-auto relative tapu-bg scale-100 origin-center"
-                        style="background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');"
-                        :dir="lang === 'ar' ? 'rtl' : 'ltr'" v-if="modals.activeProp">
+            <div v-if="modals.deed" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click.self="modals.deed = false">
+                <div class="relative w-full max-w-4xl h-[90vh] flex flex-col items-center justify-center pointer-events-none">
+                    <button @click="modals.deed = false" class="absolute -top-4 -right-4 md:-right-8 w-12 h-12 bg-red-800 text-white rounded-full flex items-center justify-center z-[10000] shadow-2xl hover:bg-red-900 hover:scale-110 transition cursor-pointer pointer-events-auto border-4 border-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
+                    <div class="bg-white w-full h-full shadow-2xl overflow-y-auto pointer-events-auto relative tapu-bg scale-100 origin-center" style="background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');" :dir="lang === 'ar' ? 'rtl' : 'ltr'" v-if="modals.activeProp">
                         <div class="min-h-full p-2 border-[16px] border-double border-slate-900 m-2">
                             <div class="h-full border-[2px] border-gold-600 p-6 relative">
-                                <div
-                                    class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none overflow-hidden">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png"
-                                        class="w-[800px] grayscale">
+                                <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none overflow-hidden">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="w-[800px] grayscale">
                                 </div>
                                 <div class="text-center mb-12 relative z-10 pt-8">
-                                    <div class="flex justify-center items-center gap-6 mb-4"><img
-                                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png"
-                                            class="h-24 drop-shadow-xl"></div>
-                                    <h1 class="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-[0.2em] font-serif mb-2"
-                                        style="font-family: 'Amiri', serif;">{{ t.syrianRepublic }}</h1>
-                                    <h2
-                                        class="text-xl md:text-2xl font-bold text-slate-700 font-serif border-b-2 border-slate-900 inline-block pb-2 px-12">
-                                        {{ t.cadastreDirectorate }}</h2>
-                                    <div class="mt-8">
-                                        <h3 class="text-5xl md:text-6xl font-black text-red-900 border-4 border-double border-red-900 inline-block px-12 py-3 transform -rotate-1 shadow-sm"
-                                            style="font-family: 'Amiri', serif;">{{ t.modalDeedTitle }}</h3>
-                                    </div>
+                                    <div class="flex justify-center items-center gap-6 mb-4"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Syria_%282025%E2%80%93present%29.svg/2560px-Emblem_of_Syria_%282025%E2%80%93present%29.svg.png" class="h-24 drop-shadow-xl"></div>
+                                    <h1 class="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-[0.2em] font-serif mb-2" style="font-family: 'Amiri', serif;">{{ t.syrianRepublic }}</h1>
+                                    <h2 class="text-xl md:text-2xl font-bold text-slate-700 font-serif border-b-2 border-slate-900 inline-block pb-2 px-12">{{ t.cadastreDirectorate }}</h2>
+                                    <div class="mt-8"><h3 class="text-5xl md:text-6xl font-black text-red-900 border-4 border-double border-red-900 inline-block px-12 py-3 transform -rotate-1 shadow-sm" style="font-family: 'Amiri', serif;">{{ t.modalDeedTitle }}</h3></div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10 px-4 md:px-12">
                                     <div class="space-y-4">
-                                        <h4
-                                            class="font-bold text-xl text-slate-900 border-b-4 border-gold-600 pb-2 mb-4 font-serif">
-                                            <i class="fa-solid fa-hotel me-2"></i> {{ t.propertyInfo }}</h4>
+                                        <h4 class="font-bold text-xl text-slate-900 border-b-4 border-gold-600 pb-2 mb-4 font-serif"><i class="fa-solid fa-hotel me-2"></i> {{ t.propertyInfo }}</h4>
                                         <table class="w-full text-sm font-serif border-collapse">
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500 w-1/3">{{ t.colCity }}</td>
-                                                <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.location }}</td>
-                                            </tr>
-                                            <tr v-if="modals.activeProp.directorate" class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">Mudurluk</td>
-                                                <td class="py-2 font-bold text-slate-900">{{
-                                                    modals.activeProp.directorate }}</td>
-                                            </tr>
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">{{ t.colParcel }}</td>
-                                                <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.ada }}/{{ modals.activeProp.parsel }}</td>
-                                            </tr>
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">{{ t.colType }}</td>
-                                                <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.type }}</td>
-                                            </tr>
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">{{ t.area }}</td>
-                                                <td class="py-2 font-bold text-lg text-slate-900">{{ getAreaText() }} m2
-                                                </td>
-                                            </tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500 w-1/3">{{ t.colCity }}</td><td class="py-2 font-bold text-lg text-slate-900">{{ modals.activeProp.location }}</td></tr>
+                                            <tr v-if="modals.activeProp.directorate" class="border-b border-slate-300"><td class="py-2 text-slate-500">Mudurluk</td><td class="py-2 font-bold text-slate-900">{{ modals.activeProp.directorate }}</td></tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500">{{ t.colParcel }}</td><td class="py-2 font-bold text-lg text-slate-900">{{ modals.activeProp.ada }}/{{ modals.activeProp.parsel }}</td></tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500">{{ t.colType }}</td><td class="py-2 font-bold text-lg text-slate-900">{{ modals.activeProp.type }}</td></tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500">{{ t.area }}</td><td class="py-2 font-bold text-lg text-slate-900">{{ getAreaText() }} m2</td></tr>
                                         </table>
                                     </div>
                                     <div class="space-y-4">
-                                        <h4
-                                            class="font-bold text-xl text-slate-900 border-b-4 border-gold-600 pb-2 mb-4 font-serif">
-                                            <i class="fa-solid fa-user-shield me-2"></i> {{ t.ownerInfo }}</h4>
+                                        <h4 class="font-bold text-xl text-slate-900 border-b-4 border-gold-600 pb-2 mb-4 font-serif"><i class="fa-solid fa-user-shield me-2"></i> {{ t.ownerInfo }}</h4>
                                         <table class="w-full text-sm font-serif border-collapse">
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500 w-1/3">{{ t.ownerName }}</td>
-                                                <td class="py-2 font-bold text-xl text-slate-900">{{ getOwnerName() }}
-                                                </td>
-                                            </tr>
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">Hisse</td>
-                                                <td class="py-2 font-bold text-slate-900">{{ getShareText() }}</td>
-                                            </tr>
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">Islem Detayi</td>
-                                                <td class="py-2 text-slate-900"><span class="font-bold">{{
-                                                        getTransactionType() }}</span><br><span
-                                                        class="text-xs text-slate-500">Yevmiye: {{ getDailyRegisterNo()
-                                                        }}</span></td>
-                                            </tr>
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">Tarih</td>
-                                                <td class="py-2 font-bold text-slate-900">{{ getSignatureDate() }}</td>
-                                            </tr>
-                                            <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">{{ t.electronicValidation }}</td>
-                                                <td class="py-2 font-mono text-slate-900 tracking-widest">SY-{{
-                                                    getValidationCode() }}</td>
-                                            </tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500 w-1/3">{{ t.ownerName }}</td><td class="py-2 font-bold text-xl text-slate-900">{{ getOwnerName() }}</td></tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500">Hisse</td><td class="py-2 font-bold text-slate-900">{{ getShareText() }}</td></tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500">Islem Detayi</td><td class="py-2 text-slate-900"><span class="font-bold">{{ getTransactionType() }}</span><br><span class="text-xs text-slate-500">Yevmiye: {{ getDailyRegisterNo() }}</span></td></tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500">Tarih</td><td class="py-2 font-bold text-slate-900">{{ getSignatureDate() }}</td></tr>
+                                            <tr class="border-b border-slate-300"><td class="py-2 text-slate-500">{{ t.electronicValidation }}</td><td class="py-2 font-mono text-slate-900 tracking-widest">SY-{{ getValidationCode() }}</td></tr>
                                         </table>
                                         <div class="mt-6 flex justify-end">
-                                            <div class="text-center"><img :src="getQrCodeUrl()"
-                                                    class="w-24 h-24 border-2 border-slate-900 p-1 mb-1">
-                                                <p class="text-[8px] font-mono text-slate-500">E-DEVLET DOGRULAMA</p>
-                                            </div>
+                                            <div class="text-center"><img :src="getQrCodeUrl()" class="w-24 h-24 border-2 border-slate-900 p-1 mb-1"><p class="text-[8px] font-mono text-slate-500">E-DEVLET DOGRULAMA</p></div>
                                         </div>
                                     </div>
                                 </div>
-                                <div
-                                    class="mt-16 flex flex-col md:flex-row justify-between items-end px-12 pb-12 relative z-10">
+                                <div class="mt-16 flex flex-col md:flex-row justify-between items-end px-12 pb-12 relative z-10">
                                     <div class="text-center"></div>
                                     <div class="text-center relative mt-8 md:mt-0">
-                                        <div
-                                            class="absolute -top-12 left-1/2 transform -translate-x-1/2 w-40 h-40 border-4 border-red-800 rounded-full opacity-80 flex items-center justify-center animate-pulse">
-                                            <div
-                                                class="w-36 h-36 border-2 border-red-800 rounded-full flex items-center justify-center">
-                                                <div
-                                                    class="text-center text-red-800 font-bold text-[10px] uppercase tracking-widest rotate-[-15deg]">
-                                                    Syrian Arab Republic<br>Cadastre<br>OFFICIAL</div>
+                                        <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 w-40 h-40 border-4 border-red-800 rounded-full opacity-80 flex items-center justify-center animate-pulse">
+                                            <div class="w-36 h-36 border-2 border-red-800 rounded-full flex items-center justify-center">
+                                                <div class="text-center text-red-800 font-bold text-[10px] uppercase tracking-widest rotate-[-15deg]">Syrian Arab Republic<br>Cadastre<br>OFFICIAL</div>
                                             </div>
                                         </div>
-                                        <p class="font-bold text-2xl text-blue-900 font-script relative z-10 font-serif italic"
-                                            style="font-family: 'Amiri', serif;">Ahmad Al-Faruqi</p>
+                                        <p class="font-bold text-2xl text-blue-900 font-script relative z-10 font-serif italic" style="font-family: 'Amiri', serif;">Ahmad Al-Faruqi</p>
                                         <div class="w-64 h-0.5 bg-slate-900 my-2"></div>
                                         <p class="text-sm font-bold uppercase tracking-widest">{{ t.officialTitle }}</p>
                                     </div>
                                 </div>
                                 <div class="absolute bottom-4 left-4 no-print flex gap-2">
-                                    <button onclick="window.print()"
-                                        class="bg-slate-800 text-white px-4 py-2 rounded shadow hover:bg-slate-700 text-xs font-bold"><i
-                                            class="fa-solid fa-print"></i> Yazdir</button>
+                                    <button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded shadow hover:bg-slate-700 text-xs font-bold"><i class="fa-solid fa-print"></i> Yazdir</button>
                                 </div>
                             </div>
                         </div>
@@ -1110,424 +728,401 @@
         </transition>
 
         <!-- Toast -->
-        <div v-if="toast.show"
-            class="fixed bottom-6 end-6 bg-slate-900 text-white p-4 rounded-xl shadow-2xl z-[10000] max-w-xs border-s-4 border-emerald-500"
-            :dir="lang === 'ar' ? 'rtl' : 'ltr'">
+        <div v-if="toast.show" class="fixed bottom-6 end-6 bg-slate-900 text-white p-4 rounded-xl shadow-2xl z-[10000] max-w-xs border-s-4 border-emerald-500" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
             <h4 class="font-bold text-sm">{{ toast.title }}</h4>
             <p class="text-xs text-slate-400">{{ toast.message }}</p>
         </div>
 
     </div>
-    {
-    return '$' + ((price || 0).toLocaleString());
-    };
+ {
+                    return '$' + ((price || 0).toLocaleString());
+                };
 
-    const getTrendPrice = (v) => {
-    return '$' + (1200 + v * 10).toLocaleString();
-    };
+                const getTrendPrice = (v) => {
+                    return '$' + (1200 + v * 10).toLocaleString();
+                };
 
-    const generateRandomCode = () => {
-    return Math.floor(Math.random() * 900000) + 100000;
-    };
+                const generateRandomCode = () => {
+                    return Math.floor(Math.random() * 900000) + 100000;
+                };
 
-    const getQrCodeUrl = () => {
-    if (!modals.value.activeProp) return '';
-    const ada = modals.value.activeProp.ada || '000';
-    const parsel = modals.value.activeProp.parsel || '000';
-    return 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SYRIAN-DEED-' + ada + '-' + parsel;
-    };
+                const getQrCodeUrl = () => {
+                    if (!modals.value.activeProp) return '';
+                    const ada = modals.value.activeProp.ada || '000';
+                    const parsel = modals.value.activeProp.parsel || '000';
+                    return 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SYRIAN-DEED-' + ada + '-' + parsel;
+                };
 
-    const getAreaText = () => {
-    if (!modals.value.activeProp) return '---';
-    return modals.value.activeProp.area_text || modals.value.activeProp.area || '---';
-    };
+                const getAreaText = () => {
+                    if (!modals.value.activeProp) return '---';
+                    return modals.value.activeProp.area_text || modals.value.activeProp.area || '---';
+                };
 
-    const getOwnerName = () => {
-    if (!modals.value.activeProp) return '---';
-    return modals.value.activeProp.owner_name || modals.value.activeProp.owner || '---';
-    };
+                const getOwnerName = () => {
+                    if (!modals.value.activeProp) return '---';
+                    return modals.value.activeProp.owner_name || modals.value.activeProp.owner || '---';
+                };
 
-    const getShareText = () => {
-    if (!modals.value.activeProp) return 'Tamami (1/1)';
-    return modals.value.activeProp.share_text || 'Tamami (1/1)';
-    };
+                const getShareText = () => {
+                    if (!modals.value.activeProp) return 'Tamami (1/1)';
+                    return modals.value.activeProp.share_text || 'Tamami (1/1)';
+                };
 
-    const getTransactionType = () => {
-    if (!modals.value.activeProp) return 'Kayit';
-    return modals.value.activeProp.transaction_type || 'Kayit';
-    };
+                const getTransactionType = () => {
+                    if (!modals.value.activeProp) return 'Kayit';
+                    return modals.value.activeProp.transaction_type || 'Kayit';
+                };
 
-    const getDailyRegisterNo = () => {
-    if (!modals.value.activeProp) return '---';
-    return modals.value.activeProp.daily_register_no || '---';
-    };
+                const getDailyRegisterNo = () => {
+                    if (!modals.value.activeProp) return '---';
+                    return modals.value.activeProp.daily_register_no || '---';
+                };
 
-    const getSignatureDate = () => {
-    if (!modals.value.activeProp) return '---';
-    return modals.value.activeProp.signature_date || '---';
-    };
+                const getSignatureDate = () => {
+                    if (!modals.value.activeProp) return '---';
+                    return modals.value.activeProp.signature_date || '---';
+                };
 
-    const getValidationCode = () => {
-    if (!modals.value.activeProp) return generateRandomCode();
-    return modals.value.activeProp.daily_register_no || generateRandomCode();
-    };
+                const getValidationCode = () => {
+                    if (!modals.value.activeProp) return generateRandomCode();
+                    return modals.value.activeProp.daily_register_no || generateRandomCode();
+                };
 
-    const changeTab = (tab) => {
-    currentTab.value = tab;
-    isMobileMenuOpen.value = false;
-    if (tab === 'dashboard') nextTick(() => { if (map.value) map.value.invalidateSize(); });
-    };
+                const changeTab = (tab) => {
+                    currentTab.value = tab;
+                    isMobileMenuOpen.value = false;
+                    if (tab === 'dashboard') nextTick(() => { if (map.value) map.value.invalidateSize(); });
+                };
 
-    const triggerFileInput = () => {
-    if (fileInput.value) fileInput.value.click();
-    };
+                const triggerFileInput = () => {
+                    if (fileInput.value) fileInput.value.click();
+                };
 
-    // COMPUTED
-    const t = computed(() => translations[lang.value]);
-    const selectedProperty = computed(() => properties.value.find(p => p.id === selectedPropertyId.value));
-    const totalValue = computed(() => {
-    const sum = properties.value.reduce((acc, p) => acc + (p.price || 0), 0);
-    return '$' + (sum / 1000000).toFixed(1) + 'M';
-    });
-    const filteredProperties = computed(() => {
-    let props = properties.value;
-    if (!searchQuery.value) return props;
-    const q = searchQuery.value.toLowerCase().trim();
-    return props.filter(p => {
-    const adaParsel = p.ada + '/' + p.parsel;
-    return (p.ada.toString().includes(q) || p.parsel.toString().includes(q) || adaParsel.includes(q) || (p.owner &&
-    p.owner.toLowerCase().includes(q)) || (p.location && p.location.toLowerCase().includes(q)));
-    });
-    });
-    const valuationResult = computed(() => { return '$' + (valArea.value * 2000).toLocaleString(); });
+                // COMPUTED
+                const t = computed(() => translations[lang.value]);
+                const selectedProperty = computed(() => properties.value.find(p => p.id === selectedPropertyId.value));
+                const totalValue = computed(() => {
+                    const sum = properties.value.reduce((acc, p) => acc + (p.price || 0), 0);
+                    return '$' + (sum / 1000000).toFixed(1) + 'M';
+                });
+                const filteredProperties = computed(() => {
+                    let props = properties.value;
+                    if (!searchQuery.value) return props;
+                    const q = searchQuery.value.toLowerCase().trim();
+                    return props.filter(p => {
+                        const adaParsel = p.ada + '/' + p.parsel;
+                        return (p.ada.toString().includes(q) || p.parsel.toString().includes(q) || adaParsel.includes(q) || (p.owner && p.owner.toLowerCase().includes(q)) || (p.location && p.location.toLowerCase().includes(q)));
+                    });
+                });
+                const valuationResult = computed(() => { return '$' + (valArea.value * 2000).toLocaleString(); });
 
-    const fillOpacityPercent = computed(() => Math.round(mapStyle.value.fillOpacity * 100));
-    const viewerScalePercent = computed(() => Math.round(viewerScale.value * 100));
+                const fillOpacityPercent = computed(() => Math.round(mapStyle.value.fillOpacity * 100));
+                const viewerScalePercent = computed(() => Math.round(viewerScale.value * 100));
 
-    const viewerTransformStyle = computed(() => {
-    return { transform: 'translate(' + viewerPanX.value + 'px, ' + viewerPanY.value + 'px) scale(' + viewerScale.value +
-    ')' };
-    });
+                const viewerTransformStyle = computed(() => {
+                    return { transform: 'translate(' + viewerPanX.value + 'px, ' + viewerPanY.value + 'px) scale(' + viewerScale.value + ')' };
+                });
 
-    const selectionBoxStyle = computed(() => {
-    return { top: selectionRect.value.top + 'px', left: selectionRect.value.left + 'px', width:
-    selectionRect.value.width + 'px', height: selectionRect.value.height + 'px' };
-    });
+                const selectionBoxStyle = computed(() => {
+                    return { top: selectionRect.value.top + 'px', left: selectionRect.value.left + 'px', width: selectionRect.value.width + 'px', height: selectionRect.value.height + 'px' };
+                });
 
-    const viewerCursorStyle = computed(() => {
-    if (viewerMode.value === 'pan') {
-    return { cursor: isPanning.value ? 'grabbing' : 'grab' };
-    }
-    return { cursor: 'crosshair' };
-    });
+                const viewerCursorStyle = computed(() => {
+                    if (viewerMode.value === 'pan') {
+                        return { cursor: isPanning.value ? 'grabbing' : 'grab' };
+                    }
+                    return { cursor: 'crosshair' };
+                });
 
-    const sidebarClasses = computed(() => {
-    let base = 'fixed md:static inset-y-0 z-[9001] w-64 bg-slate-950 text-slate-300 flex flex-col shadow-2xl
-    transition-transform duration-300 ease-in-out border-e border-slate-800';
-    if (isMobileMenuOpen.value) {
-    base += ' translate-x-0';
-    } else {
-    base += lang.value === 'ar' ? ' translate-x-full' : ' -translate-x-full';
-    }
-    base += ' md:translate-x-0';
-    return base;
-    });
+                const sidebarClasses = computed(() => {
+                    let base = 'fixed md:static inset-y-0 z-[9001] w-64 bg-slate-950 text-slate-300 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out border-e border-slate-800';
+                    if (isMobileMenuOpen.value) {
+                        base += ' translate-x-0';
+                    } else {
+                        base += lang.value === 'ar' ? ' translate-x-full' : ' -translate-x-full';
+                    }
+                    base += ' md:translate-x-0';
+                    return base;
+                });
 
-    // MAP
-    const initMap = () => {
-    if (map.value) return;
-    const satelliteLayer =
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri' });
-    map.value = markRaw(L.map('map', { center: [33.5138, 36.29], zoom: 14, layers: [satelliteLayer], zoomControl: false
-    }));
-    L.control.zoom({ position: 'bottomright' }).addTo(map.value);
-    if (properties.value.length > 0) {
-    nextTick(() => renderGeoJSON());
-    }
-    };
+                // MAP
+                const initMap = () => {
+                    if (map.value) return;
+                    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' });
+                    map.value = markRaw(L.map('map', { center: [33.5138, 36.29], zoom: 14, layers: [satelliteLayer], zoomControl: false }));
+                    L.control.zoom({ position: 'bottomright' }).addTo(map.value);
+                    if (properties.value.length > 0) {
+                        nextTick(() => renderGeoJSON());
+                    }
+                };
 
-    const initOcrMap = () => {
-    if (ocrMap.value) ocrMap.value.remove();
-    setTimeout(() => {
-    const satelliteLayer =
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri' });
-    ocrMap.value = markRaw(L.map('ocr-map-picker', { center: [33.5138, 36.29], zoom: 14, layers: [satelliteLayer],
-    renderer: L.canvas(), zoomControl: false }));
-    L.control.zoom({ position: 'bottomright' }).addTo(ocrMap.value);
-    const rawProperties = toRaw(properties.value);
-    const featureCollection = { type: "FeatureCollection", features: rawProperties.map(p => ({ type: "Feature",
-    properties: { id: p.id, ada: p.ada, parsel: p.parsel, location: p.location }, geometry: toRaw(p.geometry) })) };
-    const layer = L.geoJSON(featureCollection, {
-    style: { color: '#3b82f6', weight: 2, fillOpacity: 0.1 },
-    onEachFeature: (feature, layer) => {
-    layer.on('click', (e) => {
-    L.DomEvent.stopPropagation(e);
-    const p = feature.properties;
-    tempSelectedParcel.value = p.ada + '/' + p.parsel;
-    });
-    }
-    }).addTo(ocrMap.value);
-    try { ocrMap.value.fitBounds(layer.getBounds()); } catch (e) { }
-    }, 100);
-    };
+                const initOcrMap = () => {
+                    if (ocrMap.value) ocrMap.value.remove();
+                    setTimeout(() => {
+                        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' });
+                        ocrMap.value = markRaw(L.map('ocr-map-picker', { center: [33.5138, 36.29], zoom: 14, layers: [satelliteLayer], renderer: L.canvas(), zoomControl: false }));
+                        L.control.zoom({ position: 'bottomright' }).addTo(ocrMap.value);
+                        const rawProperties = toRaw(properties.value);
+                        const featureCollection = { type: "FeatureCollection", features: rawProperties.map(p => ({ type: "Feature", properties: { id: p.id, ada: p.ada, parsel: p.parsel, location: p.location }, geometry: toRaw(p.geometry) })) };
+                        const layer = L.geoJSON(featureCollection, {
+                            style: { color: '#3b82f6', weight: 2, fillOpacity: 0.1 },
+                            onEachFeature: (feature, layer) => {
+                                layer.on('click', (e) => {
+                                    L.DomEvent.stopPropagation(e);
+                                    const p = feature.properties;
+                                    tempSelectedParcel.value = p.ada + '/' + p.parsel;
+                                });
+                            }
+                        }).addTo(ocrMap.value);
+                        try { ocrMap.value.fitBounds(layer.getBounds()); } catch (e) { }
+                    }, 100);
+                };
 
-    const renderGeoJSON = () => {
-    const rawMap = toRaw(map.value);
-    if (!rawMap) return;
-    if (geoJsonLayer.value) rawMap.removeLayer(toRaw(geoJsonLayer.value));
-    const rawProperties = toRaw(properties.value);
-    const featureCollection = { type: "FeatureCollection", features: rawProperties.map(p => ({ type: "Feature",
-    properties: { id: p.id, ada: p.ada, parsel: p.parsel, location: p.location, type: p.type, owner: p.owner },
-    geometry: toRaw(p.geometry) })) };
-    geoJsonLayer.value = markRaw(L.geoJSON(featureCollection, {
-    style: () => ({ color: mapStyle.value.color, weight: mapStyle.value.weight, fillOpacity: mapStyle.value.fillOpacity,
-    fillColor: mapStyle.value.color, interactive: true }),
-    onEachFeature: (feature, layer) => {
-    layer.on({
-    click: (e) => {
-    L.DomEvent.stopPropagation(e);
-    const p = properties.value.find(x => x.id === feature.properties.id);
-    if (p) { selectedPropertyId.value = p.id; modals.value.activeProp = p; modals.value.parcelAction = true; }
-    },
-    mouseover: (e) => { e.target.setStyle({ weight: mapStyle.value.weight + 2, fillOpacity:
-    Math.min(mapStyle.value.fillOpacity + 0.2, 1) }); },
-    mouseout: (e) => { geoJsonLayer.value.resetStyle(e.target); }
-    });
-    }
-    }).addTo(rawMap));
-    try { const bounds = geoJsonLayer.value.getBounds(); if (bounds.isValid()) rawMap.fitBounds(bounds); } catch (e) { }
-    };
+                const renderGeoJSON = () => {
+                    const rawMap = toRaw(map.value);
+                    if (!rawMap) return;
+                    if (geoJsonLayer.value) rawMap.removeLayer(toRaw(geoJsonLayer.value));
+                    const rawProperties = toRaw(properties.value);
+                    const featureCollection = { type: "FeatureCollection", features: rawProperties.map(p => ({ type: "Feature", properties: { id: p.id, ada: p.ada, parsel: p.parsel, location: p.location, type: p.type, owner: p.owner }, geometry: toRaw(p.geometry) })) };
+                    geoJsonLayer.value = markRaw(L.geoJSON(featureCollection, {
+                        style: () => ({ color: mapStyle.value.color, weight: mapStyle.value.weight, fillOpacity: mapStyle.value.fillOpacity, fillColor: mapStyle.value.color, interactive: true }),
+                        onEachFeature: (feature, layer) => {
+                            layer.on({
+                                click: (e) => {
+                                    L.DomEvent.stopPropagation(e);
+                                    const p = properties.value.find(x => x.id === feature.properties.id);
+                                    if (p) { selectedPropertyId.value = p.id; modals.value.activeProp = p; modals.value.parcelAction = true; }
+                                },
+                                mouseover: (e) => { e.target.setStyle({ weight: mapStyle.value.weight + 2, fillOpacity: Math.min(mapStyle.value.fillOpacity + 0.2, 1) }); },
+                                mouseout: (e) => { geoJsonLayer.value.resetStyle(e.target); }
+                            });
+                        }
+                    }).addTo(rawMap));
+                    try { const bounds = geoJsonLayer.value.getBounds(); if (bounds.isValid()) rawMap.fitBounds(bounds); } catch (e) { }
+                };
 
-    watch(mapStyle, () => { if (currentTab.value === 'dashboard' && map.value) renderGeoJSON(); }, { deep: true });
+                watch(mapStyle, () => { if (currentTab.value === 'dashboard' && map.value) renderGeoJSON(); }, { deep: true });
 
-    // LOGIN
-    const handleLogin = () => {
-    loginProcessing.value = true;
-    setTimeout(() => {
-    isLoggedIn.value = true;
-    loginProcessing.value = false;
-    loading.value = true;
-    if (properties.value.length === 0) generateMockParcels();
-    setTimeout(() => { loading.value = false; nextTick(() => initMap()); }, 1000);
-    }, 1000);
-    };
+                // LOGIN
+                const handleLogin = () => {
+                    loginProcessing.value = true;
+                    setTimeout(() => {
+                        isLoggedIn.value = true;
+                        loginProcessing.value = false;
+                        loading.value = true;
+                        if (properties.value.length === 0) generateMockParcels();
+                        setTimeout(() => { loading.value = false; nextTick(() => initMap()); }, 1000);
+                    }, 1000);
+                };
 
-    const generateMockParcels = () => {
-    const centerLat = 33.5138, centerLng = 36.2900;
-    const newProps = [];
-    for (let i = 0; i < 50; i++) { const lat=centerLat + (Math.random() - 0.5) * 0.02; const lng=centerLng +
-        (Math.random() - 0.5) * 0.03; newProps.push({ id: 1000 + i, ada: 101, parsel: i + 1, location:
-        activeRegionName.value, type: 'Land' , owner: 'MOCK OWNER' , area: 500 + i * 10, price: Math.floor(Math.random()
-        * 500000) + 100000, geometry: { type: "Polygon" , coordinates: [[[lng - 0.0005, lat - 0.0005], [lng + 0.0005,
-        lat - 0.0005], [lng + 0.0005, lat + 0.0005], [lng - 0.0005, lat + 0.0005], [lng - 0.0005, lat - 0.0005]]] } });
-        } properties.value=newProps; }; // VIEWER FUNCTIONS const zoomIn=()=> { viewerScale.value *= 1.2; };
-        const zoomOut = () => { viewerScale.value *= 0.8; };
-        const resetViewer = () => { viewerScale.value = 1; viewerPanX.value = 0; viewerPanY.value = 0; };
+                const generateMockParcels = () => {
+                    const centerLat = 33.5138, centerLng = 36.2900;
+                    const newProps = [];
+                    for (let i = 0; i < 50; i++) {
+                        const lat = centerLat + (Math.random() - 0.5) * 0.02;
+                        const lng = centerLng + (Math.random() - 0.5) * 0.03;
+                        newProps.push({
+                            id: 1000 + i, ada: 101, parsel: i + 1, location: activeRegionName.value, type: 'Land', owner: 'MOCK OWNER', area: 500 + i * 10, price: Math.floor(Math.random() * 500000) + 100000,
+                            geometry: { type: "Polygon", coordinates: [[[lng - 0.0005, lat - 0.0005], [lng + 0.0005, lat - 0.0005], [lng + 0.0005, lat + 0.0005], [lng - 0.0005, lat + 0.0005], [lng - 0.0005, lat - 0.0005]]] }
+                        });
+                    }
+                    properties.value = newProps;
+                };
 
-        const handleViewerWheel = (e) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        const nextScale = viewerScale.value * delta;
-        if (nextScale > 0.1 && nextScale < 20) viewerScale.value=nextScale; }; const handleViewerMouseDown=(e)=> {
-            if (viewerMode.value === 'pan') { isPanning.value = true; }
-            else {
-            isSelecting.value = true;
-            const rect = viewerContainer.value.getBoundingClientRect();
-            selectionStart.value = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-            selectionRect.value = { top: selectionStart.value.y, left: selectionStart.value.x, width: 0, height: 0 };
+                // VIEWER FUNCTIONS
+                const zoomIn = () => { viewerScale.value *= 1.2; };
+                const zoomOut = () => { viewerScale.value *= 0.8; };
+                const resetViewer = () => { viewerScale.value = 1; viewerPanX.value = 0; viewerPanY.value = 0; };
+
+                const handleViewerWheel = (e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                    const nextScale = viewerScale.value * delta;
+                    if (nextScale > 0.1 && nextScale < 20) viewerScale.value = nextScale;
+                };
+
+                const handleViewerMouseDown = (e) => {
+                    if (viewerMode.value === 'pan') { isPanning.value = true; }
+                    else {
+                        isSelecting.value = true;
+                        const rect = viewerContainer.value.getBoundingClientRect();
+                        selectionStart.value = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                        selectionRect.value = { top: selectionStart.value.y, left: selectionStart.value.x, width: 0, height: 0 };
+                    }
+                };
+
+                const handleViewerMouseMove = (e) => {
+                    if (isPanning.value) { viewerPanX.value += e.movementX; viewerPanY.value += e.movementY; }
+                    else if (isSelecting.value) {
+                        const rect = viewerContainer.value.getBoundingClientRect();
+                        const currentX = e.clientX - rect.left;
+                        const currentY = e.clientY - rect.top;
+                        selectionRect.value = { left: Math.min(selectionStart.value.x, currentX), top: Math.min(selectionStart.value.y, currentY), width: Math.abs(currentX - selectionStart.value.x), height: Math.abs(currentY - selectionStart.value.y) };
+                    }
+                };
+
+                const handleViewerMouseUp = () => {
+                    if (isSelecting.value && selectionRect.value.width > 10) {
+                        const containerRect = viewerContainer.value.getBoundingClientRect();
+                        const scaleX = containerRect.width / selectionRect.value.width;
+                        const scaleY = containerRect.height / selectionRect.value.height;
+                        const newScale = Math.min(scaleX, scaleY) * 0.9;
+                        const centerX = selectionRect.value.left + selectionRect.value.width / 2;
+                        const centerY = selectionRect.value.top + selectionRect.value.height / 2;
+                        viewerScale.value *= newScale;
+                        viewerPanX.value = (containerRect.width / 2 - centerX) * viewerScale.value;
+                        viewerPanY.value = (containerRect.height / 2 - centerY) * viewerScale.value;
+                        viewerMode.value = 'pan';
+                    }
+                    isPanning.value = false;
+                    isSelecting.value = false;
+                };
+
+                // OCR
+                const openOcrPicker = (e) => { if (ocrInput.value) { ocrInput.value.value = ''; ocrInput.value.click(); } };
+
+                const handleOcrUpload = async (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const previewReader = new FileReader();
+                    previewReader.onload = (e) => { ocrImage.value = e.target.result; };
+                    previewReader.readAsDataURL(file);
+                    ocrScanning.value = true;
+                    ocrData.value = null;
+                    // Simulated OCR result
+                    setTimeout(() => {
+                        ocrForm.value = { owner_name: 'Test Owner', signature_date: '2024-01-15', share_text: 'Tamami', province: 'Damascus', district: 'Mezzeh', directorate: 'Merkez', property_number: '101/25', property_type: 'Arsa', area_text: '500', daily_register_no: '12345', transaction_type: 'Satis', description: '' };
+                        ocrScanning.value = false;
+                        showSuccess('Basarili', 'Tapu verisi islendi.');
+                    }, 2000);
+                };
+
+                // FILE UPLOAD (KMZ)
+                const processFileContent = async (arrayBuffer, isKmz) => {
+                    kmzLoading.value = true;
+                    loadingMsg.value = isKmz ? 'KMZ Cozuluyor...' : 'KML Isleniyor...';
+                    try {
+                        let kmlText;
+                        if (isKmz) {
+                            loadingMsg.value = 'ZIP arsivi aciliyor...';
+                            const zip = await JSZip.loadAsync(arrayBuffer);
+                            const kmlFile = Object.keys(zip.files).find(f => f.endsWith('.kml'));
+                            if (!kmlFile) throw new Error('KMZ icinde KML dosyasi bulunamadi.');
+                            loadingMsg.value = 'KML dosyasi okunuyor...';
+                            kmlText = await zip.files[kmlFile].async('string');
+                        } else {
+                            kmlText = new TextDecoder('utf-8').decode(arrayBuffer);
+                        }
+                        loadingMsg.value = 'XML parse ediliyor...';
+                        const kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
+                        const parserError = kmlDom.querySelector('parsererror');
+                        if (parserError) throw new Error('XML parse hatasi');
+                        loadingMsg.value = 'GeoJSON donusturuluyor...';
+                        const geoJson = toGeoJSON.kml(kmlDom);
+                        if (!geoJson || !geoJson.features) throw new Error('GeoJSON donusumu basarisiz');
+                        loadingMsg.value = 'Parseller isleniyor...';
+                        const filteredFeatures = geoJson.features.filter(f => f.geometry && (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon' || f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'));
+                        properties.value = filteredFeatures.map((f, index) => {
+                            const p = f.properties || {};
+                            return { id: p.id || (index + 1), ada: p.ada || '---', parsel: p.parsel || '---', location: p.location || 'Sam / Merkez', type: p.type || 'Arsa', price: p.price || Math.floor(Math.random() * 500000) + 100000, owner: p.owner || 'Mechul Malik', area: p.area || '---', geometry: f.geometry };
+                        });
+                        loadingMsg.value = 'Haritaya ekleniyor...';
+                        const rawMap = toRaw(map.value);
+                        if (rawMap) {
+                            if (geoJsonLayer.value) rawMap.removeLayer(toRaw(geoJsonLayer.value));
+                            geoJsonLayer.value = markRaw(L.geoJSON({ type: "FeatureCollection", features: filteredFeatures }, {
+                                style: { color: mapStyle.value.color, weight: mapStyle.value.weight, fillOpacity: mapStyle.value.fillOpacity, fillColor: mapStyle.value.color }
+                            }).addTo(rawMap));
+                            const bounds = geoJsonLayer.value.getBounds();
+                            if (bounds.isValid()) rawMap.fitBounds(bounds);
+                        }
+                        loadingMsg.value = '';
+                        showSuccess('Basarili', properties.value.length + ' parsel yuklendi.');
+                    } catch (err) {
+                        console.error('File Error:', err);
+                        showSuccess('Hata', 'Dosya islenemedi: ' + (err.message || 'Bilinmeyen hata'));
+                    } finally {
+                        kmzLoading.value = false;
+                        loadingMsg.value = '';
+                    }
+                };
+
+                const handleFileUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const isKmz = file.name.endsWith('.kmz');
+                    const reader = new FileReader();
+                    reader.onload = (e) => processFileContent(e.target.result, isKmz);
+                    reader.readAsArrayBuffer(file);
+                };
+
+                const autoLoadKMZ = async (filename) => {
+                    try {
+                        loadingMsg.value = 'Dosya indiriliyor...';
+                        const response = await fetch(filename, { cache: 'no-cache' });
+                        if (!response.ok) throw new Error('HTTP ' + response.status);
+                        const buffer = await response.arrayBuffer();
+                        await processFileContent(buffer, true);
+                    } catch (err) {
+                        console.error('Auto-load KMZ failed:', err);
+                        kmzLoading.value = false;
+                        loadingMsg.value = '';
+                    }
+                };
+
+                const openOcrMapModal = () => { modals.value.ocrMap = true; tempSelectedParcel.value = null; nextTick(() => initOcrMap()); };
+                const confirmOcrMapSelection = () => { modals.value.ocrMap = false; showSuccess('Eslesme Saglandi', 'Parsel verisi form ile iliskilendirildi.'); };
+
+                const openDeedModal = (p) => { selectedPropertyId.value = p.id; modals.value.activeProp = p; modals.value.deed = true; };
+
+                const saveAndGenerateDeed = () => {
+                    const newProp = {
+                        id: 9999,
+                        ada: (ocrForm.value.property_number || '---/---').split('/')[0] || '---',
+                        parsel: (ocrForm.value.property_number || '---/---').split('/')[1] || '---',
+                        location: (ocrForm.value.province || '---') + ' / ' + (ocrForm.value.district || '---'),
+                        directorate: ocrForm.value.directorate || '---',
+                        type: ocrForm.value.property_type || '---',
+                        area_text: ocrForm.value.area_text || '---',
+                        owner_name: ocrForm.value.owner_name || '---',
+                        share_text: ocrForm.value.share_text || '---',
+                        signature_date: ocrForm.value.signature_date || '---',
+                        daily_register_no: ocrForm.value.daily_register_no || '---',
+                        transaction_type: ocrForm.value.transaction_type || '---',
+                        description: ocrForm.value.description || '---'
+                    };
+                    modals.value.activeProp = newProp;
+                    modals.value.deed = true;
+                    showSuccess('Kayit Basarili', 'Yeni tapu senedi olusturuldu.');
+                };
+
+                const locateProperty = () => { /* implementation */ };
+
+                onMounted(() => {
+                    setLang('tr');
+                    setTimeout(() => autoLoadKMZ('13.kmz'), 1000);
+                });
+
+                return {
+                    loading, loadingMsg, lang, t, isLoggedIn, loginCreds, loginProcessing, isMobileMenuOpen,
+                    currentTab, map, searchQuery, properties, modals, toast,
+                    selectedPropertyId, selectedProperty, filteredProperties, totalValue, valuationResult, valArea, valRegion,
+                    ocrImage, ocrScanning, ocrData, ocrForm, tempSelectedParcel, ocrInput, fileInput,
+                    viewerScale, viewerPanX, viewerPanY, viewerMode, isPanning, isSelecting, selectionRect, viewerContainer,
+                    handleLogin, changeTab, getIcon, setLang, capitalize,
+                    handleOcrUpload, openOcrPicker, handleFileUpload, openOcrMapModal, confirmOcrMapSelection, saveAndGenerateDeed, locateProperty,
+                    zoomIn, zoomOut, resetViewer, handleViewerWheel, handleViewerMouseDown, handleViewerMouseMove, handleViewerMouseUp,
+                    kmzLoading, mapStyle, showMapSettings,
+                    aiTrendData, aiAmenities,
+                    mainTabs, serviceTabs, colorOptions,
+                    fillOpacityPercent, viewerScalePercent, viewerTransformStyle, selectionBoxStyle, viewerCursorStyle, sidebarClasses,
+                    getNavLabel, getPageTitle, getTabClass, getColorButtonClass, getPanButtonClass, getSelectButtonClass,
+                    formatPrice, getTrendPrice, generateRandomCode, getQrCodeUrl, getAreaText, getOwnerName, getShareText,
+                    getTransactionType, getDailyRegisterNo, getSignatureDate, getValidationCode,
+                    triggerFileInput, openDeedModal
+                };
             }
-            };
-
-            const handleViewerMouseMove = (e) => {
-            if (isPanning.value) { viewerPanX.value += e.movementX; viewerPanY.value += e.movementY; }
-            else if (isSelecting.value) {
-            const rect = viewerContainer.value.getBoundingClientRect();
-            const currentX = e.clientX - rect.left;
-            const currentY = e.clientY - rect.top;
-            selectionRect.value = { left: Math.min(selectionStart.value.x, currentX), top:
-            Math.min(selectionStart.value.y, currentY), width: Math.abs(currentX - selectionStart.value.x), height:
-            Math.abs(currentY - selectionStart.value.y) };
-            }
-            };
-
-            const handleViewerMouseUp = () => {
-            if (isSelecting.value && selectionRect.value.width > 10) {
-            const containerRect = viewerContainer.value.getBoundingClientRect();
-            const scaleX = containerRect.width / selectionRect.value.width;
-            const scaleY = containerRect.height / selectionRect.value.height;
-            const newScale = Math.min(scaleX, scaleY) * 0.9;
-            const centerX = selectionRect.value.left + selectionRect.value.width / 2;
-            const centerY = selectionRect.value.top + selectionRect.value.height / 2;
-            viewerScale.value *= newScale;
-            viewerPanX.value = (containerRect.width / 2 - centerX) * viewerScale.value;
-            viewerPanY.value = (containerRect.height / 2 - centerY) * viewerScale.value;
-            viewerMode.value = 'pan';
-            }
-            isPanning.value = false;
-            isSelecting.value = false;
-            };
-
-            // OCR
-            const openOcrPicker = (e) => { if (ocrInput.value) { ocrInput.value.value = ''; ocrInput.value.click(); } };
-
-            const handleOcrUpload = async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const previewReader = new FileReader();
-            previewReader.onload = (e) => { ocrImage.value = e.target.result; };
-            previewReader.readAsDataURL(file);
-            ocrScanning.value = true;
-            ocrData.value = null;
-            // Simulated OCR result
-            setTimeout(() => {
-            ocrForm.value = { owner_name: 'Test Owner', signature_date: '2024-01-15', share_text: 'Tamami', province:
-            'Damascus', district: 'Mezzeh', directorate: 'Merkez', property_number: '101/25', property_type: 'Arsa',
-            area_text: '500', daily_register_no: '12345', transaction_type: 'Satis', description: '' };
-            ocrScanning.value = false;
-            showSuccess('Basarili', 'Tapu verisi islendi.');
-            }, 2000);
-            };
-
-            // FILE UPLOAD (KMZ)
-            const processFileContent = async (arrayBuffer, isKmz) => {
-            kmzLoading.value = true;
-            loadingMsg.value = isKmz ? 'KMZ Cozuluyor...' : 'KML Isleniyor...';
-            try {
-            let kmlText;
-            if (isKmz) {
-            loadingMsg.value = 'ZIP arsivi aciliyor...';
-            const zip = await JSZip.loadAsync(arrayBuffer);
-            const kmlFile = Object.keys(zip.files).find(f => f.endsWith('.kml'));
-            if (!kmlFile) throw new Error('KMZ icinde KML dosyasi bulunamadi.');
-            loadingMsg.value = 'KML dosyasi okunuyor...';
-            kmlText = await zip.files[kmlFile].async('string');
-            } else {
-            kmlText = new TextDecoder('utf-8').decode(arrayBuffer);
-            }
-            loadingMsg.value = 'XML parse ediliyor...';
-            const kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
-            const parserError = kmlDom.querySelector('parsererror');
-            if (parserError) throw new Error('XML parse hatasi');
-            loadingMsg.value = 'GeoJSON donusturuluyor...';
-            const geoJson = toGeoJSON.kml(kmlDom);
-            if (!geoJson || !geoJson.features) throw new Error('GeoJSON donusumu basarisiz');
-            loadingMsg.value = 'Parseller isleniyor...';
-            const filteredFeatures = geoJson.features.filter(f => f.geometry && (f.geometry.type === 'Polygon' ||
-            f.geometry.type === 'MultiPolygon' || f.geometry.type === 'LineString' || f.geometry.type ===
-            'MultiLineString'));
-            properties.value = filteredFeatures.map((f, index) => {
-            const p = f.properties || {};
-            return { id: p.id || (index + 1), ada: p.ada || '---', parsel: p.parsel || '---', location: p.location ||
-            'Sam / Merkez', type: p.type || 'Arsa', price: p.price || Math.floor(Math.random() * 500000) + 100000,
-            owner: p.owner || 'Mechul Malik', area: p.area || '---', geometry: f.geometry };
-            });
-            loadingMsg.value = 'Haritaya ekleniyor...';
-            const rawMap = toRaw(map.value);
-            if (rawMap) {
-            if (geoJsonLayer.value) rawMap.removeLayer(toRaw(geoJsonLayer.value));
-            geoJsonLayer.value = markRaw(L.geoJSON({ type: "FeatureCollection", features: filteredFeatures }, {
-            style: { color: mapStyle.value.color, weight: mapStyle.value.weight, fillOpacity:
-            mapStyle.value.fillOpacity, fillColor: mapStyle.value.color }
-            }).addTo(rawMap));
-            const bounds = geoJsonLayer.value.getBounds();
-            if (bounds.isValid()) rawMap.fitBounds(bounds);
-            }
-            loadingMsg.value = '';
-            showSuccess('Basarili', properties.value.length + ' parsel yuklendi.');
-            } catch (err) {
-            console.error('File Error:', err);
-            showSuccess('Hata', 'Dosya islenemedi: ' + (err.message || 'Bilinmeyen hata'));
-            } finally {
-            kmzLoading.value = false;
-            loadingMsg.value = '';
-            }
-            };
-
-            const handleFileUpload = (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const isKmz = file.name.endsWith('.kmz');
-            const reader = new FileReader();
-            reader.onload = (e) => processFileContent(e.target.result, isKmz);
-            reader.readAsArrayBuffer(file);
-            };
-
-            const autoLoadKMZ = async (filename) => {
-            try {
-            loadingMsg.value = 'Dosya indiriliyor...';
-            const response = await fetch(filename, { cache: 'no-cache' });
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            const buffer = await response.arrayBuffer();
-            await processFileContent(buffer, true);
-            } catch (err) {
-            console.error('Auto-load KMZ failed:', err);
-            kmzLoading.value = false;
-            loadingMsg.value = '';
-            }
-            };
-
-            const openOcrMapModal = () => { modals.value.ocrMap = true; tempSelectedParcel.value = null; nextTick(() =>
-            initOcrMap()); };
-            const confirmOcrMapSelection = () => { modals.value.ocrMap = false; showSuccess('Eslesme Saglandi', 'Parsel
-            verisi form ile iliskilendirildi.'); };
-
-            const openDeedModal = (p) => { selectedPropertyId.value = p.id; modals.value.activeProp = p;
-            modals.value.deed = true; };
-
-            const saveAndGenerateDeed = () => {
-            const newProp = {
-            id: 9999,
-            ada: (ocrForm.value.property_number || '---/---').split('/')[0] || '---',
-            parsel: (ocrForm.value.property_number || '---/---').split('/')[1] || '---',
-            location: (ocrForm.value.province || '---') + ' / ' + (ocrForm.value.district || '---'),
-            directorate: ocrForm.value.directorate || '---',
-            type: ocrForm.value.property_type || '---',
-            area_text: ocrForm.value.area_text || '---',
-            owner_name: ocrForm.value.owner_name || '---',
-            share_text: ocrForm.value.share_text || '---',
-            signature_date: ocrForm.value.signature_date || '---',
-            daily_register_no: ocrForm.value.daily_register_no || '---',
-            transaction_type: ocrForm.value.transaction_type || '---',
-            description: ocrForm.value.description || '---'
-            };
-            modals.value.activeProp = newProp;
-            modals.value.deed = true;
-            showSuccess('Kayit Basarili', 'Yeni tapu senedi olusturuldu.');
-            };
-
-            const locateProperty = () => { /* implementation */ };
-
-            onMounted(() => {
-            setLang('tr');
-            setTimeout(() => autoLoadKMZ('13.kmz'), 1000);
-            });
-
-            return {
-            loading, loadingMsg, lang, t, isLoggedIn, loginCreds, loginProcessing, isMobileMenuOpen,
-            currentTab, map, searchQuery, properties, modals, toast,
-            selectedPropertyId, selectedProperty, filteredProperties, totalValue, valuationResult, valArea, valRegion,
-            ocrImage, ocrScanning, ocrData, ocrForm, tempSelectedParcel, ocrInput, fileInput,
-            viewerScale, viewerPanX, viewerPanY, viewerMode, isPanning, isSelecting, selectionRect, viewerContainer,
-            handleLogin, changeTab, getIcon, setLang, capitalize,
-            handleOcrUpload, openOcrPicker, handleFileUpload, openOcrMapModal, confirmOcrMapSelection,
-            saveAndGenerateDeed, locateProperty,
-            zoomIn, zoomOut, resetViewer, handleViewerWheel, handleViewerMouseDown, handleViewerMouseMove,
-            handleViewerMouseUp,
-            kmzLoading, mapStyle, showMapSettings,
-            aiTrendData, aiAmenities,
-            mainTabs, serviceTabs, colorOptions,
-            fillOpacityPercent, viewerScalePercent, viewerTransformStyle, selectionBoxStyle, viewerCursorStyle,
-            sidebarClasses,
-            getNavLabel, getPageTitle, getTabClass, getColorButtonClass, getPanButtonClass, getSelectButtonClass,
-            formatPrice, getTrendPrice, generateRandomCode, getQrCodeUrl, getAreaText, getOwnerName, getShareText,
-            getTransactionType, getDailyRegisterNo, getSignatureDate, getValidationCode,
-            triggerFileInput, openDeedModal
-            };
-            }
-            }).mount('#app');
-            </script>
+        }).mount('#app');
+    </script>
 </body>
-
 </html>
