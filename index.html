@@ -23,7 +23,7 @@
     </script>
 
     <!-- Vue.js 3 -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -207,7 +207,7 @@
                         <label class="block text-sm font-bold text-slate-700 mb-1">{{ t.lblPassword }}</label>
                         <input v-model="loginCreds.password" type="password"
                             class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-emerald-500 transition text-sm"
-                            placeholder="••••••••">
+                            placeholder="********">
                     </div>
 
                     <button type="submit" :disabled="loginProcessing"
@@ -438,7 +438,7 @@
                                     </div>
 
                                     <div v-else class="relative transition-transform duration-75 ease-out"
-                                        :style="{ transform: `translate(${viewerPanX}px, ${viewerPanY}px) scale(${viewerScale})` }">
+                                        :style="{ transform: 'translate(' + viewerPanX + 'px, ' + viewerPanY + 'px) scale(' + viewerScale + ')' }">
                                         <img :src="ocrImage"
                                             class="max-w-full max-h-[80vh] shadow-2xl pointer-events-none">
                                     </div>
@@ -446,12 +446,7 @@
                                     <!-- Selection Box -->
                                     <div v-if="isSelecting"
                                         class="absolute border-2 border-emerald-400 bg-emerald-400/20 z-20 pointer-events-none"
-                                        :style="{ 
-                                                top: selectionRect.top + 'px', 
-                                                left: selectionRect.left + 'px', 
-                                                width: selectionRect.width + 'px', 
-                                                height: selectionRect.height + 'px' 
-                                            }">
+                                        :style="{ top: selectionRect.top + 'px', left: selectionRect.left + 'px', width: selectionRect.width + 'px', height: selectionRect.height + 'px' }">
                                     </div>
 
                                     <!-- Scanning Effect -->
@@ -1016,9 +1011,9 @@
                                     <div v-for="item in aiAmenities" :key="item.label"
                                         class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between group hover:border-blue-200 transition">
                                         <div class="flex items-center gap-4">
-                                            <div :class="`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-slate-100 group-hover:scale-110 transition`"
+                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-slate-100 group-hover:scale-110 transition"
                                                 :style="getAmenityStyle(item.shadow)">
-                                                <i :class="`fa-solid ${item.icon}`"></i>
+                                                <i :class="'fa-solid ' + item.icon"></i>
                                             </div>
                                             <span class="font-bold text-slate-700 text-sm italic">{{ item.label
                                                 }}</span>
@@ -1188,7 +1183,7 @@
                                         </table>
                                         <div class="mt-6 flex justify-end">
                                             <div class="text-center">
-                                                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SYRIAN-DEED-${modals.activeProp.ada}-${modals.activeProp.parsel}`"
+                                                <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SYRIAN-DEED-' + modals.activeProp.ada + '-' + modals.activeProp.parsel"
                                                     class="w-24 h-24 border-2 border-slate-900 p-1 mb-1">
                                                 <p class="text-[8px] font-mono text-slate-500">E-DEVLET DOĞRULAMA</p>
                                             </div>
