@@ -600,23 +600,28 @@
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500 w-1/3">{{ t.colCity }}</td>
                                                 <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.location || activeRegionName }}</td>
+                                                    modals.activeProp.location }}</td>
+                                            </tr>
+                                            <tr v-if="modals.activeProp.directorate" class="border-b border-slate-300">
+                                                <td class="py-2 text-slate-500">Müdürlük</td>
+                                                <td class="py-2 font-bold text-slate-900">{{
+                                                    modals.activeProp.directorate }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.colParcel }}</td>
-                                                <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.ada ? modals.activeProp.ada + '/' +
-                                                    modals.activeProp.parsel : modals.activeProp.property_number }}</td>
+                                                <td class="py-2 font-bold text-lg text-slate-900">
+                                                    {{ modals.activeProp.ada }}/{{ modals.activeProp.parsel }}
+                                                </td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.colType }}</td>
                                                 <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.type || modals.activeProp.property_type }}</td>
+                                                    modals.activeProp.type }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.area }}</td>
                                                 <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.area || modals.activeProp.area_text }} m²</td>
+                                                    modals.activeProp.area_text }} m²</td>
                                             </tr>
                                         </table>
                                     </div>
@@ -629,22 +634,43 @@
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500 w-1/3">{{ t.ownerName }}</td>
                                                 <td class="py-2 font-bold text-xl text-slate-900">{{
-                                                    modals.activeProp.owner || modals.activeProp.owner_name }}</td>
+                                                    modals.activeProp.owner_name }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">{{ t.acquisitionReason }}</td>
-                                                <td class="py-2 font-bold text-slate-900">OCR Digitization / {{ new
-                                                    Date().getFullYear() }}</td>
+                                                <td class="py-2 text-slate-500">Hisse</td>
+                                                <td class="py-2 font-bold text-slate-900">{{
+                                                    modals.activeProp.share_text || 'Tamamı (1/1)' }}</td>
+                                            </tr>
+                                            <tr class="border-b border-slate-300">
+                                                <td class="py-2 text-slate-500">İşlem Detayı</td>
+                                                <td class="py-2 text-slate-900">
+                                                    <span class="font-bold">{{ modals.activeProp.transaction_type ||
+                                                        'Kayıt' }}</span>
+                                                    <br>
+                                                    <span class="text-xs text-slate-500">Yevmiye: {{
+                                                        modals.activeProp.daily_register_no || '---' }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr class="border-b border-slate-300">
+                                                <td class="py-2 text-slate-500">Tarih</td>
+                                                <td class="py-2 font-bold text-slate-900">{{
+                                                    modals.activeProp.signature_date }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.electronicValidation }}</td>
-                                                <td class="py-2 font-mono text-slate-900 tracking-widest">TR-{{
-                                                    Math.floor(Math.random()*900000)+100000 }}</td>
+                                                <td class="py-2 font-mono text-slate-900 tracking-widest">
+                                                    SY-{{ modals.activeProp.daily_register_no ||
+                                                    Math.floor(Math.random()*900000)+100000 }}
+                                                </td>
                                             </tr>
                                         </table>
-                                        <div class="mt-6 flex justify-end"><img
-                                                :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SY-KADASTRO-OCR`"
-                                                class="w-24 h-24 border-2 border-slate-900 p-1"></div>
+                                        <div class="mt-6 flex justify-end">
+                                            <div class="text-center">
+                                                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SYRIAN-DEED-${modals.activeProp.ada}-${modals.activeProp.parsel}`"
+                                                    class="w-24 h-24 border-2 border-slate-900 p-1 mb-1">
+                                                <p class="text-[8px] font-mono text-slate-500">E-DEVLET DOĞRULAMA</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- Footer -->
@@ -1146,11 +1172,87 @@
                     }
                 };
 
-                // handleFileUpload fonksiyonu - KMZ/KML yükleme için
+                // --- KMZ / KML LOADING ---
+                const processFileContent = async (arrayBuffer, isKmz) => {
+                    loading.value = true;
+                    loadingMsg.value = isKmz ? 'KMZ Çözülüyor...' : 'KML İşleniyor...';
+
+                    try {
+                        let kmlText;
+                        if (isKmz) {
+                            const zip = await JSZip.loadAsync(arrayBuffer);
+                            const kmlFile = Object.keys(zip.files).find(f => f.endsWith('.kml'));
+                            if (!kmlFile) throw new Error('KMZ içinde KML dosyası bulunamadı.');
+                            kmlText = await zip.files[kmlFile].async('string');
+                        } else {
+                            kmlText = new TextDecoder().decode(arrayBuffer);
+                        }
+
+                        const kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
+                        const geoJson = toGeoJSON.kml(kmlDom);
+
+                        // Parse properties from GeoJSON
+                        properties.value = geoJson.features.map((f, index) => {
+                            const p = f.properties || {};
+                            return {
+                                id: p.id || index + 1,
+                                ada: p.ada || p.PARSEL_NO?.split('/')[0] || '---',
+                                parsel: p.parsel || p.PARSEL_NO?.split('/')[1] || '---',
+                                location: p.location || p.MAHALLE || 'Şam / Merkez',
+                                type: p.type || p.CINSI || 'Arsa',
+                                price: p.price || Math.floor(Math.random() * 500000) + 100000,
+                                owner: p.owner || p.AD_SOYAD || 'Meçhul Malik',
+                                area: p.area || p.ALAN || '---',
+                                geometry: f.geometry
+                            };
+                        });
+
+                        // Add to map
+                        if (geoJsonLayer.value) map.value.removeLayer(geoJsonLayer.value);
+                        geoJsonLayer.value = L.geoJSON(geoJson, {
+                            style: { color: '#10b981', weight: 2, fillOpacity: 0.2 },
+                            onEachFeature: (feature, layer) => {
+                                layer.bindPopup(`<div class="p-3 font-sans">
+                                    <h4 class="font-bold border-b pb-1 mb-2">Parsel: ${feature.properties.ada || '---'}/${feature.properties.parsel || '---'}</h4>
+                                    <p class="text-xs mb-1"><b>Malik:</b> ${feature.properties.owner || '---'}</p>
+                                    <p class="text-xs"><b>Alan:</b> ${feature.properties.area || '---'} m²</p>
+                                </div>`);
+                            }
+                        }).addTo(map.value);
+
+                        if (properties.value.length > 0) {
+                            const bounds = geoJsonLayer.value.getBounds();
+                            map.value.fitBounds(bounds);
+                        }
+
+                        showSuccess('Başarılı', `${properties.value.length} parsel yüklendi.`);
+                    } catch (err) {
+                        console.error('File Error:', err);
+                        showSuccess('Hata', 'Dosya işlenemedi: ' + err.message);
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
                 const handleFileUpload = (event) => {
-                    console.log('handleFileUpload çağrıldı - KMZ/KML yükleme');
-                    // Bu fonksiyon şu an için boş, gerekirse implement edilebilir
-                    showSuccess('Bilgi', 'KMZ/KML yükleme özelliği yakında eklenecek.');
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const isKmz = file.name.endsWith('.kmz');
+                    const reader = new FileReader();
+                    reader.onload = (e) => processFileContent(e.target.result, isKmz);
+                    reader.readAsArrayBuffer(file);
+                };
+
+                const autoLoadKMZ = async (filename) => {
+                    try {
+                        console.log(`Otomatik yükleme başlatıldı: ${filename}`);
+                        const response = await fetch(filename);
+                        if (!response.ok) throw new Error('Dosya sunucuda bulunamadı.');
+                        const buffer = await response.arrayBuffer();
+                        await processFileContent(buffer, true);
+                    } catch (err) {
+                        console.warn('Auto-load KMZ failed:', err.message);
+                    }
                 };
 
                 const openOcrMapModal = () => {
@@ -1165,18 +1267,21 @@
                 };
 
                 const saveAndGenerateDeed = () => {
-                    // Create a mock property object from OCR data to show in Deed Modal
+                    // Create a robust property object from OCR form data
                     const newProp = {
                         id: 9999,
-                        ada: ocrData.value.kimlik.parsel_no.split('/')[0] || '0',
-                        parsel: ocrData.value.kimlik.parsel_no.split('/')[1] || '0',
-                        location: ocrData.value.baslik.bolge + ' / ' + ocrData.value.kimlik.bolge_semt,
-                        type: ocrData.value.kimlik.cins_kisa,
-                        area: ocrData.value.kimlik.area || 'Unknown',
-                        owner: ocrData.value.mulkiyet.malik,
-                        owner_name: ocrData.value.mulkiyet.malik, // Fallback for deed template
-                        property_number: ocrData.value.kimlik.parsel_no,
-                        property_type: ocrData.value.kimlik.cins_kisa
+                        ada: ocrForm.value.property_number.split('/')[0] || '---',
+                        parsel: ocrForm.value.property_number.split('/')[1] || '---',
+                        location: (ocrForm.value.province || '---') + ' / ' + (ocrForm.value.district || '---'),
+                        directorate: ocrForm.value.directorate || '---',
+                        type: ocrForm.value.property_type || '---',
+                        area_text: ocrForm.value.area_text || '---',
+                        owner_name: ocrForm.value.owner_name || '---',
+                        share_text: ocrForm.value.share_text || '---',
+                        signature_date: ocrForm.value.signature_date || '---',
+                        daily_register_no: ocrForm.value.daily_register_no || '---',
+                        transaction_type: ocrForm.value.transaction_type || '---',
+                        description: ocrForm.value.description || '---'
                     };
 
                     modals.value.activeProp = newProp;
@@ -1186,7 +1291,11 @@
 
                 const locateProperty = () => { /* implementation */ }; // simplified
 
-                onMounted(() => { setLang('ar'); });
+                onMounted(() => {
+                    setLang('ar');
+                    // Sayfa açıldığında 13.kmz dosyasını otomatik yükle
+                    setTimeout(() => autoLoadKMZ('13.kmz'), 1000);
+                });
 
                 return {
                     loading, loadingMsg, lang, t, isLoggedIn, loginCreds, loginProcessing, isMobileMenuOpen, loginRole,
