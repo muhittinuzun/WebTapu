@@ -143,6 +143,30 @@
                 transform: translateY(0);
             }
         }
+
+        .kmz-loader {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes pulse-emerald {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        .pulse-loader {
+            animation: pulse-emerald 2s infinite;
+        }
     </style>
 </head>
 
@@ -270,6 +294,22 @@
                                 </div>
                             </div>
                             <div id="map"></div>
+
+                            <!-- KMZ Loading Overlay -->
+                            <div v-if="kmzLoading"
+                                class="absolute inset-0 z-[2000] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+                                <div class="kmz-loader p-6 rounded-2xl flex flex-col items-center gap-4 shadow-2xl">
+                                    <div
+                                        class="w-12 h-12 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin">
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-white font-bold text-sm tracking-widest uppercase mb-1">Katman
+                                            Yükleniyor</p>
+                                        <p class="text-emerald-400 text-xs font-medium">{{ loadingMsg || 'KMZ
+                                            İşleniyor...' }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -785,6 +825,7 @@
                     description: ''
                 }); // OCR form data
                 const tempSelectedParcel = ref(null); // For map picker
+                const kmzLoading = ref(false); // New state for KMZ specific loading
 
                 // Viewer State
                 const viewerScale = ref(1);
@@ -1192,7 +1233,7 @@
 
                 // --- KMZ / KML LOADING ---
                 const processFileContent = async (arrayBuffer, isKmz) => {
-                    loading.value = true;
+                    kmzLoading.value = true;
                     loadingMsg.value = isKmz ? 'KMZ Çözülüyor...' : 'KML İşleniyor...';
 
                     try {
@@ -1226,23 +1267,22 @@
                         });
 
                         // Add to map only if map is initialized
-                        if (map.value) {
-                            if (geoJsonLayer.value) map.value.removeLayer(geoJsonLayer.value);
-                            geoJsonLayer.value = L.geoJSON(geoJson, {
+                        const rawMap = toRaw(map.value);
+                        if (rawMap) {
+                            if (geoJsonLayer.value) rawMap.removeLayer(toRaw(geoJsonLayer.value));
+                            geoJsonLayer.value = markRaw(L.geoJSON(geoJson, {
                                 style: { color: '#10b981', weight: 2, fillOpacity: 0.2 },
                                 onEachFeature: (feature, layer) => {
-                                    layer.bindPopup(`<div class="p-3 font-sans">
+                                    layer.bindPopup(`<div class="p-3 font-sans text-right" dir="rtl">
                                         <h4 class="font-bold border-b pb-1 mb-2">Parsel: ${feature.properties.ada || '---'}/${feature.properties.parsel || '---'}</h4>
                                         <p class="text-xs mb-1"><b>Malik:</b> ${feature.properties.owner || '---'}</p>
                                         <p class="text-xs"><b>Alan:</b> ${feature.properties.area || '---'} m²</p>
                                     </div>`);
                                 }
-                            }).addTo(map.value);
+                            }).addTo(rawMap));
 
-                            if (properties.value.length > 0) {
-                                const bounds = geoJsonLayer.value.getBounds();
-                                map.value.fitBounds(bounds);
-                            }
+                            const bounds = geoJsonLayer.value.getBounds();
+                            if (bounds.isValid()) rawMap.fitBounds(bounds);
                         }
 
                         showSuccess('Başarılı', `${properties.value.length} parsel yüklendi.`);
@@ -1250,7 +1290,8 @@
                         console.error('File Error:', err);
                         showSuccess('Hata', 'Dosya işlenemedi: ' + err.message);
                     } finally {
-                        loading.value = false;
+                        kmzLoading.value = false;
+                        loadingMsg.value = '';
                     }
                 };
 
@@ -1324,7 +1365,8 @@
                     viewerScale, viewerPanX, viewerPanY, viewerMode, isPanning, isSelecting, selectionRect, viewerContainer,
                     handleLogin, changeTab, getIcon, setLang, capitalize,
                     handleOcrUpload, openOcrPicker, handleFileUpload, openOcrMapModal, confirmOcrMapSelection, saveAndGenerateDeed, locateProperty,
-                    resetViewer, handleViewerWheel, handleViewerMouseDown, handleViewerMouseMove, handleViewerMouseUp
+                    resetViewer, handleViewerWheel, handleViewerMouseDown, handleViewerMouseMove, handleViewerMouseUp,
+                    kmzLoading
                 };
             }
         }).mount('#app');
