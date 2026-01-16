@@ -6,9 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Suriye Tapu ve Kadastro Bilgi Sistemi (TAKBIS)</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS - Production -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <script>
+        // Suppress development warning
+        window.process = { env: { NODE_ENV: 'production' } };
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -1787,37 +1790,84 @@
 
                     try {
                         let kmlText;
+
+                        // Step 1: Extract KML from KMZ or decode KML
                         if (isKmz) {
+                            loadingMsg.value = 'ZIP arsivi aciliyor...';
                             const zip = await JSZip.loadAsync(arrayBuffer);
                             const kmlFile = Object.keys(zip.files).find(f => f.endsWith('.kml'));
                             if (!kmlFile) throw new Error('KMZ icinde KML dosyasi bulunamadi.');
+
+                            loadingMsg.value = 'KML dosyasi okunuyor...';
                             kmlText = await zip.files[kmlFile].async('string');
                         } else {
-                            kmlText = new TextDecoder().decode(arrayBuffer);
+                            kmlText = new TextDecoder('utf-8').decode(arrayBuffer);
                         }
 
+                        // Step 2: Parse XML with error checking
+                        loadingMsg.value = 'XML parse ediliyor...';
                         const kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
+
+                        // Check for XML parsing errors
+                        const parserError = kmlDom.querySelector('parsererror');
+                        if (parserError) {
+                            throw new Error('XML parse hatasi: Gecersiz KML formatı');
+                        }
+
+                        // Step 3: Convert to GeoJSON
+                        loadingMsg.value = 'GeoJSON\'a donusturuluyor...';
                         const geoJson = toGeoJSON.kml(kmlDom);
 
-                        // Parse properties from GeoJSON - Filter out Points (markers)
-                        const filteredFeatures = geoJson.features.filter(f => f.geometry && (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon' || f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'));
+                        if (!geoJson || !geoJson.features) {
+                            throw new Error('GeoJSON donusumu basarisiz');
+                        }
 
-                        properties.value = filteredFeatures.map((f, index) => {
-                            const p = f.properties || {};
-                            return {
-                                id: p.id || index + 1,
-                                ada: p.ada || p.PARSEL_NO?.split('/')[0] || '---',
-                                parsel: p.parsel || p.PARSEL_NO?.split('/')[1] || '---',
-                                location: p.location || p.MAHALLE || 'Sam / Merkez',
-                                type: p.type || p.CINSI || 'Arsa',
-                                price: p.price || Math.floor(Math.random() * 500000) + 100000,
-                                owner: p.owner || p.AD_SOYAD || 'Mechul Malik',
-                                area: p.area || p.ALAN || '---',
-                                geometry: f.geometry
-                            };
-                        });
+                        // Step 4: Filter and process features
+                        loadingMsg.value = 'Parseller isleniyor...';
+                        const filteredFeatures = geoJson.features.filter(f =>
+                            f.geometry && (
+                                f.geometry.type === 'Polygon' ||
+                                f.geometry.type === 'MultiPolygon' ||
+                                f.geometry.type === 'LineString' ||
+                                f.geometry.type === 'MultiLineString'
+                            )
+                        );
 
-                        // Add to map only if map is initialized
+                        console.log(`${filteredFeatures.length} parsel bulundu`);
+
+                        // Process in chunks for large datasets
+                        const chunkSize = 100;
+                        const totalChunks = Math.ceil(filteredFeatures.length / chunkSize);
+
+                        properties.value = [];
+                        for (let i = 0; i < filteredFeatures.length; i += chunkSize) {
+                            const chunk = filteredFeatures.slice(i, i + chunkSize);
+                            const chunkNum = Math.floor(i / chunkSize) + 1;
+                            loadingMsg.value = `Parseller isleniyor... (${chunkNum}/${totalChunks})`;
+
+                            const processedChunk = chunk.map((f, index) => {
+                                const p = f.properties || {};
+                                return {
+                                    id: p.id || (i + index + 1),
+                                    ada: p.ada || p.PARSEL_NO?.split('/')[0] || '---',
+                                    parsel: p.parsel || p.PARSEL_NO?.split('/')[1] || '---',
+                                    location: p.location || p.MAHALLE || 'Sam / Merkez',
+                                    type: p.type || p.CINSI || 'Arsa',
+                                    price: p.price || Math.floor(Math.random() * 500000) + 100000,
+                                    owner: p.owner || p.AD_SOYAD || 'Mechul Malik',
+                                    area: p.area || p.ALAN || '---',
+                                    geometry: f.geometry
+                                };
+                            });
+
+                            properties.value.push(...processedChunk);
+
+                            // Allow UI to update between chunks
+                            await new Promise(resolve => setTimeout(resolve, 0));
+                        }
+
+                        // Step 5: Add to map
+                        loadingMsg.value = 'Haritaya ekleniyor...';
                         const rawMap = toRaw(map.value);
                         if (rawMap) {
                             if (geoJsonLayer.value) rawMap.removeLayer(toRaw(geoJsonLayer.value));
@@ -1838,13 +1888,18 @@
                             }).addTo(rawMap));
 
                             const bounds = geoJsonLayer.value.getBounds();
-                            if (bounds.isValid()) rawMap.fitBounds(bounds);
+                            if (bounds.isValid()) {
+                                loadingMsg.value = 'Harita merkeze aliniyor...';
+                                rawMap.fitBounds(bounds);
+                            }
                         }
 
+                        loadingMsg.value = '';
                         showSuccess('Basarili', `${properties.value.length} parsel yuklendi.`);
                     } catch (err) {
                         console.error('File Error:', err);
-                        showSuccess('Hata', 'Dosya islenemedi: ' + err.message);
+                        const errorMsg = err.message || 'Bilinmeyen hata';
+                        showSuccess('Hata', `Dosya islenemedi: ${errorMsg}`);
                     } finally {
                         kmzLoading.value = false;
                         loadingMsg.value = '';
@@ -1860,16 +1915,58 @@
                     reader.readAsArrayBuffer(file);
                 };
 
-                const autoLoadKMZ = async (filename) => {
-                    try {
-                        console.log(`Otomatik yukleme baslatildi: ${filename}`);
-                        const response = await fetch(filename);
-                        if (!response.ok) throw new Error('Dosya sunucuda bulunamadi.');
-                        const buffer = await response.arrayBuffer();
-                        await processFileContent(buffer, true);
-                    } catch (err) {
-                        console.warn('Auto-load KMZ failed:', err.message);
+                const autoLoadKMZ = async (filename, retries = 3) => {
+                    let lastError;
+
+                    for (let attempt = 1; attempt <= retries; attempt++) {
+                        try {
+                            console.log(`Otomatik yukleme baslatildi (Deneme ${attempt}/${retries}): ${filename}`);
+                            loadingMsg.value = `Dosya indiriliyor... (${attempt}/${retries})`;
+
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+                            const response = await fetch(filename, {
+                                signal: controller.signal,
+                                cache: 'no-cache'
+                            });
+
+                            clearTimeout(timeoutId);
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: Dosya sunucuda bulunamadi`);
+                            }
+
+                            const contentLength = response.headers.get('content-length');
+                            if (contentLength) {
+                                const sizeInMB = (parseInt(contentLength) / 1024 / 1024).toFixed(2);
+                                console.log(`Dosya boyutu: ${sizeInMB} MB`);
+                            }
+
+                            const buffer = await response.arrayBuffer();
+                            await processFileContent(buffer, true);
+                            return; // Success, exit function
+
+                        } catch (err) {
+                            lastError = err;
+                            console.warn(`Deneme ${attempt} basarisiz:`, err.message);
+
+                            // If it's the last attempt or a permanent error, give up
+                            if (attempt === retries || err.name === 'AbortError' || err.message.includes('404')) {
+                                break;
+                            }
+
+                            // Wait before retrying (exponential backoff)
+                            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                        }
                     }
+
+                    // All retries failed
+                    console.error('Auto-load KMZ failed after all retries:', lastError);
+                    showSuccess('Uyari', `Dosya yuklenemedi: ${lastError?.message || 'Bilinmeyen hata'}`);
+                    kmzLoading.value = false;
+                    loadingMsg.value = '';
                 };
 
                 const openOcrMapModal = () => {
