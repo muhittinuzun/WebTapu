@@ -295,6 +295,69 @@
                             </div>
                             <div id="map"></div>
 
+                            <!-- Map Settings Floating Menu -->
+                            <div class="absolute bottom-6 start-6 z-[1000] flex flex-col items-start gap-2">
+                                <button @click="showMapSettings = !showMapSettings"
+                                    class="bg-white/95 backdrop-blur p-3 rounded-xl shadow-xl border border-slate-200 text-slate-700 hover:text-emerald-600 transition flex items-center gap-2 font-bold text-xs ring-1 ring-slate-200">
+                                    <i class="fa-solid fa-palette text-lg"></i>
+                                    <span>Görünüm Ayarları</span>
+                                </button>
+
+                                <transition name="modal">
+                                    <div v-if="showMapSettings"
+                                        class="bg-white/95 backdrop-blur p-5 rounded-2xl shadow-2xl border border-slate-200 w-64 animate-fade-in ring-1 ring-slate-200">
+                                        <div
+                                            class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                                            <h4 class="font-bold text-xs text-slate-800 uppercase tracking-wider">Harita
+                                                Stili</h4>
+                                            <button @click="showMapSettings = false"
+                                                class="text-slate-400 hover:text-red-500"><i
+                                                    class="fa-solid fa-xmark"></i></button>
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label
+                                                    class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Çizgi
+                                                    Rengi</label>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <button
+                                                        v-for="c in ['#e11d48', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#000000']"
+                                                        @click="mapStyle.color = c" :style="{ backgroundColor: c }"
+                                                        :class="['w-6 h-6 rounded-full border-2 transition', mapStyle.color === c ? 'border-emerald-500 scale-125' : 'border-transparent']">
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <div class="flex justify-between mb-1">
+                                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Çizgi
+                                                        Kalınlığı</label>
+                                                    <span class="text-[10px] font-mono text-slate-400">{{
+                                                        mapStyle.weight }}px</span>
+                                                </div>
+                                                <input type="range" v-model.number="mapStyle.weight" min="1" max="10"
+                                                    step="1"
+                                                    class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                                            </div>
+
+                                            <div>
+                                                <div class="flex justify-between mb-1">
+                                                    <label
+                                                        class="text-[10px] font-bold text-slate-500 uppercase">Şeffaflık
+                                                        (Dolgu)</label>
+                                                    <span class="text-[10px] font-mono text-slate-400">{{
+                                                        Math.round(mapStyle.fillOpacity * 100) }}%</span>
+                                                </div>
+                                                <input type="range" v-model.number="mapStyle.fillOpacity" min="0"
+                                                    max="1" step="0.1"
+                                                    class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </transition>
+                            </div>
+
                             <!-- KMZ Loading Overlay -->
                             <div v-if="kmzLoading"
                                 class="absolute inset-0 z-[2000] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-fade-in">
@@ -826,6 +889,12 @@
                 }); // OCR form data
                 const tempSelectedParcel = ref(null); // For map picker
                 const kmzLoading = ref(false); // New state for KMZ specific loading
+                const mapStyle = ref({
+                    color: '#e11d48', // Default Rose 600
+                    weight: 2,
+                    fillOpacity: 0.2
+                });
+                const showMapSettings = ref(false);
 
                 // Viewer State
                 const viewerScale = ref(1);
@@ -848,6 +917,13 @@
                     isMobileMenuOpen.value = false;
                     if (tab === 'dashboard') nextTick(() => map.value?.invalidateSize());
                 };
+
+                // Watch for map style changes to re-render
+                watch(mapStyle, () => {
+                    if (currentTab.value === 'dashboard' && map.value) {
+                        renderGeoJSON();
+                    }
+                }, { deep: true });
 
                 // 3. COMPUTED
                 const t = computed(() => translations[lang.value]);
@@ -920,12 +996,27 @@
                 };
 
                 const renderGeoJSON = () => {
-                    if (!map.value) return;
-                    if (geoJsonLayer.value) toRaw(map.value).removeLayer(toRaw(geoJsonLayer.value));
+                    const rawMap = toRaw(map.value);
+                    if (!rawMap) return;
+                    if (geoJsonLayer.value) rawMap.removeLayer(toRaw(geoJsonLayer.value));
+
                     const rawProperties = toRaw(properties.value);
-                    const featureCollection = { type: "FeatureCollection", features: rawProperties.map(p => ({ type: "Feature", properties: { id: p.id, ...p }, geometry: toRaw(p.geometry) })) };
+                    const featureCollection = {
+                        type: "FeatureCollection",
+                        features: rawProperties.map(p => ({
+                            type: "Feature",
+                            properties: { id: p.id, ...p },
+                            geometry: toRaw(p.geometry)
+                        }))
+                    };
+
                     geoJsonLayer.value = markRaw(L.geoJSON(featureCollection, {
-                        style: { color: '#dc2626', weight: 2, fillOpacity: 0.2, fillColor: '#dc2626' },
+                        style: {
+                            color: mapStyle.value.color,
+                            weight: mapStyle.value.weight,
+                            fillOpacity: mapStyle.value.fillOpacity,
+                            fillColor: mapStyle.value.color
+                        },
                         onEachFeature: (feature, layer) => {
                             layer.on('click', () => {
                                 const p = properties.value.find(x => x.id === feature.properties.id);
@@ -936,8 +1027,12 @@
                                 }
                             });
                         }
-                    }).addTo(toRaw(map.value)));
-                    try { const bounds = toRaw(geoJsonLayer.value).getBounds(); if (bounds.isValid()) toRaw(map.value).fitBounds(bounds); } catch (e) { }
+                    }).addTo(rawMap));
+
+                    try {
+                        const bounds = geoJsonLayer.value.getBounds();
+                        if (bounds.isValid()) rawMap.fitBounds(bounds);
+                    } catch (e) { }
                 };
 
                 const handleLogin = () => {
@@ -1250,8 +1345,10 @@
                         const kmlDom = new DOMParser().parseFromString(kmlText, 'text/xml');
                         const geoJson = toGeoJSON.kml(kmlDom);
 
-                        // Parse properties from GeoJSON
-                        properties.value = geoJson.features.map((f, index) => {
+                        // Parse properties from GeoJSON - Filter out Points (markers)
+                        const filteredFeatures = geoJson.features.filter(f => f.geometry && (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon' || f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'));
+
+                        properties.value = filteredFeatures.map((f, index) => {
                             const p = f.properties || {};
                             return {
                                 id: p.id || index + 1,
@@ -1270,8 +1367,13 @@
                         const rawMap = toRaw(map.value);
                         if (rawMap) {
                             if (geoJsonLayer.value) rawMap.removeLayer(toRaw(geoJsonLayer.value));
-                            geoJsonLayer.value = markRaw(L.geoJSON(geoJson, {
-                                style: { color: '#10b981', weight: 2, fillOpacity: 0.2 },
+                            geoJsonLayer.value = markRaw(L.geoJSON({ type: "FeatureCollection", features: filteredFeatures }, {
+                                style: {
+                                    color: mapStyle.value.color,
+                                    weight: mapStyle.value.weight,
+                                    fillOpacity: mapStyle.value.fillOpacity,
+                                    fillColor: mapStyle.value.color
+                                },
                                 onEachFeature: (feature, layer) => {
                                     layer.bindPopup(`<div class="p-3 font-sans text-right" dir="rtl">
                                         <h4 class="font-bold border-b pb-1 mb-2">Parsel: ${feature.properties.ada || '---'}/${feature.properties.parsel || '---'}</h4>
@@ -1366,7 +1468,7 @@
                     handleLogin, changeTab, getIcon, setLang, capitalize,
                     handleOcrUpload, openOcrPicker, handleFileUpload, openOcrMapModal, confirmOcrMapSelection, saveAndGenerateDeed, locateProperty,
                     resetViewer, handleViewerWheel, handleViewerMouseDown, handleViewerMouseMove, handleViewerMouseUp,
-                    kmzLoading
+                    kmzLoading, mapStyle, showMapSettings
                 };
             }
         }).mount('#app');
