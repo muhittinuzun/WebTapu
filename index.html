@@ -332,6 +332,19 @@
                                                     <input v-model="ocrForm.signature_date"
                                                         class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
+                                                <div class="col-span-2">
+                                                    <label
+                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Yevmiye
+                                                        No / İşlem Türü</label>
+                                                    <div class="grid grid-cols-2 gap-2">
+                                                        <input v-model="ocrForm.daily_register_no"
+                                                            placeholder="Yevmiye No"
+                                                            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                        <input v-model="ocrForm.transaction_type"
+                                                            placeholder="İşlem Türü"
+                                                            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -355,6 +368,13 @@
                                                     <input v-model="ocrForm.district"
                                                         class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
+                                                <div class="col-span-2">
+                                                    <label
+                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Müdürlük
+                                                        / Daire</label>
+                                                    <input v-model="ocrForm.directorate"
+                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                </div>
                                                 <div class="col-span-2 relative">
                                                     <label
                                                         class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ada
@@ -372,9 +392,13 @@
                                                 <div class="col-span-2">
                                                     <label
                                                         class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nitelik
-                                                        / Cins</label>
-                                                    <input v-model="ocrForm.property_type"
-                                                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                        / Cins / Yüzölçümü</label>
+                                                    <div class="grid grid-cols-2 gap-2">
+                                                        <input v-model="ocrForm.property_type" placeholder="Nitelik"
+                                                            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                        <input v-model="ocrForm.area_text" placeholder="Yüzölçümü"
+                                                            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
+                                                    </div>
                                                 </div>
                                                 <div class="col-span-2">
                                                     <label
@@ -503,7 +527,7 @@
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.area }}</td>
                                                 <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.area }} m²</td>
+                                                    modals.activeProp.area || modals.activeProp.area_text }} m²</td>
                                             </tr>
                                         </table>
                                     </div>
@@ -631,7 +655,20 @@
                 const ocrImage = ref(null);
                 const ocrScanning = ref(false);
                 const ocrData = ref(null);
-                const ocrForm = ref(null); // OCR form data
+                const ocrForm = ref({
+                    owner_name: '',
+                    signature_date: '',
+                    share_text: '',
+                    province: '',
+                    district: '',
+                    directorate: '',
+                    property_number: '',
+                    property_type: '',
+                    area_text: '',
+                    daily_register_no: '',
+                    transaction_type: '',
+                    description: ''
+                }); // OCR form data
                 const tempSelectedParcel = ref(null); // For map picker
 
                 // 2. HELPER FUNCTIONS
@@ -886,11 +923,15 @@
                             parsed.mulkiyet.malik = getV('owner_name') || 'Unknown';
                             parsed.mulkiyet.tarih = getV('signature_date') || getV('transaction_date');
                             parsed.mulkiyet.hisse = getV('share_text');
-                            parsed.baslik.bolge = getV('province') || getV('directorate') || getV('bolge');
-                            parsed.kimlik.bolge_semt = getV('district') || getV('office_or_circle') || getV('bolge_semt');
+                            parsed.baslik.bolge = getV('province') || getV('bolge');
+                            parsed.baslik.mudurluk = getV('directorate') || getV('office_or_circle');
+                            parsed.kimlik.bolge_semt = getV('district') || getV('bolge_semt');
                             parsed.kimlik.parsel_no = getV('property_number') || getV('parsel_no');
                             parsed.kimlik.cins_kisa = getV('property_type') || getV('cins_kisa');
                             parsed.kimlik.aciklama = getV('description') || getV('aciklama');
+                            parsed.kimlik.yuzolcumu = getV('area_text');
+                            parsed.mulkiyet.yevmiye = getV('daily_register_no');
+                            parsed.mulkiyet.islem_turu = getV('transaction_type');
 
                             console.log('OCR: Eşleşen Veri:', parsed);
 
@@ -902,8 +943,12 @@
                                 share_text: parsed.mulkiyet.hisse || '',
                                 province: parsed.baslik.bolge || '',
                                 district: parsed.kimlik.bolge_semt || '',
+                                directorate: parsed.baslik.mudurluk || '',
                                 property_number: parsed.kimlik.parsel_no || '',
                                 property_type: parsed.kimlik.cins_kisa || '',
+                                area_text: parsed.kimlik.yuzolcumu || '',
+                                daily_register_no: parsed.mulkiyet.yevmiye || '',
+                                transaction_type: parsed.mulkiyet.islem_turu || '',
                                 description: parsed.kimlik.aciklama || ''
                             };
                             showSuccess('Başarılı', 'Tapu verisi işlendi.');
