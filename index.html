@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="tr" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Suriye Tapu ve Kadastro Bilgi Sistemi (TAKBİS)</title>
+    <title>Suriye Tapu ve Kadastro Bilgi Sistemi (TAKBIS)</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,7 @@
     </script>
 
     <!-- Vue.js 3 -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -179,8 +179,8 @@
         <div v-if="!isLoggedIn" class="fixed inset-0 z-[10000] flex items-center justify-center login-pattern p-4"
             :dir="lang === 'ar' ? 'rtl' : 'ltr'">
             <div class="absolute top-6 right-6 flex gap-2 z-20">
-                <button @click="setLang('ar')"
-                    class="px-3 py-1 rounded text-xs font-bold transition bg-emerald-600 text-white">عربي</button>
+                <button @click="setLang('tr')"
+                    class="px-3 py-1 rounded text-xs font-bold transition bg-emerald-600 text-white">AR</button>
                 <button @click="setLang('tr')"
                     class="px-3 py-1 rounded text-xs font-bold transition bg-slate-800 text-slate-400">TR</button>
                 <button @click="setLang('en')"
@@ -207,7 +207,7 @@
                         <label class="block text-sm font-bold text-slate-700 mb-1">{{ t.lblPassword }}</label>
                         <input v-model="loginCreds.password" type="password"
                             class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-emerald-500 transition text-sm"
-                            placeholder="********">
+                            placeholder="••••••••">
                     </div>
 
                     <button type="submit" :disabled="loginProcessing"
@@ -242,14 +242,12 @@
                     <button v-for="tab in ['dashboard', 'properties', 'transfer', 'ocr']" @click="changeTab(tab)"
                         :class="currentTab === tab ? 'bg-emerald-700 text-white shadow-lg' : 'hover:bg-slate-800 hover:text-white'"
                         class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm font-medium"><i
-                            :class="getIcon(tab)" class="w-5 text-center text-lg"></i> {{ t['nav' + capitalize(tab)]
-                        }}</button>
+                            :class="getIcon(tab)" class="w-5 text-center text-lg"></i> {{ t['nav' + capitalize(tab)] }}</button>
                     <p class="px-3 text-[10px] font-bold text-slate-500 uppercase mb-2 mt-6">{{ t.menuServices }}</p>
                     <button v-for="tab in ['valuation', 'expropriation']" @click="changeTab(tab)"
                         :class="currentTab === tab ? 'bg-emerald-700 text-white shadow-lg' : 'hover:bg-slate-800 hover:text-white'"
                         class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-sm font-medium"><i
-                            :class="getIcon(tab)" class="w-5 text-center text-lg"></i> {{ t['nav' + capitalize(tab)]
-                        }}</button>
+                            :class="getIcon(tab)" class="w-5 text-center text-lg"></i> {{ t['nav' + capitalize(tab)] }}</button>
                 </nav>
             </aside>
 
@@ -262,8 +260,7 @@
                         <button @click="isMobileMenuOpen = !isMobileMenuOpen"
                             class="md:hidden text-slate-600 text-xl p-1"><i class="fa-solid fa-bars"></i></button>
                         <h2 class="text-sm md:text-lg font-bold text-slate-800 flex items-center gap-2 truncate"><span
-                                class="w-1.5 h-5 bg-red-600 rounded-full hidden md:block"></span> {{ t[currentTab +
-                            'Title'] || t.navMap }}</h2>
+                                class="w-1.5 h-5 bg-red-600 rounded-full hidden md:block"></span> {{ t[currentTab + 'Title'] || t.navMap }}</h2>
                     </div>
                     <div class="flex items-center gap-3" v-if="currentTab === 'dashboard'">
                         <div class="relative group">
@@ -299,7 +296,7 @@
                                 <button @click="showMapSettings = !showMapSettings"
                                     class="bg-white/95 backdrop-blur p-3 rounded-xl shadow-xl border border-slate-200 text-slate-700 hover:text-emerald-600 transition flex items-center gap-2 font-bold text-xs ring-1 ring-slate-200">
                                     <i class="fa-solid fa-palette text-lg"></i>
-                                    <span>Görünüm Ayarları</span>
+                                    <span>Gorunum Ayarlari</span>
                                 </button>
 
                                 <transition name="modal">
@@ -317,7 +314,7 @@
                                         <div class="space-y-4">
                                             <div>
                                                 <label
-                                                    class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Çizgi
+                                                    class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Cizgi
                                                     Rengi</label>
                                                 <div class="flex flex-wrap gap-2">
                                                     <button
@@ -330,10 +327,9 @@
 
                                             <div>
                                                 <div class="flex justify-between mb-1">
-                                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Çizgi
-                                                        Kalınlığı</label>
-                                                    <span class="text-[10px] font-mono text-slate-400">{{
-                                                        mapStyle.weight }}px</span>
+                                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Cizgi
+                                                        Kalinligi</label>
+                                                    <span class="text-[10px] font-mono text-slate-400">{{ mapStyle.weight }}px</span>
                                                 </div>
                                                 <input type="range" v-model.number="mapStyle.weight" min="1" max="10"
                                                     step="1"
@@ -343,10 +339,9 @@
                                             <div>
                                                 <div class="flex justify-between mb-1">
                                                     <label
-                                                        class="text-[10px] font-bold text-slate-500 uppercase">Şeffaflık
+                                                        class="text-[10px] font-bold text-slate-500 uppercase">Seffaflik
                                                         (Dolgu)</label>
-                                                    <span class="text-[10px] font-mono text-slate-400">{{
-                                                        Math.round(mapStyle.fillOpacity * 100) }}%</span>
+                                                    <span class="text-[10px] font-mono text-slate-400">{{ Math.round(mapStyle.fillOpacity * 100) }}%</span>
                                                 </div>
                                                 <input type="range" v-model.number="mapStyle.fillOpacity" min="0"
                                                     max="1" step="0.1"
@@ -365,10 +360,8 @@
                                         class="w-12 h-12 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin">
                                     </div>
                                     <div class="text-center">
-                                        <p class="text-white font-bold text-sm tracking-widest uppercase mb-1">Katman
-                                            Yükleniyor</p>
-                                        <p class="text-emerald-400 text-xs font-medium">{{ loadingMsg || 'KMZ
-                                            İşleniyor...' }}</p>
+                                        <p class="text-white font-bold text-sm tracking-widest uppercase mb-1">Katman Yukleniyor</p>
+                                        <p class="text-emerald-400 text-xs font-medium">{{ loadingMsg || 'KMZ Isleniyor...' }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -385,8 +378,7 @@
                                 class="w-full md:w-1/2 bg-slate-800 p-4 flex flex-col relative border-e border-slate-700">
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-white font-bold flex items-center gap-2"><i
-                                            class="fa-solid fa-file-contract text-emerald-400"></i> {{ t.ocrOriginalDoc
-                                        }}</h3>
+                                            class="fa-solid fa-file-contract text-emerald-400"></i> {{ t.ocrOriginalDoc }}</h3>
                                     <div class="flex gap-2">
                                         <input type="file" ref="ocrInput" @change="handleOcrUpload"
                                             accept="image/*,.pdf" class="hidden">
@@ -438,7 +430,7 @@
                                     </div>
 
                                     <div v-else class="relative transition-transform duration-75 ease-out"
-                                        :style="{ transform: 'translate(' + viewerPanX + 'px, ' + viewerPanY + 'px) scale(' + viewerScale + ')' }">
+                                        :style="{ transform: `translate(${viewerPanX}px, ${viewerPanY}px) scale(${viewerScale})` }">
                                         <img :src="ocrImage"
                                             class="max-w-full max-h-[80vh] shadow-2xl pointer-events-none">
                                     </div>
@@ -446,7 +438,12 @@
                                     <!-- Selection Box -->
                                     <div v-if="isSelecting"
                                         class="absolute border-2 border-emerald-400 bg-emerald-400/20 z-20 pointer-events-none"
-                                        :style="{ top: selectionRect.top + 'px', left: selectionRect.left + 'px', width: selectionRect.width + 'px', height: selectionRect.height + 'px' }">
+                                        :style="{ 
+                                                top: selectionRect.top + 'px', 
+                                                left: selectionRect.left + 'px', 
+                                                width: selectionRect.width + 'px', 
+                                                height: selectionRect.height + 'px' 
+                                            }">
                                     </div>
 
                                     <!-- Scanning Effect -->
@@ -462,8 +459,7 @@
                                     <div class="flex justify-between items-start">
                                         <div>
                                             <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                                <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> {{
-                                                t.ocrAnalysisTitle }}
+                                                <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i> {{ t.ocrAnalysisTitle }}
                                             </h3>
                                             <p class="text-xs text-slate-500 mt-1">{{ t.ocrAnalysisSubtitle }}</p>
                                         </div>
@@ -485,23 +481,23 @@
                                             <p class="text-sm font-bold text-slate-600">AI Belgeyi Analiz Ediyor...</p>
                                             <p class="text-xs text-slate-400 mt-1">OCR Motoru: Google Cloud Vision v2
                                             </p>
-                                            <p class="text-xs text-slate-400">Veri İşleme: n8n Workflow</p>
+                                            <p class="text-xs text-slate-400">Veri Isleme: n8n Workflow</p>
                                         </div>
                                     </div>
 
                                     <!-- Extracted Data Form -->
                                     <div v-else-if="ocrForm" class="space-y-6 animate-fade-in">
 
-                                        <!-- Mülkiyet Bilgileri -->
+                                        <!-- Mulkiyet Bilgileri -->
                                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative">
                                             <div
                                                 class="absolute -top-3 right-4 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">
-                                                Mülkiyet</div>
+                                                Mulkiyet</div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <div class="col-span-2">
                                                     <label
                                                         class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Malik
-                                                        Adı Soyadı</label>
+                                                        Adi Soyadi</label>
                                                     <input v-model="ocrForm.owner_name"
                                                         class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
                                                 </div>
@@ -513,7 +509,7 @@
                                                 </div>
                                                 <div>
                                                     <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">İşlem
+                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Islem
                                                         Tarihi</label>
                                                     <input v-model="ocrForm.signature_date"
                                                         class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
@@ -521,42 +517,42 @@
                                                 <div class="col-span-2">
                                                     <label
                                                         class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Yevmiye
-                                                        No / İşlem Türü</label>
+                                                        No / Islem Turu</label>
                                                     <div class="grid grid-cols-2 gap-2">
                                                         <input v-model="ocrForm.daily_register_no"
                                                             placeholder="Yevmiye No"
                                                             class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                         <input v-model="ocrForm.transaction_type"
-                                                            placeholder="İşlem Türü"
+                                                            placeholder="Islem Turu"
                                                             class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Taşınmaz Kimliği -->
+                                        <!-- Tasinmaz Kimligi -->
                                         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative">
                                             <div
                                                 class="absolute -top-3 right-4 bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200">
-                                                Taşınmaz Kimliği</div>
+                                                Tasinmaz Kimligi</div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <div>
                                                     <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">İl
-                                                        / Bölge</label>
+                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Il
+                                                        / Bolge</label>
                                                     <input v-model="ocrForm.province"
                                                         class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
                                                 <div>
                                                     <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">İlçe
+                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ilce
                                                         / Semt</label>
                                                     <input v-model="ocrForm.district"
                                                         class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                 </div>
                                                 <div class="col-span-2">
                                                     <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Müdürlük
+                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Mudurluk
                                                         / Daire</label>
                                                     <input v-model="ocrForm.directorate"
                                                         class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
@@ -570,25 +566,25 @@
                                                             class="flex-1 p-2.5 bg-yellow-50 border border-yellow-300 rounded-lg text-sm font-black text-slate-900 tracking-wider">
                                                         <button @click="openOcrMapModal"
                                                             class="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700 transition shadow flex items-center justify-center gap-2 text-xs font-bold"
-                                                            title="Haritada Eşleştir">
-                                                            <i class="fa-solid fa-map-location-dot"></i> Eşleştir
+                                                            title="Haritada Eslestir">
+                                                            <i class="fa-solid fa-map-location-dot"></i> Eslestir
                                                         </button>
                                                     </div>
                                                 </div>
                                                 <div class="col-span-2">
                                                     <label
                                                         class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nitelik
-                                                        / Cins / Yüzölçümü</label>
+                                                        / Cins / Yuzolcumu</label>
                                                     <div class="grid grid-cols-2 gap-2">
                                                         <input v-model="ocrForm.property_type" placeholder="Nitelik"
                                                             class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
-                                                        <input v-model="ocrForm.area_text" placeholder="Yüzölçümü"
+                                                        <input v-model="ocrForm.area_text" placeholder="Yuzolcumu"
                                                             class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700">
                                                     </div>
                                                 </div>
                                                 <div class="col-span-2">
                                                     <label
-                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Açıklama</label>
+                                                        class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Aciklama</label>
                                                     <textarea v-model="ocrForm.description" rows="2"
                                                         class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 resize-none"></textarea>
                                                 </div>
@@ -598,7 +594,7 @@
                                         <div class="pt-2">
                                             <button @click="saveAndGenerateDeed"
                                                 class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition flex items-center justify-center gap-3 shadow-lg transform active:scale-95">
-                                                <i class="fa-solid fa-file-signature"></i> Onayla ve Tapu Oluştur
+                                                <i class="fa-solid fa-file-signature"></i> Onayla ve Tapu Olustur
                                             </button>
                                         </div>
                                     </div>
@@ -607,7 +603,7 @@
                                     <div v-else
                                         class="flex flex-col items-center justify-center h-full text-slate-400 opacity-50">
                                         <i class="fa-solid fa-arrow-right-to-bracket text-4xl mb-4 text-slate-300"></i>
-                                        <p>Analiz için soldan bir belge yükleyin.</p>
+                                        <p>Analiz icin soldan bir belge yukleyin.</p>
                                     </div>
                                 </div>
                             </div>
@@ -625,8 +621,7 @@
                                     <i class="fa-solid fa-hotel"></i>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">{{
-                                        t.totalProperties }}</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">{{ t.totalProperties }}</p>
                                     <p class="text-xl font-black text-slate-800">{{ properties.length }}</p>
                                 </div>
                             </div>
@@ -638,7 +633,7 @@
                                 </div>
                                 <div>
                                     <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">TOPLAM
-                                        DEĞER</p>
+                                        DEGER</p>
                                     <p class="text-xl font-black text-slate-800">{{ totalValue }}</p>
                                 </div>
                             </div>
@@ -650,16 +645,11 @@
                                 <table class="w-full text-start border-collapse min-w-[700px]">
                                     <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                                         <tr>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.colParcel }}</th>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.colLocation }}</th>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.colType }}</th>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.owner }}</th>
-                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{
-                                                t.colValue }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.colParcel }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.colLocation }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.colType }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.owner }}</th>
+                                            <th class="p-4 text-start text-[10px] font-bold text-slate-500 uppercase">{{ t.colValue }}</th>
                                             <th class="p-4 text-center text-[10px] font-bold text-slate-500 uppercase">
                                                 {{ t.colAction }}</th>
                                         </tr>
@@ -670,18 +660,15 @@
                                             <td class="p-4">
                                                 <div class="flex items-center gap-2">
                                                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                                                    <span class="text-sm font-bold text-slate-800">{{ p.ada }}/{{
-                                                        p.parsel }}</span>
+                                                    <span class="text-sm font-bold text-slate-800">{{ p.ada }}/{{ p.parsel }}</span>
                                                 </div>
                                             </td>
                                             <td class="p-4 text-xs text-slate-600">{{ p.location }}</td>
                                             <td class="p-4 text-xs">
-                                                <span class="bg-slate-100 px-2 py-0.5 rounded-full text-slate-600">{{
-                                                    p.type }}</span>
+                                                <span class="bg-slate-100 px-2 py-0.5 rounded-full text-slate-600">{{ p.type }}</span>
                                             </td>
                                             <td class="p-4 text-xs font-bold text-slate-800">{{ p.owner }}</td>
-                                            <td class="p-4 text-sm font-black text-emerald-700">${{ (p.price ||
-                                                0).toLocaleString() }}</td>
+                                            <td class="p-4 text-sm font-black text-emerald-700">${{ (p.price || 0).toLocaleString() }}</td>
                                             <td class="p-4 text-center">
                                                 <button
                                                     @click="selectedPropertyId = p.id; modals.activeProp = p; modals.deed = true"
@@ -706,7 +693,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-2xl font-black text-slate-800">{{ t.transferTitle }}</h3>
-                                    <p class="text-slate-500 text-sm">Resmi mülkiyet devri başlatmak için bilgileri
+                                    <p class="text-slate-500 text-sm">Resmi mulkiyet devri baslatmak icin bilgileri
                                         doldurun.</p>
                                 </div>
                             </div>
@@ -714,17 +701,14 @@
                             <div class="space-y-6">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{
-                                            t.labelSelectProp }}</label>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.labelSelectProp }}</label>
                                         <select v-model="selectedPropertyId"
                                             class="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 outline-none focus:border-emerald-500 transition font-bold text-slate-800">
-                                            <option v-for="p in properties" :key="p.id" :value="p.id">{{ p.ada }}/{{
-                                                p.parsel }} - {{ p.location }}</option>
+                                            <option v-for="p in properties" :key="p.id" :value="p.id">{{ p.ada }}/{{ p.parsel }} - {{ p.location }}</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{
-                                            t.labelBuyerID }}</label>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.labelBuyerID }}</label>
                                         <input type="text" placeholder="9XXXXXXXXXX"
                                             class="w-full border-2 border-slate-100 rounded-xl p-3 text-slate-800 outline-none focus:border-emerald-500 transition font-bold">
                                     </div>
@@ -733,20 +717,19 @@
                                 <div v-if="selectedProperty"
                                     class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 space-y-4 animate-fade-in">
                                     <h4 class="font-bold text-emerald-900 flex items-center gap-2"><i
-                                            class="fa-solid fa-circle-info"></i> Seçili Mülk Özeti</h4>
+                                            class="fa-solid fa-circle-info"></i> Secili Mulk Ozeti</h4>
                                     <div class="grid grid-cols-3 gap-4 text-xs">
                                         <div>
-                                            <p class="text-emerald-600/60 font-bold uppercase">MALİK</p>
+                                            <p class="text-emerald-600/60 font-bold uppercase">MALIK</p>
                                             <p class="font-bold text-emerald-900">{{ selectedProperty.owner }}</p>
                                         </div>
                                         <div>
                                             <p class="text-emerald-600/60 font-bold uppercase">ALAN</p>
-                                            <p class="font-bold text-emerald-900">{{ selectedProperty.area }} m²</p>
+                                            <p class="font-bold text-emerald-900">{{ selectedProperty.area }} m2</p>
                                         </div>
                                         <div>
-                                            <p class="text-emerald-600/60 font-bold uppercase">RAYİÇ</p>
-                                            <p class="font-bold text-emerald-900">${{
-                                                selectedProperty.price.toLocaleString() }}</p>
+                                            <p class="text-emerald-600/60 font-bold uppercase">RAYIC</p>
+                                            <p class="font-bold text-emerald-900">${{ selectedProperty.price.toLocaleString() }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -768,8 +751,7 @@
                                     <i class="fa-solid fa-calculator text-emerald-600"></i> {{ t.navValuation }}
                                 </h3>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.colCity
-                                        }}</label>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.colCity }}</label>
                                     <select v-model="valRegion"
                                         class="w-full border-2 border-slate-100 rounded-xl p-3 bg-slate-50 font-bold">
                                         <option value="mezzeh">Damascus / Mezzeh</option>
@@ -779,21 +761,20 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-2">{{ t.area }}
-                                        (m²)</label>
+                                        (m2)</label>
                                     <input v-model.number="valArea" type="number"
                                         class="w-full border-2 border-slate-100 rounded-xl p-3 font-bold">
                                 </div>
                                 <button
-                                    class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition shadow-lg">{{
-                                    t.btnRecalculate }}</button>
+                                    class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition shadow-lg">{{ t.btnRecalculate }}</button>
                             </div>
                             <div
                                 class="bg-slate-950 p-8 rounded-3xl text-white flex flex-col items-center justify-center text-center space-y-4">
                                 <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest">{{ t.estValue }}
                                 </p>
                                 <p class="text-5xl font-black text-white">{{ valuationResult }}</p>
-                                <p class="text-[10px] text-slate-500 max-w-[200px] italic">Bu değer piyasa ortalamaları
-                                    ve konuma göre otomatik hesaplanmıştır.</p>
+                                <p class="text-[10px] text-slate-500 max-w-[200px] italic">Bu deger piyasa ortalamalari
+                                    ve konuma gore otomatik hesaplanmistir.</p>
                             </div>
                         </div>
                     </div>
@@ -813,8 +794,8 @@
                             </div>
                             <div class="bg-red-50 p-8 rounded-2xl border-2 border-dashed border-red-200 text-center">
                                 <i class="fa-solid fa-shield-slash text-4xl text-red-300 mb-4"></i>
-                                <p class="text-slate-600 font-bold italic">Sorgulanan bölgede aktif bir kamulaştırma
-                                    kararı veya mülkiyet şerhi bulunmamaktadır.</p>
+                                <p class="text-slate-600 font-bold italic">Sorgulanan bolgede aktif bir kamulastirma
+                                    karari veya mulkiyet serhi bulunmamaktadir.</p>
                             </div>
                         </div>
                     </div>
@@ -830,7 +811,7 @@
                     class="bg-white w-full max-w-4xl h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col relative">
                     <div class="p-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
                         <h3 class="font-bold flex items-center gap-2"><i
-                                class="fa-solid fa-map-pin text-emerald-400"></i> Parsel Seçimi</h3>
+                                class="fa-solid fa-map-pin text-emerald-400"></i> Parsel Secimi</h3>
                         <button @click="modals.ocrMap = false" class="hover:text-red-400 transition"><i
                                 class="fa-solid fa-xmark text-xl"></i></button>
                     </div>
@@ -840,11 +821,11 @@
 
                         <div
                             class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[500] bg-white px-6 py-3 rounded-full shadow-xl border border-slate-200 flex gap-4 items-center">
-                            <p class="text-sm font-bold text-slate-700" v-if="tempSelectedParcel">Seçili: <span
+                            <p class="text-sm font-bold text-slate-700" v-if="tempSelectedParcel">Secili: <span
                                     class="text-emerald-600">#{{ tempSelectedParcel }}</span></p>
-                            <p class="text-sm text-slate-400" v-else>Lütfen haritadan bir parsel seçin</p>
+                            <p class="text-sm text-slate-400" v-else>Lutfen haritadan bir parsel secin</p>
                             <button @click="confirmOcrMapSelection" :disabled="!tempSelectedParcel"
-                                class="bg-slate-900 text-white px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50 hover:bg-slate-800 transition">Seçimi
+                                class="bg-slate-900 text-white px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50 hover:bg-slate-800 transition">Secimi
                                 Onayla</button>
                         </div>
                     </div>
@@ -864,9 +845,8 @@
                             <i class="fa-solid fa-location-crosshairs"></i>
                         </div>
                         <div>
-                            <h3 class="text-xl font-black text-slate-800">Parsel İşlemi Seçin</h3>
-                            <p class="text-slate-500 text-sm mt-1" v-if="modals.activeProp">#{{ modals.activeProp.ada
-                                }}/{{ modals.activeProp.parsel }} nolu parsel için ne yapmak istersiniz?</p>
+                            <h3 class="text-xl font-black text-slate-800">Parsel Islemi Secin</h3>
+                            <p class="text-slate-500 text-sm mt-1" v-if="modals.activeProp">#{{ modals.activeProp.ada }}/{{ modals.activeProp.parsel }} nolu parsel icin ne yapmak istersiniz?</p>
                         </div>
                         <div class="grid grid-cols-1 gap-3">
                             <button @click="modals.parcelAction = false; modals.deed = true"
@@ -878,7 +858,7 @@
                                     </div>
                                     <div>
                                         <p class="text-xs font-bold text-slate-800">Tapu Senedi</p>
-                                        <p class="text-[10px] text-slate-400">Resmi kayıtları görüntüle</p>
+                                        <p class="text-[10px] text-slate-400">Resmi kayitlari goruntule</p>
                                     </div>
                                 </div>
                                 <i
@@ -893,7 +873,7 @@
                                     </div>
                                     <div>
                                         <p class="text-xs font-bold text-slate-800">Yapay Zeka Analizi</p>
-                                        <p class="text-[10px] text-slate-400">Yatırım ve çevre analizi</p>
+                                        <p class="text-[10px] text-slate-400">Yatirim ve cevre analizi</p>
                                     </div>
                                 </div>
                                 <i
@@ -931,15 +911,14 @@
                                 <h3 class="text-2xl font-black text-slate-900">Yapay Zeka Gayrimenkul Analizi</h3>
                                 <p class="text-slate-500 font-medium flex items-center gap-2">
                                     <i class="fa-solid fa-location-dot text-blue-500"></i>
-                                    {{ modals.activeProp?.location }} | Ada/Parsel: {{ modals.activeProp?.ada }}/{{
-                                    modals.activeProp?.parsel }}
+                                    {{ modals.activeProp?.location }} | Ada/Parsel: {{ modals.activeProp?.ada }}/{{ modals.activeProp?.parsel }}
                                 </p>
                             </div>
                             <div
                                 class="ms-auto flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100">
                                 <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                                <span class="text-xs font-black text-emerald-700 uppercase tracking-tighter">AI GÜNCEL
-                                    VERİ</span>
+                                <span class="text-xs font-black text-emerald-700 uppercase tracking-tighter">AI GUNCEL
+                                    VERI</span>
                             </div>
                         </div>
                     </div>
@@ -952,8 +931,8 @@
                                 class="md:col-span-2 bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-6">
                                 <div class="flex justify-between items-center">
                                     <h4 class="font-black text-slate-800 flex items-center gap-2 italic">
-                                        <i class="fa-solid fa-chart-line text-blue-600"></i> Fiyat Değişim Trendi (3
-                                        Yıl)
+                                        <i class="fa-solid fa-chart-line text-blue-600"></i> Fiyat Degisim Trendi (3
+                                        Yil)
                                     </h4>
                                     <span class="text-emerald-500 font-black text-lg">+32.4%</span>
                                 </div>
@@ -963,7 +942,7 @@
                                         :style="{ height: v + '%' }">
                                         <div
                                             class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
-                                            ${{ (1200 + v * 10).toLocaleString() }}/m²
+                                            ${{ (1200 + v * 10).toLocaleString() }}/m2
                                         </div>
                                     </div>
                                 </div>
@@ -972,7 +951,7 @@
                                     <span>2023 Q1</span>
                                     <span>2024 Q1</span>
                                     <span>2025 Q1</span>
-                                    <span>GÜNCEL</span>
+                                    <span>GUNCEL</span>
                                 </div>
                             </div>
 
@@ -995,28 +974,27 @@
                                         <span class="text-4xl font-black">8.9</span>
                                     </div>
                                 </div>
-                                <p class="text-sm font-medium text-slate-400 px-4">Bu bölge önümüzdeki 12 ay içinde
-                                    yüksek değer artış potansiyeli taşıyor.</p>
+                                <p class="text-sm font-medium text-slate-400 px-4">Bu bolge onumuzdeki 12 ay icinde
+                                    yuksek deger artis potansiyeli tasiyor.</p>
                             </div>
                         </div>
 
                         <!-- Analysis Details -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <!-- Çevresel Analiz -->
+                            <!-- Cevresel Analiz -->
                             <div class="space-y-4">
                                 <h4 class="font-black text-slate-800 flex items-center gap-2">
-                                    <i class="fa-solid fa-map-location text-emerald-600"></i> Çevresel Analiz & İmkanlar
+                                    <i class="fa-solid fa-map-location text-emerald-600"></i> Cevresel Analiz & Imkanlar
                                 </h4>
                                 <div class="grid grid-cols-1 gap-3">
                                     <div v-for="item in aiAmenities" :key="item.label"
                                         class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between group hover:border-blue-200 transition">
                                         <div class="flex items-center gap-4">
-                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-slate-100 group-hover:scale-110 transition"
+                                            <div :class="`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-slate-100 group-hover:scale-110 transition`"
                                                 :style="getAmenityStyle(item.shadow)">
-                                                <i :class="'fa-solid ' + item.icon"></i>
+                                                <i :class="`fa-solid ${item.icon}`"></i>
                                             </div>
-                                            <span class="font-bold text-slate-700 text-sm italic">{{ item.label
-                                                }}</span>
+                                            <span class="font-bold text-slate-700 text-sm italic">{{ item.label }}</span>
                                         </div>
                                         <span class="text-xs font-black text-slate-400">{{ item.dist }}</span>
                                     </div>
@@ -1026,7 +1004,7 @@
                             <!-- AI Insights -->
                             <div class="space-y-4 text-start">
                                 <h4 class="font-black text-slate-800 flex items-center gap-2 italic">
-                                    <i class="fa-solid fa-lightbulb text-amber-500"></i> Yapay Zeka Öngörüleri
+                                    <i class="fa-solid fa-lightbulb text-amber-500"></i> Yapay Zeka Ongoruleri
                                 </h4>
                                 <div
                                     class="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-4 h-full">
@@ -1036,17 +1014,17 @@
                                                 class="shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xs">
                                                 1</div>
                                             <p class="text-sm text-slate-600 font-medium italic"><span
-                                                    class="font-black text-slate-900">Şehir Planı:</span> Belediyenin
-                                                yeni metro hattı projesi bu parselin 500m ilerisinden geçecektir. Bu
-                                                durum ticari değeri %15 artırabilir.</p>
+                                                    class="font-black text-slate-900">Sehir Plani:</span> Belediyenin
+                                                yeni metro hatti projesi bu parselin 500m ilerisinden gececektir. Bu
+                                                durum ticari degeri %15 artirabilir.</p>
                                         </div>
                                         <div class="flex gap-4">
                                             <div
                                                 class="shrink-0 w-8 h-8 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-xs">
                                                 2</div>
                                             <p class="text-sm text-slate-600 font-medium italic"><span
-                                                    class="font-black text-slate-900">Demografik:</span> Bölgede genç
-                                                nüfusu ve beyaz yaka çalışan oranı son 2 yılda %12 artış göstermiştir.
+                                                    class="font-black text-slate-900">Demografik:</span> Bolgede genc
+                                                nufusu ve beyaz yaka calisan orani son 2 yilda %12 artis gostermistir.
                                             </p>
                                         </div>
                                         <div class="flex gap-4">
@@ -1054,14 +1032,14 @@
                                                 class="shrink-0 w-8 h-8 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center text-xs">
                                                 3</div>
                                             <p class="text-sm text-slate-600 font-medium italic"><span
-                                                    class="font-black text-slate-900">Risk Analizi:</span> Zemin yapısı
-                                                stabil olup, sel veya heyelan riski %2'nin altındadır.</p>
+                                                    class="font-black text-slate-900">Risk Analizi:</span> Zemin yapisi
+                                                stabil olup, sel veya heyelan riski %2'nin altindadir.</p>
                                         </div>
                                     </div>
                                     <div class="mt-8 pt-8 border-t border-slate-100 flex items-center justify-between">
                                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Analiz
-                                            Başarı Oranı</p>
-                                        <p class="text-xs font-black text-blue-600">%94 Doğruluk</p>
+                                            Basari Orani</p>
+                                        <p class="text-xs font-black text-blue-600">%94 Dogruluk</p>
                                     </div>
                                 </div>
                             </div>
@@ -1116,13 +1094,11 @@
                                         <table class="w-full text-sm font-serif border-collapse">
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500 w-1/3">{{ t.colCity }}</td>
-                                                <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.location }}</td>
+                                                <td class="py-2 font-bold text-lg text-slate-900">{{ modals.activeProp.location }}</td>
                                             </tr>
                                             <tr v-if="modals.activeProp.directorate" class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">Müdürlük</td>
-                                                <td class="py-2 font-bold text-slate-900">{{
-                                                    modals.activeProp.directorate }}</td>
+                                                <td class="py-2 text-slate-500">Mudurluk</td>
+                                                <td class="py-2 font-bold text-slate-900">{{ modals.activeProp.directorate }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.colParcel }}</td>
@@ -1132,13 +1108,11 @@
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.colType }}</td>
-                                                <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.type }}</td>
+                                                <td class="py-2 font-bold text-lg text-slate-900">{{ modals.activeProp.type }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.area }}</td>
-                                                <td class="py-2 font-bold text-lg text-slate-900">{{
-                                                    modals.activeProp.area_text }} m²</td>
+                                                <td class="py-2 font-bold text-lg text-slate-900">{{ modals.activeProp.area_text }} m2</td>
                                             </tr>
                                         </table>
                                     </div>
@@ -1150,42 +1124,36 @@
                                         <table class="w-full text-sm font-serif border-collapse">
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500 w-1/3">{{ t.ownerName }}</td>
-                                                <td class="py-2 font-bold text-xl text-slate-900">{{
-                                                    modals.activeProp.owner_name }}</td>
+                                                <td class="py-2 font-bold text-xl text-slate-900">{{ modals.activeProp.owner_name }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">Hisse</td>
-                                                <td class="py-2 font-bold text-slate-900">{{
-                                                    modals.activeProp.share_text || 'Tamamı (1/1)' }}</td>
+                                                <td class="py-2 font-bold text-slate-900">{{ modals.activeProp.share_text || 'Tamami (1/1)' }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
-                                                <td class="py-2 text-slate-500">İşlem Detayı</td>
+                                                <td class="py-2 text-slate-500">Islem Detayi</td>
                                                 <td class="py-2 text-slate-900">
-                                                    <span class="font-bold">{{ modals.activeProp.transaction_type ||
-                                                        'Kayıt' }}</span>
+                                                    <span class="font-bold">{{ modals.activeProp.transaction_type || 'Kayit' }}</span>
                                                     <br>
-                                                    <span class="text-xs text-slate-500">Yevmiye: {{
-                                                        modals.activeProp.daily_register_no || '---' }}</span>
+                                                    <span class="text-xs text-slate-500">Yevmiye: {{ modals.activeProp.daily_register_no || '---' }}</span>
                                                 </td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">Tarih</td>
-                                                <td class="py-2 font-bold text-slate-900">{{
-                                                    modals.activeProp.signature_date }}</td>
+                                                <td class="py-2 font-bold text-slate-900">{{ modals.activeProp.signature_date }}</td>
                                             </tr>
                                             <tr class="border-b border-slate-300">
                                                 <td class="py-2 text-slate-500">{{ t.electronicValidation }}</td>
                                                 <td class="py-2 font-mono text-slate-900 tracking-widest">
-                                                    SY-{{ modals.activeProp.daily_register_no ||
-                                                    Math.floor(Math.random()*900000)+100000 }}
+                                                    SY-{{ modals.activeProp.daily_register_no || Math.floor(Math.random()*900000)+100000 }}
                                                 </td>
                                             </tr>
                                         </table>
                                         <div class="mt-6 flex justify-end">
                                             <div class="text-center">
-                                                <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SYRIAN-DEED-' + modals.activeProp.ada + '-' + modals.activeProp.parsel"
+                                                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SYRIAN-DEED-${modals.activeProp.ada}-${modals.activeProp.parsel}`"
                                                     class="w-24 h-24 border-2 border-slate-900 p-1 mb-1">
-                                                <p class="text-[8px] font-mono text-slate-500">E-DEVLET DOĞRULAMA</p>
+                                                <p class="text-[8px] font-mono text-slate-500">E-DEVLET DOGRULAMA</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1213,7 +1181,7 @@
                                 <div class="absolute bottom-4 left-4 no-print flex gap-2">
                                     <button onclick="window.print()"
                                         class="bg-slate-800 text-white px-4 py-2 rounded shadow hover:bg-slate-700 text-xs font-bold"><i
-                                            class="fa-solid fa-print"></i> Yazdır</button>
+                                            class="fa-solid fa-print"></i> Yazdir</button>
                                 </div>
                             </div>
                         </div>
@@ -1231,252 +1199,36 @@
 
     </div>
 
-
     <script>
         const { createApp, ref, computed, onMounted, nextTick, watch, markRaw, toRaw } = Vue;
 
         const translations = {
             tr: {
-                loading: 'YUKLENIYOR...',
-                loadingMsg: 'Suriye CBS Cekirdegine Baglaniyor...',
-                loginSystemName: 'Suriye Tapu ve Kadastro Bilgi Sistemi',
-                loginSubtitle: 'TAKBİS - Resmi Giris Portali',
-                lblUsername: 'Kullanici Adi',
-                lblPassword: 'Sifre',
-                btnLogin: 'Giris Yap',
-                btnUploadKMZ: 'KMZ Yukle',
-                menuGeneral: 'GENEL ISLEMLER',
-                menuServices: 'HIZMETLER',
-                menuAdmin: 'YONETICI & DENETIM',
-                navMap: 'Harita & CBS',
-                navProperties: 'Mulk Listesi',
-                navTransfer: 'Tapu Devir/Satis',
-                navValuation: 'Deger Hesapla',
-                navExpropriation: 'Kamulastirma',
-                navLogs: 'Denetim Loglari',
-                navOcr: 'Akilli Tapu (AI)',
-                searchPlaceholder: 'Ada/Parsel, Koordinat, Konum...',
-                totalProperties: 'TOPLAM MULK',
-                pendingApps: 'BEKLEYEN',
-                riskCount: 'RISKLI',
-                dashboardTitle: 'CBS Paneli',
-                propertiesTitle: 'Mulk Listesi',
-                propertyListTitle: 'Tasinmaz Kayitlari',
-                transferTitle: 'RESMI TAPU DEVIR ISLEMI',
-                ocrTitle: 'Akilli Tapu (AI)',
-                valuationTitle: 'Deger Hesaplama',
-                expropriationTitle: 'Kamulastirma Sorgusu',
-                colParcel: 'Ada/Parsel',
-                colLocation: 'Konum',
-                colType: 'Nitelik',
-                colValue: 'Rayic Bedel',
-                colAction: 'Islem',
-                owner: 'Malik',
-                btnViewDeed: 'Tapu',
-                exportPdf: 'PDF Indir',
-                typeSale: 'Satis',
-                typeInheritance: 'Miras',
-                labelSelectProp: 'Mulk Seciniz',
-                labelBuyerID: 'Alici Kimlik No',
-                btnStartApp: 'Basvuru Yap',
-                modalDeedTitle: 'TAPU SENEDI',
-                colCity: 'Il/Ilce',
-                modalAppTitle: 'Randevu Olustur',
-                labelDate: 'Tarih Seciniz',
-                btnConfirm: 'Onayla',
-                btnCheck: 'SORGULA',
-                btnRecalculate: 'Yeniden Hesapla',
-                estValue: 'Tahmini Deger',
-                area: 'Yuzolcumu',
-                age: 'Bina Yasi',
-                expSubtitle: 'Resmi Kisitlama ve Kamulastirma Sorgusu',
-                decisionDate: 'Karar Tarihi',
-                authority: 'Ilgili Kurum',
-                logout: 'Cikis Yap',
-                activeRegion: 'AKTIF BOLGE',
-                roleCitizen: 'Vatandas',
-                roleOfficer: 'Memur',
-                roleRealtor: 'Emlakci',
-                loggedInAs: 'Giris Yapan',
-                secureLogin: 'Guvenli Giris',
-                ocrOriginalDoc: 'Orijinal Tapu Belgesi',
-                ocrUpload: 'Belge Yukle',
-                ocrPlaceholder: 'Tapu gorselini veya PDF buraya yukleyin',
-                ocrAnalysisTitle: 'Yapay Zeka Analizi',
-                ocrAnalysisSubtitle: 'Belge taraniyor ve veriler cikariliyor...',
-                ocrAiNote: 'Bu veriler yapay zeka ile cikarilmistir, lutfen kontrol ediniz.',
-                ocrVerifyMap: 'Haritada Dogrula',
-                ocrConfirm: 'Verileri Onayla',
-                ownerName: 'Malik Adi',
-                acquisitionReason: 'Edinim Sebebi',
-                electronicValidation: 'Elektronik Dogrulama',
-                propertyInfo: 'Tasinmaz Bilgileri',
-                ownerInfo: 'Mulkiyet Bilgileri',
-                officialTitle: 'Yetkili Imza',
-                syrianRepublic: 'SURIYE CUMHURIYETI',
-                cadastreDirectorate: 'Tapu ve Kadastro Mudurlugu'
+                loading: 'YUKLENIYOR...', loadingMsg: 'Suriye CBS Cekirdegine Baglaniliyor...', menuGeneral: 'GENEL ISLEMLER', menuServices: 'HIZMETLER', menuAdmin: 'YONETICI & DENETIM', navMap: 'Harita & CBS', navProperties: 'Mulk Listesi', navTransfer: 'Tapu Devir/Satis', navValuation: 'Deger Hesapla', navExpropriation: 'Kamulastirma', navLogs: 'Denetim Loglari', navOcr: 'Akilli Tapu (AI)', searchPlaceholder: 'Ada/Parsel, Koordinat, Konum...', totalProperties: 'TOPLAM MULK', pendingApps: 'BEKLEYEN', riskCount: 'RISKLI', dashboardTitle: 'CBS Paneli', propertyListTitle: 'Tasinmaz Kayitlari', transferTitle: 'RESMI TAPU DEVIR ISLEMI', colParcel: 'Ada/Parsel', colLocation: 'Konum', colType: 'Nitelik', colValue: 'Rayic Bedel', colAction: 'Islem', owner: 'Malik', btnViewDeed: 'Tapu', exportPdf: 'PDF Indir', typeSale: 'Satis', typeInheritance: 'Miras', labelSelectProp: 'Mulk Seciniz', labelBuyerID: 'Alici Kimlik No', btnStartApp: 'Basvuru Yap', modalDeedTitle: 'TAPU SENEDI', colCity: 'Il/Ilce', modalAppTitle: 'Randevu Olustur', labelDate: 'Tarih Seciniz', btnConfirm: 'Onayla', btnCheck: 'SORGULA', btnRecalculate: 'Yeniden Hesapla', estValue: 'Tahmini Deger', area: 'Yuzolcumu', age: 'Bina Yasi', expSubtitle: 'Resmi Kisitlama ve Kamulastirma Sorgusu', decisionDate: 'Karar Tarihi', authority: 'Ilgili Kurum', logout: 'Cikis Yap', activeRegion: 'AKTIF BOLGE',
+                roleCitizen: 'Vatandas', roleOfficer: 'Memur', roleRealtor: 'Emlakci', loggedInAs: 'Giris Yapan', secureLogin: 'Guvenli Giris',
+                ocrOriginalDoc: 'Orijinal Tapu Belgesi', ocrUpload: 'Belge Yukle', ocrPlaceholder: 'Tapu gorselini veya PDF buraya yukleyin', ocrAnalysisTitle: 'Yapay Zeka Analizi', ocrAnalysisSubtitle: 'Belge taraniyor ve veriler cikariliyor...', ocrAiNote: 'Bu veriler yapay zeka ile cikarilmistir, lutfen kontrol ediniz.', ocrVerifyMap: 'Haritada Dogrula', ocrConfirm: 'Verileri Onayla',
+                ownerName: 'Malik Adi', acquisitionReason: 'Edinim Sebebi', electronicValidation: 'Elektronik Dogrulama', propertyInfo: 'Tasinmaz Bilgileri', ownerInfo: 'Mulkiyet Bilgileri', officialTitle: 'Yetkili Imza',
+                syrianRepublic: 'SURIYE CUMHURIYETI', cadastreDirectorate: 'Tapu ve Kadastro Mudurlugu',
+                btnLogin: 'Giris Yap', lblUsername: 'Kullanici Adi', lblPassword: 'Sifre', loginSystemName: 'TAKBIS Giris', loginSubtitle: 'Tapu Kadastro Bilgi Sistemi', btnUploadKMZ: 'KMZ Yukle'
             },
             ar: {
-                loading: 'جار التحميل...',
-                loadingMsg: 'جاري الاتصال...',
-                loginSystemName: 'نظام معلومات السجل العقاري السوري',
-                loginSubtitle: 'البوابة الرسمية للدخول',
-                lblUsername: 'اسم المستخدم',
-                lblPassword: 'كلمة المرور',
-                btnLogin: 'دخول',
-                btnUploadKMZ: 'تحميل KMZ',
-                menuGeneral: 'العمليات',
-                menuServices: 'الخدمات',
-                menuAdmin: 'الإدارة',
-                navMap: 'الخريطة',
-                navProperties: 'القائمة',
-                navTransfer: 'نقل الملكية',
-                navValuation: 'التقييم',
-                navExpropriation: 'الاستعلام',
-                navLogs: 'السجلات',
-                navOcr: 'طابو ذكي (AI)',
-                searchPlaceholder: 'بحث...',
-                totalProperties: 'العقارات',
-                pendingApps: 'قيد الانتظار',
-                riskCount: 'معرض للخطر',
-                dashboardTitle: 'لوحة التحكم',
-                propertiesTitle: 'قائمة العقارات',
-                propertyListTitle: 'سجلات العقارات',
-                transferTitle: 'نقل الملكية الرسمي',
-                ocrTitle: 'الطابو الذكي (AI)',
-                valuationTitle: 'حاسبة القيمة',
-                expropriationTitle: 'استعلام المصادرة',
-                colParcel: 'القطعة',
-                colLocation: 'الموقع',
-                colType: 'النوع',
-                colValue: 'القيمة',
-                colAction: 'الإجراء',
-                owner: 'المالك',
-                btnViewDeed: 'الصك',
-                exportPdf: 'تصدير PDF',
-                typeSale: 'بيع',
-                typeInheritance: 'إرث',
-                labelSelectProp: 'اختر العقار',
-                labelBuyerID: 'رقم هوية المشتري',
-                btnStartApp: 'تقديم',
-                modalDeedTitle: 'سند الملكية',
-                colCity: 'المدينة',
-                modalAppTitle: 'موعد',
-                labelDate: 'اختر التاريخ',
-                btnConfirm: 'تأكيد',
-                btnCheck: 'استعلام',
-                btnRecalculate: 'إعادة حساب',
-                estValue: 'القيمة التقديرية',
-                area: 'المساحة',
-                age: 'عمر البناء',
-                expSubtitle: 'استعلام رسمي',
-                decisionDate: 'تاريخ القرار',
-                authority: 'الجهة المختصة',
-                logout: 'خروج',
-                activeRegion: 'المنطقة النشطة',
-                roleCitizen: 'مواطن',
-                roleOfficer: 'موظف',
-                roleRealtor: 'وسيط',
-                loggedInAs: 'تسجيل الدخول',
-                secureLogin: 'دخول آمن',
-                ocrOriginalDoc: 'الوثيقة الأصلية',
-                ocrUpload: 'رفع وتحليل',
-                ocrPlaceholder: 'تحميل صورة الطابو',
-                ocrAnalysisTitle: 'تحليل الذكاء الاصطناعي',
-                ocrAnalysisSubtitle: 'جاري المعالجة...',
-                ocrAiNote: 'تم استخراج البيانات بواسطة الذكاء الاصطناعي',
-                ocrVerifyMap: 'مطابقة على الخريطة',
-                ocrConfirm: 'تأكيد وحفظ',
-                ownerName: 'اسم المالك',
-                acquisitionReason: 'سبب الاكتساب',
-                electronicValidation: 'التحقق الإلكتروني',
-                propertyInfo: 'معلومات العقار',
-                ownerInfo: 'معلومات الملكية',
-                officialTitle: 'التوقيع المعتمد',
-                syrianRepublic: 'الجمهورية العربية السورية',
-                cadastreDirectorate: 'مديرية السجل العقاري'
+                loading: 'Loading...', loadingMsg: 'Connecting...', menuGeneral: 'Operations', menuServices: 'Services', menuAdmin: 'Admin', navMap: 'Map', navProperties: 'List', navTransfer: 'Transfer', navValuation: 'Valuation', navExpropriation: 'Inquiry', navLogs: 'Logs', navOcr: 'Smart Deed (AI)', searchPlaceholder: 'Search...', totalProperties: 'Properties', pendingApps: 'Pending', riskCount: 'At Risk', dashboardTitle: 'Dashboard', propertyListTitle: 'Property Records', transferTitle: 'Official Transfer', colParcel: 'Parcel', colLocation: 'Location', colType: 'Type', colValue: 'Value', colAction: 'Action', owner: 'Owner', btnViewDeed: 'Deed', exportPdf: 'Export PDF', typeSale: 'Sale', typeInheritance: 'Inheritance', labelSelectProp: 'Select Property', labelBuyerID: 'Buyer ID', btnStartApp: 'Apply', modalDeedTitle: 'TITLE DEED', colCity: 'City', modalAppTitle: 'Appointment', labelDate: 'Select Date', btnConfirm: 'Confirm', btnCheck: 'Check', btnRecalculate: 'Recalculate', estValue: 'Est. Value', area: 'Area', age: 'Building Age', expSubtitle: 'Official Inquiry', decisionDate: 'Decision Date', authority: 'Authority', logout: 'Logout', activeRegion: 'Active Region',
+                roleCitizen: 'Citizen', roleOfficer: 'Officer', roleRealtor: 'Realtor', loggedInAs: 'Logged In As', secureLogin: 'Secure Login',
+                ocrOriginalDoc: 'Original Deed', ocrUpload: 'Upload', ocrPlaceholder: 'Upload deed image', ocrAnalysisTitle: 'AI Analysis', ocrAnalysisSubtitle: 'Processing...', ocrAiNote: 'AI extracted data, please verify.', ocrVerifyMap: 'Verify on Map', ocrConfirm: 'Confirm',
+                ownerName: 'Owner Name', acquisitionReason: 'Acquisition Reason', electronicValidation: 'Electronic Validation', propertyInfo: 'Property Info', ownerInfo: 'Ownership Info', officialTitle: 'Authorized Signature',
+                syrianRepublic: 'Syrian Arab Republic', cadastreDirectorate: 'Land Registry Directorate',
+                btnLogin: 'Login', lblUsername: 'Username', lblPassword: 'Password', loginSystemName: 'TAKBIS Login', loginSubtitle: 'Land Registry System', btnUploadKMZ: 'Upload KMZ'
             },
             en: {
-                loading: 'LOADING...',
-                loadingMsg: 'Connecting to Damascus GIS Core...',
-                loginSystemName: 'Syria Land Registry Information System',
-                loginSubtitle: 'TAKBIS - Official Login Portal',
-                lblUsername: 'Username',
-                lblPassword: 'Password',
-                btnLogin: 'Login',
-                btnUploadKMZ: 'Upload KMZ',
-                menuGeneral: 'OPERATIONS',
-                menuServices: 'SERVICES',
-                menuAdmin: 'ADMIN & AUDIT',
-                navMap: 'Map & GIS',
-                navProperties: 'Properties',
-                navTransfer: 'Transfer',
-                navValuation: 'Valuation',
-                navExpropriation: 'Inquiry',
-                navLogs: 'Audit Logs',
-                navOcr: 'Smart Deed (AI)',
-                searchPlaceholder: 'Search Parcel, Coords, Location...',
-                totalProperties: 'PROPERTIES',
-                pendingApps: 'PENDING',
-                riskCount: 'AT RISK',
-                dashboardTitle: 'GIS Dashboard',
-                propertiesTitle: 'Property List',
-                propertyListTitle: 'Property Records',
-                transferTitle: 'OFFICIAL TITLE TRANSFER',
-                ocrTitle: 'Smart Deed (AI)',
-                valuationTitle: 'Value Calculator',
-                expropriationTitle: 'Expropriation Inquiry',
-                colParcel: 'Parcel',
-                colLocation: 'Location',
-                colType: 'Type',
-                colValue: 'Value',
-                colAction: 'Action',
-                owner: 'Owner',
-                btnViewDeed: 'Deed',
-                exportPdf: 'Export PDF',
-                typeSale: 'Sale',
-                typeInheritance: 'Inheritance',
-                labelSelectProp: 'Select Property',
-                labelBuyerID: 'Buyer ID',
-                btnStartApp: 'Apply',
-                modalDeedTitle: 'TITLE DEED',
-                colCity: 'City/District',
-                modalAppTitle: 'Appointment',
-                labelDate: 'Select Date',
-                btnConfirm: 'Confirm',
-                btnCheck: 'CHECK',
-                btnRecalculate: 'Recalculate',
-                estValue: 'Est. Value',
-                area: 'Area',
-                age: 'Building Age',
-                expSubtitle: 'Official Restriction Inquiry',
-                decisionDate: 'Decision Date',
-                authority: 'Authority',
-                logout: 'Logout',
-                activeRegion: 'ACTIVE REGION',
-                roleCitizen: 'Citizen',
-                roleOfficer: 'Officer',
-                roleRealtor: 'Realtor',
-                loggedInAs: 'Logged In As',
-                secureLogin: 'Secure Login',
-                ocrOriginalDoc: 'Original Title Deed',
-                ocrUpload: 'Upload Document',
-                ocrPlaceholder: 'Upload deed image or PDF here',
-                ocrAnalysisTitle: 'AI Analysis',
-                ocrAnalysisSubtitle: 'Scanning document and extracting data...',
-                ocrAiNote: 'Data extracted by AI, please verify.',
-                ocrVerifyMap: 'Verify on Map',
-                ocrConfirm: 'Confirm Data',
-                ownerName: 'Owner Name',
-                acquisitionReason: 'Acquisition Reason',
-                electronicValidation: 'Electronic Validation',
-                propertyInfo: 'Property Info',
-                ownerInfo: 'Ownership Info',
-                officialTitle: 'Authorized Signature',
-                syrianRepublic: 'SYRIAN ARAB REPUBLIC',
-                cadastreDirectorate: 'Land Registry Directorate'
+                loading: 'LOADING...', loadingMsg: 'Connecting to Damascus GIS Core...', menuGeneral: 'OPERATIONS', menuServices: 'SERVICES', menuAdmin: 'ADMIN & AUDIT', navMap: 'Map & GIS', navProperties: 'Properties', navTransfer: 'Transfer', navValuation: 'Valuation', navExpropriation: 'Inquiry', navLogs: 'Audit Logs', navOcr: 'Smart Deed (AI)', searchPlaceholder: 'Search Parcel, Coords, Location...', totalProperties: 'PROPERTIES', pendingApps: 'PENDING', riskCount: 'AT RISK', dashboardTitle: 'GIS Dashboard', propertyListTitle: 'Property Records', transferTitle: 'OFFICIAL TITLE TRANSFER', colParcel: 'Parcel', colLocation: 'Location', colType: 'Type', colValue: 'Value', colAction: 'Action', owner: 'Owner', btnViewDeed: 'Deed', exportPdf: 'Export PDF', typeSale: 'Sale', typeInheritance: 'Inheritance', labelSelectProp: 'Select Property', labelBuyerID: 'Buyer ID', btnStartApp: 'Apply', modalDeedTitle: 'TITLE DEED', colCity: 'City/District', modalAppTitle: 'Appointment', labelDate: 'Select Date', btnConfirm: 'Confirm', btnCheck: 'CHECK', btnRecalculate: 'Recalculate', estValue: 'Est. Value', area: 'Area', age: 'Building Age', expSubtitle: 'Official Restriction Inquiry', decisionDate: 'Decision Date', authority: 'Authority', logout: 'Logout', activeRegion: 'ACTIVE REGION',
+                roleCitizen: 'Citizen', roleOfficer: 'Officer', roleRealtor: 'Realtor', loggedInAs: 'Logged In As', secureLogin: 'Secure Login',
+                ocrOriginalDoc: 'Original Title Deed', ocrUpload: 'Upload Document', ocrPlaceholder: 'Upload deed image or PDF here', ocrAnalysisTitle: 'AI Analysis', ocrAnalysisSubtitle: 'Scanning document and extracting data...', ocrAiNote: 'Data extracted by AI, please verify.', ocrVerifyMap: 'Verify on Map', ocrConfirm: 'Confirm Data',
+                ownerName: 'Owner Name', acquisitionReason: 'Acquisition Reason', electronicValidation: 'Electronic Validation', propertyInfo: 'Property Info', ownerInfo: 'Ownership Info', officialTitle: 'Authorized Signature',
+                syrianRepublic: 'SYRIAN ARAB REPUBLIC', cadastreDirectorate: 'Land Registry Directorate',
+                btnLogin: 'Login', lblUsername: 'Username', lblPassword: 'Password', loginSystemName: 'TAKBIS Login', loginSubtitle: 'Land Registry Information System', btnUploadKMZ: 'Upload KMZ'
             }
         };
+
         createApp({
             setup() {
                 // 1. STATE
@@ -1535,9 +1287,9 @@
                 const aiTrendData = ref([40, 45, 42, 55, 65, 60, 75, 80, 78, 85, 95, 100]);
                 const aiAmenities = ref([
                     { icon: 'fa-mosque', label: 'Cami', dist: '150m', shadow: 'emerald' },
-                    { icon: 'fa-school', label: 'Okul / Eğitim', dist: '400m', shadow: 'blue' },
+                    { icon: 'fa-school', label: 'Okul / Egitim', dist: '400m', shadow: 'blue' },
                     { icon: 'fa-hospital', label: 'Hastane', dist: '1.2km', shadow: 'red' },
-                    { icon: 'fa-bus', label: 'Toplu Taşıma', dist: '300m', shadow: 'amber' }
+                    { icon: 'fa-bus', label: 'Toplu Tasima', dist: '300m', shadow: 'amber' }
                 ]);
                 const getAmenityStyle = (shadow) => {
                     return {
@@ -1702,7 +1454,7 @@
 
                 const handleLogin = () => {
                     loginProcessing.value = true;
-                    // Eğer önceden KMZ vb ile parsel yüklenmemişse örnek parselleri oluştur
+                    // Eger onceden KMZ vb ile parsel yuklenmemisse ornek parselleri olustur
                     setTimeout(() => {
                         isLoggedIn.value = true;
                         loginProcessing.value = false;
@@ -1735,10 +1487,10 @@
                 };
 
                 // n8n webhook notu:
-                // - /webhook-test/* sadece n8n editöründe "Listen for test event" açıkken çalışır (aksi halde 404 döner)
-                // - Canlı kullanım için genelde /webhook/* (workflow aktifken) kullanılır
+                // - /webhook-test/* sadece n8n editorunde "Listen for test event" acikken calisir (aksi halde 404 doner)
+                // - Canli kullanim icin genelde /webhook/* (workflow aktifken) kullanilir
                 //
-                // İpucu: URL'yi kod değiştirmeden test etmek için query param ile override edebilirsin:
+                // Ipucu: URL'yi kod degistirmeden test etmek icin query param ile override edebilirsin:
                 // - index.html?n8n=https%3A%2F%2Fn8n.ittyazilim.com%2Fwebhook%2F6a41b4a1-abcb-4610-85c8-8b2ac4cb680a
                 const N8N_WEBHOOK_URL_TEST = 'https://n8n.ittyazilim.com/webhook-test/6a41b4a1-abcb-4610-85c8-8b2ac4cb680a';
                 const N8N_WEBHOOK_URL_PROD = 'https://n8n.ittyazilim.com/webhook/6a41b4a1-abcb-4610-85c8-8b2ac4cb680a';
@@ -1769,14 +1521,14 @@
                 // Shift+Click => TEST, normal click => PROD
                 const openOcrPicker = (e) => {
                     ocrWebhookMode.value = e?.shiftKey ? 'test' : 'prod';
-                    console.log(`OCR: Mod seçildi: ${ocrWebhookMode.value.toUpperCase()}`);
+                    console.log(`OCR: Mod secildi: ${ocrWebhookMode.value.toUpperCase()}`);
 
                     if (!ocrInput.value) {
-                        console.error('OCR: ocrInput ref bulunamadı');
+                        console.error('OCR: ocrInput ref bulunamadi');
                         return;
                     }
 
-                    // Aynı dosyayı tekrar seçebilmek için input'u sıfırla
+                    // Ayni dosyayi tekrar secebilmek icin input'u sifirla
                     ocrInput.value.value = '';
                     ocrInput.value.click();
                 };
@@ -1851,9 +1603,9 @@
                     const file = event.target.files[0];
                     if (!file) return;
 
-                    console.log('OCR: Dosya yüklendi:', file.name, file.type, file.size, 'bytes');
+                    console.log('OCR: Dosya yuklendi:', file.name, file.type, file.size, 'bytes');
 
-                    // Görseli önizleme için oku
+                    // Gorseli onizleme icin oku
                     const previewReader = new FileReader();
                     previewReader.onload = (e) => { ocrImage.value = e.target.result; };
                     previewReader.readAsDataURL(file);
@@ -1862,11 +1614,11 @@
                     ocrData.value = null;
 
                     try {
-                        // Dosyayı Base64'e çevir (n8n workflow JSON bekliyor)
+                        // Dosyayi Base64'e cevir (n8n workflow JSON bekliyor)
                         const base64 = await new Promise((resolve, reject) => {
                             const reader = new FileReader();
                             reader.onload = () => {
-                                // DataURL'den "data:image/jpeg;base64," kısmını ayıkla
+                                // DataURL'den "data:image/jpeg;base64," kismini ayikla
                                 const base64String = reader.result.split(',')[1];
                                 resolve(base64String);
                             };
@@ -1875,7 +1627,7 @@
                         });
 
                         const webhookUrl = resolveN8nWebhookUrl();
-                        console.log('OCR: Webhook\'a gönderiliyor...', webhookUrl);
+                        console.log('OCR: Webhook\'a gonderiliyor...', webhookUrl);
 
                         const response = await fetch(webhookUrl, {
                             method: 'POST',
@@ -1883,16 +1635,16 @@
                             body: JSON.stringify({ data: base64 }) // Payload: { "data": "BASE64_STRING" }
                         });
 
-                        console.log('OCR: Webhook yanıtı:', response.status, response.statusText);
+                        console.log('OCR: Webhook yaniti:', response.status, response.statusText);
 
                         if (response.ok) {
                             const result = await response.json();
                             console.log('--- OCR WEBHOOK RAW DATA ---');
-                            console.dir(result); // Browser console'da objeyi detaylı görmek için
+                            console.dir(result); // Browser console'da objeyi detayli gormek icin
                             console.log('Stringified:', JSON.stringify(result));
 
-                            // n8n bazen [{json:{...}}] veya {...} döner. 
-                            // En içteki anlamlı datayı bulmaya çalışalım.
+                            // n8n bazen [{json:{...}}] veya {...} doner. 
+                            // En icteki anlamli datayi bulmaya calisalim.
                             let data = result;
                             if (Array.isArray(data)) data = data[0];
                             if (data && data.json) data = data.json;
@@ -1913,7 +1665,7 @@
                                     }
                                 } else {
                                     for (const k in obj) {
-                                        if (k === 'pages' || k === 'sections' || k === 'data') { // Önce bildiğimiz dallara bak
+                                        if (k === 'pages' || k === 'sections' || k === 'data') { // Once bildigimiz dallara bak
                                             const found = findDeep(obj[k], key);
                                             if (found !== null) return found;
                                         }
@@ -1944,7 +1696,7 @@
                             parsed.mulkiyet.yevmiye = getV('daily_register_no');
                             parsed.mulkiyet.islem_turu = getV('transaction_type');
 
-                            console.log('OCR: Eşleşen Veri:', parsed);
+                            console.log('OCR: Eslesen Veri:', parsed);
 
                             ocrData.value = parsed;
                             // OCR form verisini de doldur
@@ -1962,30 +1714,30 @@
                                 transaction_type: parsed.mulkiyet.islem_turu || '',
                                 description: parsed.kimlik.aciklama || ''
                             };
-                            showSuccess('Başarılı', 'Tapu verisi işlendi.');
+                            showSuccess('Basarili', 'Tapu verisi islendi.');
                         } else {
                             const errorText = await response.text();
-                            console.error('OCR: Webhook hatası:', response.status, errorText);
+                            console.error('OCR: Webhook hatasi:', response.status, errorText);
 
                             if (errorText.includes('POST requests') || errorText.includes('Method not allowed')) {
-                                showSuccess('n8n Ayar Hatası', 'n8n Webhook node\'u "GET" modunda kalmış. Lütfen n8n\'de Webhook node ayarlarını açıp Method\'u "POST" yapın.');
+                                showSuccess('n8n Ayar Hatasi', 'n8n Webhook node\'u "GET" modunda kalmis. Lutfen n8n\'de Webhook node ayarlarini acip Method\'u "POST" yapin.');
                             } else if (response.status === 404) {
-                                console.error("OCR: 404 alındı. Muhtemel neden: /webhook-test URL'si dinlemede değil (n8n'de 'Listen for test event' açık olmalı) veya URL yolu yanlış.");
-                                showSuccess('n8n Bağlantı Sorunu', 'Webhook bulunamadı (404). n8n\'de "Listen for test event" butonuna bastınız mı?');
+                                console.error("OCR: 404 alindi. Muhtemel neden: /webhook-test URL'si dinlemede degil (n8n'de 'Listen for test event' acik olmali) veya URL yolu yanlis.");
+                                showSuccess('n8n Baglanti Sorunu', 'Webhook bulunamadi (404). n8n\'de "Listen for test event" butonuna bastiniz mi?');
                             }
-                            throw new Error(`Webhook hatası: ${response.status} - ${errorText}`);
+                            throw new Error(`Webhook hatasi: ${response.status} - ${errorText}`);
                         }
                     } catch (error) {
                         console.error("OCR Error:", error);
 
-                        // CORS hatasını kontrol et
+                        // CORS hatasini kontrol et
                         if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-                            console.error('CORS Hatası: n8n webhook\'una CORS header\'ları eklenmeli!');
-                            showSuccess('CORS Hatası', 'Webhook\'a erişilemiyor. n8n webhook\'una CORS header\'ları eklenmeli:\n\nAccess-Control-Allow-Origin: *\nAccess-Control-Allow-Methods: POST\nAccess-Control-Allow-Headers: Content-Type');
+                            console.error('CORS Hatasi: n8n webhook\'una CORS header\'lari eklenmeli!');
+                            showSuccess('CORS Hatasi', 'Webhook\'a erisilemiyor. n8n webhook\'una CORS header\'lari eklenmeli:\n\nAccess-Control-Allow-Origin: *\nAccess-Control-Allow-Methods: POST\nAccess-Control-Allow-Headers: Content-Type');
                         }
 
-                        console.warn("OCR Error - İşlem durduruldu");
-                        showSuccess('Hata', 'OCR işlemi başarısız: ' + error.message);
+                        console.warn("OCR Error - Islem durduruldu");
+                        showSuccess('Hata', 'OCR islemi basarisiz: ' + error.message);
                     } finally {
                         ocrScanning.value = false;
                     }
@@ -1994,14 +1746,14 @@
                 // --- KMZ / KML LOADING ---
                 const processFileContent = async (arrayBuffer, isKmz) => {
                     kmzLoading.value = true;
-                    loadingMsg.value = isKmz ? 'KMZ Çözülüyor...' : 'KML İşleniyor...';
+                    loadingMsg.value = isKmz ? 'KMZ Cozuluyor...' : 'KML Isleniyor...';
 
                     try {
                         let kmlText;
                         if (isKmz) {
                             const zip = await JSZip.loadAsync(arrayBuffer);
                             const kmlFile = Object.keys(zip.files).find(f => f.endsWith('.kml'));
-                            if (!kmlFile) throw new Error('KMZ içinde KML dosyası bulunamadı.');
+                            if (!kmlFile) throw new Error('KMZ icinde KML dosyasi bulunamadi.');
                             kmlText = await zip.files[kmlFile].async('string');
                         } else {
                             kmlText = new TextDecoder().decode(arrayBuffer);
@@ -2019,10 +1771,10 @@
                                 id: p.id || index + 1,
                                 ada: p.ada || p.PARSEL_NO?.split('/')[0] || '---',
                                 parsel: p.parsel || p.PARSEL_NO?.split('/')[1] || '---',
-                                location: p.location || p.MAHALLE || 'Şam / Merkez',
+                                location: p.location || p.MAHALLE || 'Sam / Merkez',
                                 type: p.type || p.CINSI || 'Arsa',
                                 price: p.price || Math.floor(Math.random() * 500000) + 100000,
-                                owner: p.owner || p.AD_SOYAD || 'Meçhul Malik',
+                                owner: p.owner || p.AD_SOYAD || 'Mechul Malik',
                                 area: p.area || p.ALAN || '---',
                                 geometry: f.geometry
                             };
@@ -2043,7 +1795,7 @@
                                     layer.bindPopup(`<div class="p-3 font-sans text-right" dir="rtl">
                                         <h4 class="font-bold border-b pb-1 mb-2">Parsel: ${feature.properties.ada || '---'}/${feature.properties.parsel || '---'}</h4>
                                         <p class="text-xs mb-1"><b>Malik:</b> ${feature.properties.owner || '---'}</p>
-                                        <p class="text-xs"><b>Alan:</b> ${feature.properties.area || '---'} m²</p>
+                                        <p class="text-xs"><b>Alan:</b> ${feature.properties.area || '---'} m2</p>
                                     </div>`);
                                 }
                             }).addTo(rawMap));
@@ -2052,10 +1804,10 @@
                             if (bounds.isValid()) rawMap.fitBounds(bounds);
                         }
 
-                        showSuccess('Başarılı', `${properties.value.length} parsel yüklendi.`);
+                        showSuccess('Basarili', `${properties.value.length} parsel yuklendi.`);
                     } catch (err) {
                         console.error('File Error:', err);
-                        showSuccess('Hata', 'Dosya işlenemedi: ' + err.message);
+                        showSuccess('Hata', 'Dosya islenemedi: ' + err.message);
                     } finally {
                         kmzLoading.value = false;
                         loadingMsg.value = '';
@@ -2073,9 +1825,9 @@
 
                 const autoLoadKMZ = async (filename) => {
                     try {
-                        console.log(`Otomatik yükleme başlatıldı: ${filename}`);
+                        console.log(`Otomatik yukleme baslatildi: ${filename}`);
                         const response = await fetch(filename);
-                        if (!response.ok) throw new Error('Dosya sunucuda bulunamadı.');
+                        if (!response.ok) throw new Error('Dosya sunucuda bulunamadi.');
                         const buffer = await response.arrayBuffer();
                         await processFileContent(buffer, true);
                     } catch (err) {
@@ -2091,7 +1843,7 @@
 
                 const confirmOcrMapSelection = () => {
                     modals.value.ocrMap = false;
-                    showSuccess('Eşleşme Sağlandı', 'Parsel verisi form ile ilişkilendirildi.');
+                    showSuccess('Eslesme Saglandi', 'Parsel verisi form ile iliskilendirildi.');
                 };
 
                 const saveAndGenerateDeed = () => {
@@ -2114,21 +1866,20 @@
 
                     modals.value.activeProp = newProp;
                     modals.value.deed = true;
-                    showSuccess('Kayıt Başarılı', 'Yeni tapu senedi oluşturuldu.');
+                    showSuccess('Kayit Basarili', 'Yeni tapu senedi olusturuldu.');
                 };
 
                 const locateProperty = () => { /* implementation */ }; // simplified
 
                 onMounted(() => {
-                    setLang('ar');
-                    // Sayfa açıldığında 13.kmz dosyasını otomatik yükle
+                    setLang('tr');
+                    // Sayfa acildiginda 13.kmz dosyasini otomatik yukle
                     setTimeout(() => autoLoadKMZ('13.kmz'), 1000);
                 });
 
                 return {
                     loading, loadingMsg, lang, t, isLoggedIn, loginCreds, loginProcessing, isMobileMenuOpen, loginRole,
                     currentTab, map, searchQuery, properties, modals, toast,
-                    selectedPropertyId, selectedProperty, filteredProperties, totalValue, valuationResult, valArea, valRegion,
                     ocrImage, ocrScanning, ocrData, ocrForm, tempSelectedParcel, ocrInput,
                     viewerScale, viewerPanX, viewerPanY, viewerMode, isPanning, isSelecting, selectionRect, viewerContainer,
                     handleLogin, changeTab, getIcon, setLang, capitalize,
