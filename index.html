@@ -832,7 +832,11 @@
                     const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' });
                     map.value = markRaw(L.map('map', { center: [33.5138, 36.29], zoom: 14, layers: [satelliteLayer], renderer: L.canvas(), zoomControl: false }));
                     L.control.zoom({ position: 'bottomright' }).addTo(map.value);
-                    if (properties.value.length > 0) renderGeoJSON();
+
+                    // If properties were pre-loaded (e.g. via KMZ auto-load), render them now
+                    if (properties.value.length > 0) {
+                        nextTick(() => renderGeoJSON());
+                    }
                 };
 
                 const initOcrMap = () => {
@@ -897,7 +901,21 @@
 
                 const handleLogin = () => {
                     loginProcessing.value = true;
-                    setTimeout(() => { isLoggedIn.value = true; loginProcessing.value = false; loading.value = true; generateMockParcels(); setTimeout(() => { loading.value = false; nextTick(() => initMap()); }, 1000); }, 1000);
+                    // Eğer önceden KMZ vb ile parsel yüklenmemişse örnek parselleri oluştur
+                    setTimeout(() => {
+                        isLoggedIn.value = true;
+                        loginProcessing.value = false;
+                        loading.value = true;
+
+                        if (properties.value.length === 0) {
+                            generateMockParcels();
+                        }
+
+                        setTimeout(() => {
+                            loading.value = false;
+                            nextTick(() => initMap());
+                        }, 1000);
+                    }, 1000);
                 };
 
                 const generateMockParcels = () => {
@@ -1207,22 +1225,24 @@
                             };
                         });
 
-                        // Add to map
-                        if (geoJsonLayer.value) map.value.removeLayer(geoJsonLayer.value);
-                        geoJsonLayer.value = L.geoJSON(geoJson, {
-                            style: { color: '#10b981', weight: 2, fillOpacity: 0.2 },
-                            onEachFeature: (feature, layer) => {
-                                layer.bindPopup(`<div class="p-3 font-sans">
-                                    <h4 class="font-bold border-b pb-1 mb-2">Parsel: ${feature.properties.ada || '---'}/${feature.properties.parsel || '---'}</h4>
-                                    <p class="text-xs mb-1"><b>Malik:</b> ${feature.properties.owner || '---'}</p>
-                                    <p class="text-xs"><b>Alan:</b> ${feature.properties.area || '---'} m²</p>
-                                </div>`);
-                            }
-                        }).addTo(map.value);
+                        // Add to map only if map is initialized
+                        if (map.value) {
+                            if (geoJsonLayer.value) map.value.removeLayer(geoJsonLayer.value);
+                            geoJsonLayer.value = L.geoJSON(geoJson, {
+                                style: { color: '#10b981', weight: 2, fillOpacity: 0.2 },
+                                onEachFeature: (feature, layer) => {
+                                    layer.bindPopup(`<div class="p-3 font-sans">
+                                        <h4 class="font-bold border-b pb-1 mb-2">Parsel: ${feature.properties.ada || '---'}/${feature.properties.parsel || '---'}</h4>
+                                        <p class="text-xs mb-1"><b>Malik:</b> ${feature.properties.owner || '---'}</p>
+                                        <p class="text-xs"><b>Alan:</b> ${feature.properties.area || '---'} m²</p>
+                                    </div>`);
+                                }
+                            }).addTo(map.value);
 
-                        if (properties.value.length > 0) {
-                            const bounds = geoJsonLayer.value.getBounds();
-                            map.value.fitBounds(bounds);
+                            if (properties.value.length > 0) {
+                                const bounds = geoJsonLayer.value.getBounds();
+                                map.value.fitBounds(bounds);
+                            }
                         }
 
                         showSuccess('Başarılı', `${properties.value.length} parsel yüklendi.`);
