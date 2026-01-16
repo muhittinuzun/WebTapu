@@ -271,8 +271,7 @@
                                 accept=".kmz,.kml,.json,.geojson" class="hidden">
                             <button @click="$refs.fileInput.click()"
                                 class="bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-slate-900 transition flex items-center gap-2 text-xs md:text-sm font-bold border border-slate-600"><i
-                                    class="fa-solid fa-cloud-arrow-up"></i> <span>{{
-                                    t.btnUploadKMZ }}</span></button>
+                                    class="fa-solid fa-cloud-arrow-up"></i> <span>{{ t.btnUploadKMZ }}</span></button>
                         </div>
                     </div>
                 </header>
@@ -964,7 +963,7 @@
                                     <span class="text-emerald-500 font-black text-lg">+32.4%</span>
                                 </div>
                                 <div class="h-48 flex items-end justify-between gap-2 px-2">
-                                    <div v-for="(v, i) in [40, 45, 42, 55, 65, 60, 75, 80, 78, 85, 95, 100]" :key="i"
+                                    <div v-for="(v, i) in aiTrendData" :key="i"
                                         class="flex-1 bg-blue-500/10 rounded-t-lg relative hover:bg-blue-500 transition-all cursor-help group"
                                         :style="{ height: v + '%' }">
                                         <div
@@ -1014,16 +1013,11 @@
                                     <i class="fa-solid fa-map-location text-emerald-600"></i> Çevresel Analiz & İmkanlar
                                 </h4>
                                 <div class="grid grid-cols-1 gap-3">
-                                    <div v-for="item in [
-                                        { icon: 'fa-mosque', label: 'Cami', dist: '150m', shadow: 'emerald' },
-                                        { icon: 'fa-school', label: 'Okul / Eğitim', dist: '400m', shadow: 'blue' },
-                                        { icon: 'fa-hospital', label: 'Hastane', dist: '1.2km', shadow: 'red' },
-                                        { icon: 'fa-bus', label: 'Toplu Taşıma', dist: '300m', shadow: 'amber' }
-                                    ]" :key="item.label"
+                                    <div v-for="item in aiAmenities" :key="item.label"
                                         class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between group hover:border-blue-200 transition">
                                         <div class="flex items-center gap-4">
                                             <div :class="`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-slate-100 group-hover:scale-110 transition`"
-                                                :style="{ color: `var(--tw-text-${item.shadow}-600)`, backgroundColor: `var(--tw-bg-${item.shadow}-50)` }">
+                                                :style="getAmenityStyle(item.shadow)">
                                                 <i :class="`fa-solid ${item.icon}`"></i>
                                             </div>
                                             <span class="font-bold text-slate-700 text-sm italic">{{ item.label
@@ -1319,6 +1313,21 @@
                     weight: 2,
                     fillOpacity: 0.2
                 });
+
+                // AI Analysis Data to Fix Template Syntax Errors
+                const aiTrendData = ref([40, 45, 42, 55, 65, 60, 75, 80, 78, 85, 95, 100]);
+                const aiAmenities = ref([
+                    { icon: 'fa-mosque', label: 'Cami', dist: '150m', shadow: 'emerald' },
+                    { icon: 'fa-school', label: 'Okul / Eğitim', dist: '400m', shadow: 'blue' },
+                    { icon: 'fa-hospital', label: 'Hastane', dist: '1.2km', shadow: 'red' },
+                    { icon: 'fa-bus', label: 'Toplu Taşıma', dist: '300m', shadow: 'amber' }
+                ]);
+                const getAmenityStyle = (shadow) => {
+                    return {
+                        color: `var(--tw-text-${shadow}-600)`,
+                        backgroundColor: `var(--tw-bg-${shadow}-50)`
+                    };
+                };
 
                 // Viewer State
                 const viewerScale = ref(1);
@@ -1907,7 +1916,8 @@
                     handleLogin, changeTab, getIcon, setLang, capitalize,
                     handleOcrUpload, openOcrPicker, handleFileUpload, openOcrMapModal, confirmOcrMapSelection, saveAndGenerateDeed, locateProperty,
                     resetViewer, handleViewerWheel, handleViewerMouseDown, handleViewerMouseMove, handleViewerMouseUp,
-                    kmzLoading, mapStyle, showMapSettings
+                    kmzLoading, mapStyle, showMapSettings,
+                    aiTrendData, aiAmenities, getAmenityStyle
                 };
             }
         }).mount('#app');
