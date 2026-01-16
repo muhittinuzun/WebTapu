@@ -103,6 +103,46 @@
             opacity: 0;
             transform: translateY(10px) scale(0.95);
         }
+
+        @keyframes scan {
+            0% {
+                top: 0;
+                opacity: 0;
+            }
+
+            5% {
+                opacity: 1;
+            }
+
+            95% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+
+        .animate-scan {
+            animation: scan 3s ease-in-out infinite;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -255,13 +295,62 @@
                                     </div>
                                 </div>
 
+                                <!-- Viewer Toolbar -->
                                 <div
-                                    class="flex-1 bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center relative overflow-hidden group">
+                                    class="flex items-center gap-2 mb-2 bg-slate-900/50 p-2 rounded-lg border border-slate-700 overflow-x-auto">
+                                    <button @click="viewerScale *= 1.2"
+                                        class="p-2 text-white hover:bg-slate-700 rounded transition" title="Yakinlas"><i
+                                            class="fa-solid fa-plus"></i></button>
+                                    <button @click="viewerScale *= 0.8"
+                                        class="p-2 text-white hover:bg-slate-700 rounded transition" title="Uzaklas"><i
+                                            class="fa-solid fa-minus"></i></button>
+                                    <button @click="resetViewer"
+                                        class="p-2 text-white hover:bg-slate-700 rounded transition" title="Sifirla"><i
+                                            class="fa-solid fa-compress"></i></button>
+                                    <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                                    <button @click="viewerMode = 'pan'"
+                                        :class="['p-2 rounded transition', viewerMode === 'pan' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-700']"
+                                        title="Kaydirma Modu">
+                                        <i class="fa-solid fa-hand"></i>
+                                    </button>
+                                    <button @click="viewerMode = 'select'"
+                                        :class="['p-2 rounded transition', viewerMode === 'select' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:bg-slate-700']"
+                                        title="Secerek Zoom Modu">
+                                        <i class="fa-solid fa-vector-square"></i>
+                                    </button>
+                                    <div
+                                        class="ms-auto flex items-center gap-2 text-[10px] text-slate-500 font-mono px-2">
+                                        {{ Math.round(viewerScale * 100) }}%
+                                    </div>
+                                </div>
+
+                                <div ref="viewerContainer" @wheel="handleViewerWheel" @mousedown="handleViewerMouseDown"
+                                    @mousemove="handleViewerMouseMove" @mouseup="handleViewerMouseUp"
+                                    @mouseleave="handleViewerMouseUp"
+                                    class="flex-1 bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-600 flex items-center justify-center relative overflow-hidden group select-none cursor-crosshair"
+                                    :style="{ cursor: viewerMode === 'pan' ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }">
+
                                     <div v-if="!ocrImage" class="text-slate-500 flex flex-col items-center">
                                         <i class="fa-solid fa-file-invoice text-5xl mb-4 opacity-50"></i>
                                         <p class="text-sm font-medium">{{ t.ocrPlaceholder }}</p>
                                     </div>
-                                    <img v-else :src="ocrImage" class="max-w-full max-h-full object-contain shadow-2xl">
+
+                                    <div v-else class="relative transition-transform duration-75 ease-out"
+                                        :style="{ transform: `translate(${viewerPanX}px, ${viewerPanY}px) scale(${viewerScale})` }">
+                                        <img :src="ocrImage"
+                                            class="max-w-full max-h-[80vh] shadow-2xl pointer-events-none">
+                                    </div>
+
+                                    <!-- Selection Box -->
+                                    <div v-if="isSelecting"
+                                        class="absolute border-2 border-emerald-400 bg-emerald-400/20 z-20 pointer-events-none"
+                                        :style="{ 
+                                                top: selectionRect.top + 'px', 
+                                                left: selectionRect.left + 'px', 
+                                                width: selectionRect.width + 'px', 
+                                                height: selectionRect.height + 'px' 
+                                            }">
+                                    </div>
 
                                     <!-- Scanning Effect -->
                                     <div v-if="ocrScanning"
@@ -671,6 +760,17 @@
                 }); // OCR form data
                 const tempSelectedParcel = ref(null); // For map picker
 
+                // Viewer State
+                const viewerScale = ref(1);
+                const viewerPanX = ref(0);
+                const viewerPanY = ref(0);
+                const viewerMode = ref('pan'); // 'pan' | 'select'
+                const isPanning = ref(false);
+                const isSelecting = ref(false);
+                const selectionStart = ref({ x: 0, y: 0 });
+                const selectionRect = ref({ top: 0, left: 0, width: 0, height: 0 });
+                const viewerContainer = ref(null);
+
                 // 2. HELPER FUNCTIONS
                 const showSuccess = (title, msg) => { toast.value = { show: true, title, message: msg }; setTimeout(() => toast.value.show = false, 3000); };
                 const setLang = (c) => { lang.value = c; document.documentElement.setAttribute('dir', c === 'ar' ? 'rtl' : 'ltr'); };
@@ -834,6 +934,72 @@
                     // Aynı dosyayı tekrar seçebilmek için input'u sıfırla
                     ocrInput.value.value = '';
                     ocrInput.value.click();
+                };
+
+                // --- VIEWER FUNCTIONS ---
+                const resetViewer = () => {
+                    viewerScale.value = 1;
+                    viewerPanX.value = 0;
+                    viewerPanY.value = 0;
+                };
+
+                const handleViewerWheel = (e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                    const nextScale = viewerScale.value * delta;
+                    if (nextScale > 0.1 && nextScale < 20) {
+                        viewerScale.value = nextScale;
+                    }
+                };
+
+                const handleViewerMouseDown = (e) => {
+                    if (viewerMode.value === 'pan') {
+                        isPanning.value = true;
+                    } else {
+                        isSelecting.value = true;
+                        const rect = viewerContainer.value.getBoundingClientRect();
+                        selectionStart.value = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                        selectionRect.value = { top: selectionStart.value.y, left: selectionStart.value.x, width: 0, height: 0 };
+                    }
+                };
+
+                const handleViewerMouseMove = (e) => {
+                    if (isPanning.value) {
+                        viewerPanX.value += e.movementX;
+                        viewerPanY.value += e.movementY;
+                    } else if (isSelecting.value) {
+                        const rect = viewerContainer.value.getBoundingClientRect();
+                        const currentX = e.clientX - rect.left;
+                        const currentY = e.clientY - rect.top;
+
+                        selectionRect.value = {
+                            left: Math.min(selectionStart.value.x, currentX),
+                            top: Math.min(selectionStart.value.y, currentY),
+                            width: Math.abs(currentX - selectionStart.value.x),
+                            height: Math.abs(currentY - selectionStart.value.y)
+                        };
+                    }
+                };
+
+                const handleViewerMouseUp = () => {
+                    if (isSelecting.value && selectionRect.value.width > 10) {
+                        // Zoom to selection
+                        const containerRect = viewerContainer.value.getBoundingClientRect();
+                        const scaleX = containerRect.width / selectionRect.value.width;
+                        const scaleY = containerRect.height / selectionRect.value.height;
+                        const newScale = Math.min(scaleX, scaleY) * 0.9;
+
+                        const centerX = selectionRect.value.left + selectionRect.value.width / 2;
+                        const centerY = selectionRect.value.top + selectionRect.value.height / 2;
+
+                        viewerScale.value *= newScale;
+                        viewerPanX.value = (containerRect.width / 2 - centerX) * viewerScale.value;
+                        viewerPanY.value = (containerRect.height / 2 - centerY) * viewerScale.value;
+
+                        viewerMode.value = 'pan';
+                    }
+                    isPanning.value = false;
+                    isSelecting.value = false;
                 };
 
                 const handleOcrUpload = async (event) => {
