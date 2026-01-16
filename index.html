@@ -858,7 +858,229 @@
             </div>
         </transition>
 
-        <!-- Tapu Deed Modal (Reused) -->
+        <!-- PARCEL ACTION CHOICE MODAL -->
+        <transition name="modal">
+            <div v-if="modals.parcelAction"
+                class="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md"
+                @click.self="modals.parcelAction = false">
+                <div class="bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden animate-scale-up">
+                    <div class="p-8 text-center space-y-6">
+                        <div
+                            class="w-20 h-20 bg-emerald-100 rounded-3xl mx-auto flex items-center justify-center text-emerald-600 text-3xl">
+                            <i class="fa-solid fa-location-crosshairs"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-black text-slate-800">Parsel İşlemi Seçin</h3>
+                            <p class="text-slate-500 text-sm mt-1" v-if="modals.activeProp">#{{ modals.activeProp.ada
+                                }}/{{ modals.activeProp.parsel }} nolu parsel için ne yapmak istersiniz?</p>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3">
+                            <button @click="modals.parcelAction = false; modals.deed = true"
+                                class="flex items-center justify-between p-4 bg-slate-50 hover:bg-emerald-50 border-2 border-slate-100 hover:border-emerald-200 rounded-2xl transition-all group text-start">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition">
+                                        <i class="fa-solid fa-file-invoice"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-800">Tapu Senedi</p>
+                                        <p class="text-[10px] text-slate-400">Resmi kayıtları görüntüle</p>
+                                    </div>
+                                </div>
+                                <i
+                                    class="fa-solid fa-chevron-right text-slate-300 group-hover:text-emerald-300 transition"></i>
+                            </button>
+                            <button @click="modals.parcelAction = false; modals.aiAnalysis = true"
+                                class="flex items-center justify-between p-4 bg-slate-50 hover:bg-blue-50 border-2 border-slate-100 hover:border-blue-200 rounded-2xl transition-all group text-start">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition animate-pulse-slow">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-800">Yapay Zeka Analizi</p>
+                                        <p class="text-[10px] text-slate-400">Yatırım ve çevre analizi</p>
+                                    </div>
+                                </div>
+                                <i
+                                    class="fa-solid fa-chevron-right text-slate-300 group-hover:text-blue-300 transition"></i>
+                            </button>
+                        </div>
+                        <button @click="modals.parcelAction = false"
+                            class="text-xs font-bold text-slate-400 hover:text-slate-600 transition tracking-widest uppercase">Kapat</button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- AI PARCEL ANALYSIS MODAL -->
+        <transition name="modal">
+            <div v-if="modals.aiAnalysis"
+                class="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl"
+                @click.self="modals.aiAnalysis = false">
+                <div
+                    class="bg-slate-50 w-full max-w-5xl h-[85vh] rounded-[40px] shadow-2xl overflow-hidden flex flex-col relative border border-white/20 animate-scale-up">
+                    <!-- Close Button -->
+                    <button @click="modals.aiAnalysis = false"
+                        class="absolute top-6 right-6 z-20 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+
+                    <!-- Header -->
+                    <div class="p-8 bg-white border-b border-slate-200 shrink-0">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-16 h-16 bg-blue-600 text-white rounded-[24px] flex items-center justify-center text-2xl shadow-xl shadow-blue-500/20">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-black text-slate-900">Yapay Zeka Gayrimenkul Analizi</h3>
+                                <p class="text-slate-500 font-medium flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot text-blue-500"></i>
+                                    {{ modals.activeProp?.location }} | Ada/Parsel: {{ modals.activeProp?.ada }}/{{
+                                    modals.activeProp?.parsel }}
+                                </p>
+                            </div>
+                            <div
+                                class="ms-auto flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-2xl border border-emerald-100">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                <span class="text-xs font-black text-emerald-700 uppercase tracking-tighter">AI GÜNCEL
+                                    VERİ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="flex-1 overflow-y-auto p-8 space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Trend Card -->
+                            <div
+                                class="md:col-span-2 bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-6">
+                                <div class="flex justify-between items-center">
+                                    <h4 class="font-black text-slate-800 flex items-center gap-2 italic">
+                                        <i class="fa-solid fa-chart-line text-blue-600"></i> Fiyat Değişim Trendi (3
+                                        Yıl)
+                                    </h4>
+                                    <span class="text-emerald-500 font-black text-lg">+32.4%</span>
+                                </div>
+                                <div class="h-48 flex items-end justify-between gap-2 px-2">
+                                    <div v-for="(v, i) in [40, 45, 42, 55, 65, 60, 75, 80, 78, 85, 95, 100]" :key="i"
+                                        class="flex-1 bg-blue-500/10 rounded-t-lg relative hover:bg-blue-500 transition-all cursor-help group"
+                                        :style="{ height: v + '%' }">
+                                        <div
+                                            class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
+                                            ${{ (1200 + v * 10).toLocaleString() }}/m²
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                                    <span>2023 Q1</span>
+                                    <span>2024 Q1</span>
+                                    <span>2025 Q1</span>
+                                    <span>GÜNCEL</span>
+                                </div>
+                            </div>
+
+                            <!-- Score Card -->
+                            <div
+                                class="bg-slate-900 rounded-[32px] p-8 text-white flex flex-col items-center justify-center text-center space-y-4 relative overflow-hidden">
+                                <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/20 blur-3xl rounded-full">
+                                </div>
+                                <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">YATIRIM PUANI
+                                </p>
+                                <div class="relative">
+                                    <svg class="w-32 h-32 transform -rotate-90">
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8"
+                                            fill="transparent" class="text-slate-800" />
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8"
+                                            fill="transparent" class="text-blue-500" stroke-dasharray="364.4"
+                                            stroke-dashoffset="40" stroke-linecap="round" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-4xl font-black">8.9</span>
+                                    </div>
+                                </div>
+                                <p class="text-sm font-medium text-slate-400 px-4">Bu bölge önümüzdeki 12 ay içinde
+                                    yüksek değer artış potansiyeli taşıyor.</p>
+                            </div>
+                        </div>
+
+                        <!-- Analysis Details -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Çevresel Analiz -->
+                            <div class="space-y-4">
+                                <h4 class="font-black text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-map-location text-emerald-600"></i> Çevresel Analiz & İmkanlar
+                                </h4>
+                                <div class="grid grid-cols-1 gap-3">
+                                    <div v-for="item in [
+                                        { icon: 'fa-mosque', label: 'Cami', dist: '150m', shadow: 'emerald' },
+                                        { icon: 'fa-school', label: 'Okul / Eğitim', dist: '400m', shadow: 'blue' },
+                                        { icon: 'fa-hospital', label: 'Hastane', dist: '1.2km', shadow: 'red' },
+                                        { icon: 'fa-bus', label: 'Toplu Taşıma', dist: '300m', shadow: 'amber' }
+                                    ]" :key="item.label"
+                                        class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between group hover:border-blue-200 transition">
+                                        <div class="flex items-center gap-4">
+                                            <div :class="`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-slate-100 group-hover:scale-110 transition`"
+                                                :style="{ color: `var(--tw-text-${item.shadow}-600)`, backgroundColor: `var(--tw-bg-${item.shadow}-50)` }">
+                                                <i :class="`fa-solid ${item.icon}`"></i>
+                                            </div>
+                                            <span class="font-bold text-slate-700 text-sm italic">{{ item.label
+                                                }}</span>
+                                        </div>
+                                        <span class="text-xs font-black text-slate-400">{{ item.dist }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Insights -->
+                            <div class="space-y-4 text-start">
+                                <h4 class="font-black text-slate-800 flex items-center gap-2 italic">
+                                    <i class="fa-solid fa-lightbulb text-amber-500"></i> Yapay Zeka Öngörüleri
+                                </h4>
+                                <div
+                                    class="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-4 h-full">
+                                    <div class="space-y-4">
+                                        <div class="flex gap-4">
+                                            <div
+                                                class="shrink-0 w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xs">
+                                                1</div>
+                                            <p class="text-sm text-slate-600 font-medium italic"><span
+                                                    class="font-black text-slate-900">Şehir Planı:</span> Belediyenin
+                                                yeni metro hattı projesi bu parselin 500m ilerisinden geçecektir. Bu
+                                                durum ticari değeri %15 artırabilir.</p>
+                                        </div>
+                                        <div class="flex gap-4">
+                                            <div
+                                                class="shrink-0 w-8 h-8 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-xs">
+                                                2</div>
+                                            <p class="text-sm text-slate-600 font-medium italic"><span
+                                                    class="font-black text-slate-900">Demografik:</span> Bölgede genç
+                                                nüfusu ve beyaz yaka çalışan oranı son 2 yılda %12 artış göstermiştir.
+                                            </p>
+                                        </div>
+                                        <div class="flex gap-4">
+                                            <div
+                                                class="shrink-0 w-8 h-8 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center text-xs">
+                                                3</div>
+                                            <p class="text-sm text-slate-600 font-medium italic"><span
+                                                    class="font-black text-slate-900">Risk Analizi:</span> Zemin yapısı
+                                                stabil olup, sel veya heyelan riski %2'nin altındadır.</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-8 pt-8 border-t border-slate-100 flex items-center justify-between">
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Analiz
+                                            Başarı Oranı</p>
+                                        <p class="text-xs font-black text-blue-600">%94 Doğruluk</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
         <transition name="modal">
             <div v-if="modals.deed"
                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
@@ -1070,7 +1292,7 @@
                 const activeRegionName = ref('Damascus / Mezzeh');
                 const expLoading = ref(false);
                 const expResult = ref(null);
-                const modals = ref({ deed: false, appointment: false, activeProp: null, ocrMap: false });
+                const modals = ref({ deed: false, appointment: false, activeProp: null, ocrMap: false, parcelAction: false, aiAnalysis: false });
                 const toast = ref({ show: false, title: '', message: '' });
                 const showMapSettings = ref(false);
                 const ocrImage = ref(null);
@@ -1176,12 +1398,13 @@
                         const layer = L.geoJSON(featureCollection, {
                             style: { color: '#3b82f6', weight: 2, fillOpacity: 0.1 },
                             onEachFeature: (feature, layer) => {
-                                layer.on('click', () => {
-                                    // Highlight logic
-                                    // Reset style first (simplified)
-                                    // Set clicked style
-                                    layer.setStyle({ color: '#ef4444', weight: 4, fillOpacity: 0.6 });
+                                layer.on('click', (e) => {
+                                    L.DomEvent.stopPropagation(e);
                                     const p = feature.properties;
+                                    selectedPropertyId.value = p.id;
+                                    modals.value.activeProp = properties.value.find(x => x.id === p.id) || p;
+                                    modals.value.parcelAction = true;
+
                                     tempSelectedParcel.value = `${p.ada}/${p.parsel}`;
                                     // Update form data (mock)
                                     if (ocrData.value) {
@@ -1228,7 +1451,7 @@
                                     if (p) {
                                         selectedPropertyId.value = p.id;
                                         modals.value.activeProp = p;
-                                        modals.value.deed = true;
+                                        modals.value.parcelAction = true;
                                     }
                                 },
                                 mouseover: (e) => {
