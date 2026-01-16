@@ -839,54 +839,60 @@
 
                         if (response.ok) {
                             const result = await response.json();
-                            console.log('OCR: Webhook ham yanıt:', result);
+                            console.log('--- OCR WEBHOOK RAW DATA ---');
+                            console.dir(result); // Browser console'da objeyi detaylı görmek için
+                            console.log('Stringified:', JSON.stringify(result));
 
-                            // n8n bazen veriyi [{ json: { ... } }] şeklinde sarmalar, bunu açalım
-                            let data = Array.isArray(result) ? result[0] : result;
+                            // n8n bazen [{json:{...}}] veya {...} döner. 
+                            // En içteki anlamlı datayı bulmaya çalışalım.
+                            let data = result;
+                            if (Array.isArray(data)) data = data[0];
                             if (data && data.json) data = data.json;
 
-                            console.log('OCR: İşlenecek veri objesi:', data);
+                            console.log('--- OCR PROCESSED DATA ---', data);
 
                             const parsed = { baslik: {}, kimlik: {}, mulkiyet: {} };
 
-                            // Helper to find field value in sections (data object or array)
-                            const findVal = (key) => {
-                                if (!data || !data.pages) return '';
+                            // Ultra Robust Recursive Search
+                            const findDeep = (obj, key) => {
+                                if (!obj || typeof obj !== 'object') return null;
+                                if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
 
-                                for (const p of data.pages) {
-                                    if (!p.sections) continue;
-                                    for (const s of p.sections) {
-                                        if (s.data) {
-                                            // Data bir dizi ise (genelde p1 tablosu)
-                                            if (Array.isArray(s.data)) {
-                                                for (const item of s.data) {
-                                                    if (item && item[key] !== undefined && item[key] !== null) {
-                                                        console.log(`OCR: Bulundu [Array] -> ${key}:`, item[key]);
-                                                        return item[key];
-                                                    }
-                                                }
-                                            }
-                                            // Data bir obje ise (genelde p2 detayları)
-                                            else if (typeof s.data === 'object') {
-                                                if (s.data[key] !== undefined && s.data[key] !== null) {
-                                                    console.log(`OCR: Bulundu [Object] -> ${key}:`, s.data[key]);
-                                                    return s.data[key];
-                                                }
-                                            }
+                                if (Array.isArray(obj)) {
+                                    for (const item of obj) {
+                                        const found = findDeep(item, key);
+                                        if (found !== null) return found;
+                                    }
+                                } else {
+                                    for (const k in obj) {
+                                        if (k === 'pages' || k === 'sections' || k === 'data') { // Önce bildiğimiz dallara bak
+                                            const found = findDeep(obj[k], key);
+                                            if (found !== null) return found;
+                                        }
+                                    }
+                                    // Bulunamazsa her yeri tara
+                                    for (const k in obj) {
+                                        if (k !== 'pages' && k !== 'sections' && k !== 'data') {
+                                            const found = findDeep(obj[k], key);
+                                            if (found !== null) return found;
                                         }
                                     }
                                 }
-                                return '';
+                                return null;
                             };
 
-                            parsed.mulkiyet.malik = findVal('owner_name') || 'Unknown';
-                            parsed.mulkiyet.tarih = findVal('signature_date') || findVal('transaction_date');
-                            parsed.mulkiyet.hisse = findVal('share_text');
-                            parsed.baslik.bolge = findVal('province') || findVal('directorate') || findVal('bolge');
-                            parsed.kimlik.bolge_semt = findVal('district') || findVal('office_or_circle') || findVal('bolge_semt');
-                            parsed.kimlik.parsel_no = findVal('property_number') || findVal('parsel_no');
-                            parsed.kimlik.cins_kisa = findVal('property_type') || findVal('cins_kisa');
-                            parsed.kimlik.aciklama = findVal('description') || findVal('aciklama');
+                            const getV = (key) => findDeep(data, key) || '';
+
+                            parsed.mulkiyet.malik = getV('owner_name') || 'Unknown';
+                            parsed.mulkiyet.tarih = getV('signature_date') || getV('transaction_date');
+                            parsed.mulkiyet.hisse = getV('share_text');
+                            parsed.baslik.bolge = getV('province') || getV('directorate') || getV('bolge');
+                            parsed.kimlik.bolge_semt = getV('district') || getV('office_or_circle') || getV('bolge_semt');
+                            parsed.kimlik.parsel_no = getV('property_number') || getV('parsel_no');
+                            parsed.kimlik.cins_kisa = getV('property_type') || getV('cins_kisa');
+                            parsed.kimlik.aciklama = getV('description') || getV('aciklama');
+
+                            console.log('OCR: Eşleşen Veri:', parsed);
 
                             ocrData.value = parsed;
                             // OCR form verisini de doldur
