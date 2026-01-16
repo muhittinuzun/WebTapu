@@ -1,0 +1,20 @@
+# Extracted KML files (already in KMZ)
+doc.kml
+*.kml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
